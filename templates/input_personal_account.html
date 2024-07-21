@@ -1,12 +1,12 @@
 
-{{define "personal_account"}}
+{{define "input_personal_account"}}
     {{template "header"}}
 
 
-  
+
         Вход в личный кабинет
         <form action="/input_personal_account" method="post">
-              <input name="login" id="login" placeholder="почта"
+              <input name="email" id="email" placeholder="почта"
               class="form-control"><br>
               <input name="password" id="password" class="form-control" placeholder="Пароль"></input> <br>
               <button class="btn btn-warning">Войти</button>

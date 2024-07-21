@@ -16,6 +16,18 @@ _ "github.com/go-sql-driver/mysql"
 
 )
 
+
+type User struct{
+   Id, Name, Surname, Email, Password, Nickname string
+   Authorized bool
+}
+
+type Data_for_personal_page struct{
+  Persona User
+  Icon1 string
+  Background_video string
+}
+var authorized_user User
 func home_page(w http.ResponseWriter, r *http.Request){
       t, err := template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
       if err != nil{
@@ -98,7 +110,7 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
     	}
     	defer image1.Close()
 
-    	image2, _, err := r.FormFile("backgroud_video")
+    	image2, _, err := r.FormFile("background_video")
     	if err != nil {
     		http.Error(w, "Failed to get image2", http.StatusBadRequest)
     		return
@@ -117,15 +129,20 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
     	}
 
     	// Сохраняем второе изображение
-    	err = saveFile("backgroud_video.mp4", image2, dir)
+    	err = saveFile("background_video.mp4", image2, dir)
     	if err != nil {
     		http.Error(w, "Failed to save image2", http.StatusInternalServerError)
     		return
     	}
 
-    	fmt.Fprintf(w, "Images uploaded successfully")
-
-
+    //	fmt.Fprintf(w, "Images uploaded successfully")
+      authorized_user.Name = name
+      authorized_user.Surname = surname
+      authorized_user.Email = email
+      authorized_user.Password = password
+      authorized_user.Id = strconv.Itoa(idC)
+      authorized_user.Authorized = true
+      http.Redirect(w, r, "/", http.StatusSeeOther)
 
 
 
@@ -134,6 +151,8 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
   t.ExecuteTemplate(w, "create_personal_page", nil)
 
 }
+
+
 
 func saveFile(fileName string, file multipart.File, dir string) error {
 	// Создаем полный путь для сохранения файла
@@ -158,8 +177,50 @@ func saveFile(fileName string, file multipart.File, dir string) error {
 
 
 
+func authorization(w http.ResponseWriter, r *http.Request){
+  t, err := template.ParseFiles("templates/input_personal_account.html", "templates/header.html", "templates/footer.html")
+  if err != nil{
+    fmt.Fprintf(w, err.Error())
 
+  }
+    if r.Method == http.MethodPost {
+      email := r.FormValue("email")
+      password := r.FormValue("password")
 
+      db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+      if err != nil{
+        panic(err)
+      }
+
+      defer db.Close()
+      fmt.Printf("Подключено")
+      //Установка данных
+     //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
+     var zapros = fmt.Sprintf("SELECT id, name, surname, email, password, nickname FROM `persons` WHERE email = '%s' AND password='%s'", email, password)
+     res,err := db.Query(zapros)
+     fmt.Println(zapros)
+     var cur_user User
+     for res.Next(){
+
+       err = res.Scan(&cur_user.Id, &cur_user.Name, &cur_user.Surname, &cur_user.Email, &cur_user.Password, &cur_user.Nickname)
+     }
+     if (cur_user.Id != ""){
+       authorized_user = cur_user
+         http.Redirect(w, r, "/personal_account", http.StatusSeeOther)
+     }
+
+   }
+   t.ExecuteTemplate(w, "input_personal_account", nil)
+}
+
+func personal_account(w http.ResponseWriter, r *http.Request){
+  t, _ := template.ParseFiles("templates/personal_page.html", "templates/header.html", "templates/footer.html")
+  var data Data_for_personal_page
+  data.Persona = authorized_user
+  data.Icon1 = "./static/personal_static/" + authorized_user.Name+"_"+authorized_user.Surname+"_"+ authorized_user.Id + "/icon_1.jpg"
+  data.Background_video = "./static/personal_static/" + authorized_user.Name+"_"+authorized_user.Surname+"_"+ authorized_user.Id + "/background_video.mp4"
+  t.ExecuteTemplate(w, "personal_page", data)
+}
 
  func main() {
  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
@@ -167,8 +228,8 @@ func saveFile(fileName string, file multipart.File, dir string) error {
 
  r.HandleFunc("/", home_page)
 r.HandleFunc("/create_personal_page", create_personal_account)
-
-
+r.HandleFunc("/input_personal_account", authorization)
+r.HandleFunc("/personal_account", personal_account)
 
  fmt.Println()
  http.Handle ("/", r)
