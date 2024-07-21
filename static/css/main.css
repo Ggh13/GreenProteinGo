@@ -1,0 +1,332 @@
+html,body {
+  font-family: "Russo One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+
+  width: 100%;
+  height: 100%;
+}
+.custom{
+  display:flex;
+  min-height: 100vh;
+  height: auto;
+}
+
+
+html{
+  background:  white; <!--antiquewhite;--!>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*{
+    margin: 0px;
+    padding: 0px;
+}
+
+
+
+#mid_block{
+    margin: 0;
+    padding: 0;
+    background: #7b9f20;
+    width: 100%;
+    height: 50px;
+    float: left;
+    position: absolute;
+    top:50px;
+
+}
+#text1{
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    justify-content: left;
+    color: antiquewhite;
+    font-size: 50px;
+    font-weight: 1000;
+    -webkit-text-stroke: 0px #7b9f20;
+    position: absolute;
+    top:34px
+
+}
+
+#text2{
+    margin: 0;
+    padding: 0;
+    text-align: right;
+    justify-content: right;
+    color: faebd7;
+    font-size: 50px;
+    font-weight: 1000;
+    -webkit-text-stroke: 0px #7b9f20;
+    position: absolute;
+    top:46px;
+    float: right;
+    right: 80px;
+
+}
+#textForName{
+  position: relative;
+  text-align: center;
+  float: left;
+  top: -200px;
+  left: 260px;
+}
+.block_for_text{
+  display: flex;
+   justify-content: center;
+   align-items: center;
+   width:  fit-content;
+   height: fit-content;
+   padding: 10px;
+  background: #ADFF2F;
+  text-align: center;
+  border-radius: 10px;
+  border-color: #67991C;
+  border-width: 3px;
+  border-style: solid;
+}
+.container{
+  padding: 5px;
+
+}
+
+.backgroundvideo {
+  object-fit: fill;
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 300px;
+  text-align: center;
+}
+#icon1{
+  display: block;
+  position: relative;
+  width: 200px;
+  text-align: center;
+  height: 200px;
+  float: top;
+  top: -50px;
+  left:50px;
+}
+#header{
+    margin: 0;
+    padding: 0;
+
+    background: greenyellow;
+    width: 100%;
+    height: 150px;
+
+    position: relative;
+    /*float: top;*/
+
+    /*align-items: left;
+    display: flex;
+    */
+}
+
+
+#main{
+    margin: 5px;
+    object-fit: fill;
+    width: flex;
+    height: flex;
+    background: #faebd7;
+    justify-content: center;
+    align-items: center;
+    border-radius:20px 20px 0 0 ;
+    border-style: solid;
+    border-color: #e5c08f;
+     border-width: 2px ; /* Толщина границы */
+
+
+
+}
+
+.background-block{
+  background: #fff;
+  position: relative;
+  width: calc(100% + 15px);
+  height: 100%;
+  border-radius: 20px;
+  left:-20px;
+  top:-10px;
+  padding: 15px;
+}
+
+.padd-0{
+  padding: 0 !important;
+}
+.bg-green{
+  background: #7b9f20;
+}
+.block_for_aside{
+  float: left;
+  position: relative;
+  left: -120px;
+  margin: 0 1.5%;
+}
+.block_for_right_aside{
+  float: right;
+  position: relative;
+  margin: 0 1.5%;
+  top: -550px;
+  left: 150px;
+
+}
+#aside{
+    margin: 0;
+    padding: 0;
+    background: #7b9f20;
+    width: 10%;
+    height: 1000px;
+    float: left;
+}
+
+#nav{
+    list-style: none;
+    display: block;
+    float: center;
+    width: 50%;
+    margin-right: -35px;
+    text-align: center;
+    margin-bottom: 50px;
+    margin-top: 8px;
+}
+
+#nav li{
+
+
+    background: #00A63E;
+    border: 1px solid silver;
+    padding: 0 20px;
+    cursor: pointer;
+    width: 100px;
+    height: 35px;
+
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#nav li:not(:last-of-type){
+    margin-bottom:20px;
+}
+
+#mid_text{
+  text-align: center;
+}
+
+
+#image_for_searching{
+  width: 200px;
+  height: 200px;
+  display: block;
+  position: relative;
+  text-align: center;
+  float: left;
+  top: 25px;
+  left: 25px;
+}
+#block_for_personal_view{
+  background: #ffd700;
+
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+
+  width: 800px;
+  height: 250px;
+}
+
+
+
+/* Стили для формы */
+ .form-container {
+   font-family: "Russo One", sans-serif;
+     font-family: 'Arial', sans-serif;
+     background-color: antiquewhite; /* Бежевый фон */
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     height: 100vh;
+     margin: 0;
+ }
+ .form {
+   font-family: "Russo One", sans-serif;
+     max-width: 600px;
+     width: 100%;
+     background-color: #4CAF50; /* Зеленый цвет */
+     padding: 40px;
+     border-radius: 10px;
+     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+     color: #fff;
+     text-align: center;
+ }
+ .form h2 {
+   font-family: "Russo One", sans-serif;
+     font-size: 36px;
+     margin-bottom: 30px;
+     text-transform: uppercase;
+ }
+ .form-group {
+   font-family: "Russo One", sans-serif;
+     margin-bottom: 20px;
+     text-align: left;
+ }
+ .form-group label {
+   font-family: "Russo One", sans-serif;
+     display: block;
+     font-size: 18px;
+     margin-bottom: 8px;
+ }
+ .form-group input, .form-group textarea {
+   font-family: "Russo One", sans-serif;
+     width: 100%;
+     padding: 12px;
+     background-color: #fff;
+     border: 1px solid #ccc;
+     border-radius: 5px;
+     font-size: 16px;
+     box-sizing: border-box;
+ }
+ .form-group input[type="file"] {
+   font-family: "Russo One", sans-serif;
+     margin-top: 10px;
+ }
+ .form-group input[type="submit"] {
+   font-family: "Russo One", sans-serif;
+     background-color: #fff;
+     color: #4CAF50;
+     border: none;
+     cursor: pointer;
+     padding: 12px 20px;
+     font-size: 18px;
+     border-radius: 5px;
+     transition: background-color 0.3s ease, color 0.3s ease;
+ }
+ .form-group input[type="submit"]:hover {
+   font-family: "Russo One", sans-serif;
+     background-color: #4CAF50;
+     color: #fff;
+ }
+ .form-group .file-upload-label {
+   font-family: "Russo One", sans-serif;
+     display: block;
+     margin-top: 10px;
+     color: #4CAF50;
+ }

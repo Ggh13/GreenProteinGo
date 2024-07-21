@@ -1,0 +1,50 @@
+
+{{define "search_people_page"}}
+{{template "header"}}
+
+
+
+
+
+
+            <form action="/search_people_page" method="post">
+                 <label for="firstName">Имя:</label>
+                 <input type="text" id="firstName" name="firstName">
+
+                 <label for="lastName">Фамилия:</label>
+                 <input type="text" id="lastName" name="lastName">
+
+                 <label for="nickname">Никнейм:</label>
+                 <input type="text" id="nickname" name="nickname">
+
+                 <input type="submit" value="Отправить"><br></br>
+             </form>
+             <p>Поиск по запросу: {{.Name_of_serching}} {{.Surname_of_serching}} {{.Nickname_of_serching}} {{.Error}}</p>
+             <br>
+             <br>
+             <br>
+             {{range .Persons}}
+              <tr>
+                  <button type="button" name="button">
+                    <div id="block_for_personal_view" onclick="redirectToNewPage('{{.Id}}')">
+                        <p><img id="image_for_searching" src="\{{.Icon_photo}}" alt="Image!!">
+
+                        <td>{{.Name}}</td>
+                        <td>{{.Surname}}</td>
+
+                    </div>
+                  </button>
+
+              </tr><br><br>
+              {{end}}
+          
+              <script>
+                  function redirectToNewPage(param) {
+                      // Формируем URL с параметром
+                      var url = '/user_page/' + encodeURIComponent(param);
+                      // Переходим на новую страницу
+                      window.location.href = url;
+                  }
+              </script>
+{{template "footer"}}
+{{end}}

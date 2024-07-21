@@ -1,0 +1,37 @@
+
+{{define "create_train"}}
+    {{template "header"}}
+
+
+
+        <h1 class="cover-heading">Тренaровка</h1>
+        <form action="/create_train" method="post">
+            <label for="dropdown">Выберите упражнение:</label>
+
+
+                <select id="dropdown" name="option_of_train" >
+                  {{range .Unique_types_of_exercises_m}}
+                        <option value="{{.}}">{{.}}</option>
+                  {{end}}
+                </select>
+
+
+            <div class="form-group">
+                <label for="code">Укажите вес</label>
+                <input type="text" id="weight" name="weight" required>
+            </div>
+
+            <div class="form-group">
+                <label for="code">Укажите количество повторений</label>
+                <input type="text" id="count" name="count" required>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Отправить">
+            </div>
+
+        </form>
+    
+
+    {{template "footer"}}
+{{end}}

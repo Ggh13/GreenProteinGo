@@ -1,0 +1,30 @@
+
+{{define "user_page"}}
+{{template "header"}}
+
+
+
+
+
+          <div id="main">
+
+                <video id="backgroundvideo"  autoplay loop muted>
+                  <source src="\{{.Background_video}}" type="video/mp4">
+
+                  Ваш браузер не поддерживает тег видео.
+                </video>
+
+          <p><img id="icon1" src="\{{.Icon_photo}}" alt="Image!!" style="width:200px;height:200px;"><h1  id="textForName">{{.Persona.Name}} {{.Persona.Surname}} </h1> </p>
+
+          <div id="mid_text">
+              Силовые
+          </div>
+          <div>
+            {{range $key, $value := .Achive_count_and_name}}
+              <li>{{$key}}: {{$value}}</li>
+            {{end}}
+          </div>
+        </div>
+
+{{template "footer"}}
+{{end}}
