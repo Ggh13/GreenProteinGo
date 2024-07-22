@@ -11,7 +11,12 @@ _ "github.com/go-sql-driver/mysql"
  "mime/multipart"
  "io"
  "time"
-//"os"
+"log"
+"gonum.org/v1/plot"
+"gonum.org/v1/plot/plotter"
+"gonum.org/v1/plot/plotutil"
+"gonum.org/v1/plot/vg"
+"gonum.org/v1/plot/vg/draw"
 //"log"
 
 
@@ -421,6 +426,41 @@ func create_train(w http.ResponseWriter, r *http.Request){
 }
 
 
+func graphic(times []time.Time, values []float64) {
+    // Создание точек для графика
+    pts := make(plotter.XYs, len(times))
+    for i, t := range times {
+        pts[i].X = float64(t.Unix())
+        pts[i].Y = values[i]
+    }
+
+    // Создание нового графика
+    p := plot.New()
+
+
+    // Настройка оси X для отображения дат
+    p.X.Label.Text = "Дата"
+    p.X.Tick.Marker = plot.TimeTicks{Format: "02.01.2006"}
+
+    // Добавление точек на график
+    line, points, err := plotter.NewLinePoints(pts)
+    if err != nil {
+        log.Fatal(err)
+    }
+    line.Color = plotutil.Color(0)
+    points.Shape = draw.CircleGlyph{}
+    points.Color = plotutil.Color(1)
+    p.Add(line, points)
+
+    // Сохранение графика в файл
+    if err := p.Save(10*vg.Inch, 6*vg.Inch, "static/plot.jpg"); err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(times, values)
+    println("График успешно сохранен в plot.png")
+}
+
+
 func personal_statistic(w http.ResponseWriter, r *http.Request){
   t, _ := template.ParseFiles("templates/personal_statistic.html", "templates/header.html", "templates/footer.html")
   var data Data_for_personal_page
@@ -430,8 +470,49 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
   var current_user_id = vars["id_user"]
   data.Persona.Id = current_user_id
   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
+
+
+  db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+  fmt.Printf("Подключено")
+  var zapros string
+  if r.Method == http.MethodPost {
+
+    option_of_train := r.FormValue("option_of_train")
+    zapros = fmt.Sprintf("WITH ranked_weights AS (SELECT weight, year, month, day, ROW_NUMBER() OVER (PARTITION BY year, month, day ORDER BY weight DESC) AS row_num FROM trainings WHERE name_of_train = '%s') SELECT weight, year, month, day FROM ranked_weights WHERE row_num = 1;", option_of_train)
+
+  }else{
+    zapros = fmt.Sprintf("WITH ranked_weights AS (SELECT weight, year, month, day, ROW_NUMBER() OVER (PARTITION BY year, month, day ORDER BY weight DESC) AS row_num FROM trainings) SELECT weight, year, month, day FROM ranked_weights WHERE row_num = 1")
+
+  }
+  //Установка данных
+ //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
+  res,err := db.Query(zapros)
+ fmt.Println(zapros)
+
+ var times []time.Time
+ var weights []float64
+
+
+ for res.Next(){
+   var year, month, day, weight int
+   err = res.Scan(&weight, &year, &month, &day)
+   times = append(times, time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC))
+   weights = append(weights, float64(weight))
+ }
+ graphic(times, weights)
+
   t.ExecuteTemplate(w, "personal_statistic", data)
 }
+
+
+
+
+
  func main() {
  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
  r := mux.NewRouter()
