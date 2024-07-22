@@ -1,0 +1,34 @@
+
+{{define "personal_statistic"}}
+    {{template "header"}}
+
+
+
+        <h1 class="cover-heading">Тренaровка</h1>
+        <form action="/personal_statistic/{{.Persona.Id}}" method="post">
+            <label for="dropdown">Выберите упражнение:</label>
+
+
+                <select id="dropdown" name="option_of_train" >
+                  {{range .Unique_types_of_exercises}}
+                        <option value="{{.}}">{{.}}</option>
+                  {{end}}
+                </select>
+
+
+                <label for="dropdown2">Выберите по какому результатау отображать:</label>
+                <select id="dropdown2" name="options2">
+                    <option value="absolute_power">Самый большой вес</option>
+                    <option value="most_repetitions">Наибольшее кол-во повторений</option>
+                    <option value="most_distence">Дистанция</option>
+                </select>
+
+            <div class="form-group">
+                <input type="submit" value="Отправить">
+            </div>
+
+        </form>
+
+
+    {{template "footer"}}
+{{end}}

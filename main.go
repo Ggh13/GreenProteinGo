@@ -10,6 +10,7 @@ _ "github.com/go-sql-driver/mysql"
 
  "mime/multipart"
  "io"
+ "time"
 //"os"
 //"log"
 
@@ -374,6 +375,15 @@ func submit_achive(w http.ResponseWriter, r *http.Request){
  }
 }
 
+func getTimeInfo() [4]int {
+	now := time.Now()
+	year := now.Year()
+	month := int(now.Month())
+	dayOfWeek := int(now.Weekday())
+	secondsOfDay := now.Hour()*3600 + now.Minute()*60 + now.Second()
+
+	return [4]int{year, month, dayOfWeek, secondsOfDay}
+}
 
 func create_train(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/create_train.html", "templates/header.html", "templates/footer.html")
@@ -399,7 +409,7 @@ func create_train(w http.ResponseWriter, r *http.Request){
     fmt.Printf("Подключено")
     //Установка данных
 
-    var time_now [4]int = [4]int{1,2,3,4}
+    var time_now  = getTimeInfo()
    //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
    result, err := db.Exec("insert into test.trainings (id_person, name_of_train, weight, count, year, month, day, seconds) values (?, ?, ?, ?, ? ,? ,? , ?)", authorized_user.Id, option_of_train, weight, count, time_now[0], time_now[1], time_now[2], time_now[3])
    fmt.Println(result, "   RES345")
@@ -410,6 +420,18 @@ func create_train(w http.ResponseWriter, r *http.Request){
   t.ExecuteTemplate(w, "create_train", data)
 }
 
+
+func personal_statistic(w http.ResponseWriter, r *http.Request){
+  t, _ := template.ParseFiles("templates/personal_statistic.html", "templates/header.html", "templates/footer.html")
+  var data Data_for_personal_page
+  vars := mux.Vars(r)
+  w.WriteHeader(http.StatusOK)
+//  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
+  var current_user_id = vars["id_user"]
+  data.Persona.Id = current_user_id
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
+  t.ExecuteTemplate(w, "personal_statistic", data)
+}
  func main() {
  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
  r := mux.NewRouter()
@@ -420,7 +442,7 @@ r.HandleFunc("/input_personal_account", authorization)
 r.HandleFunc("/submit_achive", submit_achive)
 r.HandleFunc("/user_page/{id_user}", personal_account)
 r.HandleFunc("/create_train", create_train)
-
+r.HandleFunc("/personal_statistic/{id_user}", personal_statistic)
 
  fmt.Println()
  http.Handle ("/", r)
