@@ -23,12 +23,12 @@
               Силовые
           </div>
           <div>
-            {{range $key, $value := .Achive_count_and_name}}
+            {{range $key, $value := .Sport_achive}}
               <li>{{$key}}: {{$value}}</li>
             {{end}}
           </div>
-{{.Is_that_authorized_user}}
-{{ if .Is_that_authorized_user }}
+{{.Persona.Is_that_authorized_user}}
+{{ if .Persona.Is_that_authorized_user }}
           <h1 class="cover-heading">Форма добавления достижений</h1>
           <form action="/submit_achive" method="post">
               <label for="dropdown">Выберите упражнение:</label>
@@ -52,7 +52,7 @@
 
               <input type="submit" value="Отправить">
         </form>
-        {{else}}
+{{else}}
          bfjeefn
         {{end}}
 <br><br><br>
@@ -64,7 +64,7 @@
 
 </div>
 
-{{ if .Is_that_authorized_user }}
+{{ if .Persona.Is_that_authorized_user }}
 <div class="block_for_right_aside">
   <div class = "block_for_text">
           <a class="nav-link" href="/create_train" >Добавить сделанное упражнение</a>

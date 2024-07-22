@@ -19,13 +19,14 @@ _ "github.com/go-sql-driver/mysql"
 
 type User struct{
    Id, Name, Surname, Email, Password, Nickname string
-   Authorized bool
+   Is_that_authorized_user bool
 }
 
 type Data_for_personal_page struct{
   Persona User
   Icon1 string
   Background_video string
+  Sport_achive map[string]string
 }
 var authorized_user User
 func home_page(w http.ResponseWriter, r *http.Request){
@@ -141,7 +142,7 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
       authorized_user.Email = email
       authorized_user.Password = password
       authorized_user.Id = strconv.Itoa(idC)
-      authorized_user.Authorized = true
+      authorized_user.Is_that_authorized_user = true
       http.Redirect(w, r, "/", http.StatusSeeOther)
 
 
@@ -174,7 +175,27 @@ func saveFile(fileName string, file multipart.File, dir string) error {
 	return nil
 }
 
+func get_user_data_by_id(id_user_cur string) User{
+  db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+  if err != nil{
+    panic(err)
+  }
 
+  defer db.Close()
+  fmt.Printf("Подключено")
+  //Установка данных
+ //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
+  var zapros = fmt.Sprintf("SELECT id, name, surname, email, password, nickname FROM `persons` WHERE id = '%s'", id_user_cur)
+  res,err := db.Query(zapros)
+  fmt.Println(zapros)
+
+  var cur_user User
+  for res.Next(){
+    err = res.Scan(&cur_user.Id, &cur_user.Name, &cur_user.Surname, &cur_user.Email, &cur_user.Password, &cur_user.Nickname)
+  }
+  return cur_user
+
+}
 
 
 func authorization(w http.ResponseWriter, r *http.Request){
@@ -204,9 +225,10 @@ func authorization(w http.ResponseWriter, r *http.Request){
 
        err = res.Scan(&cur_user.Id, &cur_user.Name, &cur_user.Surname, &cur_user.Email, &cur_user.Password, &cur_user.Nickname)
      }
+
      if (cur_user.Id != ""){
        authorized_user = cur_user
-         http.Redirect(w, r, "/personal_account", http.StatusSeeOther)
+         http.Redirect(w, r, "/user_page/" + cur_user.Id, http.StatusSeeOther)
      }
 
    }
@@ -215,10 +237,77 @@ func authorization(w http.ResponseWriter, r *http.Request){
 
 func personal_account(w http.ResponseWriter, r *http.Request){
   t, _ := template.ParseFiles("templates/personal_page.html", "templates/header.html", "templates/footer.html")
+
+  vars := mux.Vars(r)
+  w.WriteHeader(http.StatusOK)
+//  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
+  var current_user_id = vars["id_user"]
+
   var data Data_for_personal_page
-  data.Persona = authorized_user
-  data.Icon1 = "./static/personal_static/" + authorized_user.Name+"_"+authorized_user.Surname+"_"+ authorized_user.Id + "/icon_1.jpg"
-  data.Background_video = "./static/personal_static/" + authorized_user.Name+"_"+authorized_user.Surname+"_"+ authorized_user.Id + "/background_video.mp4"
+
+  data.Persona = get_user_data_by_id(current_user_id)
+  if(data.Persona.Id == authorized_user.Id){
+    data.Persona.Is_that_authorized_user = true
+  }
+
+
+
+
+
+
+  fmt.Println(current_user_id)
+
+
+  data.Icon1 = "./static/personal_static/" + data.Persona.Name+"_"+data.Persona.Surname+"_"+ data.Persona.Id + "/icon_1.jpg"
+  data.Background_video = "./static/personal_static/" + data.Persona.Name+"_"+data.Persona.Surname+"_"+ data.Persona.Id + "/background_video.mp4"
+
+  db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+  fmt.Printf("Подключено")
+  //Установка данных
+ //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
+ var zapros = fmt.Sprintf("SELECT type_training, type_of_sports_load FROM `view_personal_achievements` WHERE id_user = '%s'", current_user_id)
+ res,err := db.Query(zapros)
+ fmt.Println(zapros)
+data.Sport_achive = make(map[string]string)
+ for res.Next(){
+   var type_training, type_of_sports_load string
+   err = res.Scan(&type_training, &type_of_sports_load)
+   fmt.Println("9999---------------------9999 ",type_training, type_of_sports_load)
+   if(type_of_sports_load == "absolute_power"){
+     var zapros2 = fmt.Sprintf("SELECT weight, count FROM `trainings` WHERE name_of_train = '%s' AND id_person = '%s'", type_training, current_user_id)
+     res2,err := db.Query(zapros2)
+     if err != nil{
+       panic(err)
+     }
+     fmt.Println(zapros2)
+     fmt.Println("-----------------------")
+     fmt.Println(res2)
+     fmt.Println("-----------------------")
+     var maximim_weight, count_for_maximim_weight int
+     maximim_weight = -1
+     count_for_maximim_weight = -1
+     for res2.Next(){
+       var weight, count int
+       err = res2.Scan(&weight, &count)
+       fmt.Println(weight, count, "        -----------------------------333333")
+       if(maximim_weight < weight){
+         maximim_weight = weight
+         count_for_maximim_weight = count
+       }
+       if(maximim_weight == weight){
+         count_for_maximim_weight = max(count, count_for_maximim_weight)
+       }
+     }
+     data.Sport_achive[type_training] = type_training + " " + strconv.Itoa(maximim_weight) + " for " + strconv.Itoa(count_for_maximim_weight) + " times"
+   }
+ }
+
+
   t.ExecuteTemplate(w, "personal_page", data)
 }
 
@@ -229,7 +318,7 @@ func personal_account(w http.ResponseWriter, r *http.Request){
  r.HandleFunc("/", home_page)
 r.HandleFunc("/create_personal_page", create_personal_account)
 r.HandleFunc("/input_personal_account", authorization)
-r.HandleFunc("/personal_account", personal_account)
+r.HandleFunc("/user_page/{id_user}", personal_account)
 
  fmt.Println()
  http.Handle ("/", r)
