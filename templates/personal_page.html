@@ -33,7 +33,7 @@
           <form action="/submit_achive" method="post">
               <label for="dropdown">Выберите упражнение:</label>
               <select id="dropdown" name="options">
-                {{range .Unique_types_of_exercises_m}}
+                {{range .Unique_types_of_exercises}}
                       <option value="{{.}}">{{.}}</option>
                 {{end}}
 

@@ -27,6 +27,7 @@ type Data_for_personal_page struct{
   Icon1 string
   Background_video string
   Sport_achive map[string]string
+  Unique_types_of_exercises []string
 }
 var authorized_user User
 func home_page(w http.ResponseWriter, r *http.Request){
@@ -204,6 +205,9 @@ func authorization(w http.ResponseWriter, r *http.Request){
     fmt.Fprintf(w, err.Error())
 
   }
+  if(authorized_user.Is_that_authorized_user){
+    http.Redirect(w, r, "/user_page/" + authorized_user.Id, http.StatusSeeOther)
+  }
     if r.Method == http.MethodPost {
       email := r.FormValue("email")
       password := r.FormValue("password")
@@ -228,12 +232,46 @@ func authorization(w http.ResponseWriter, r *http.Request){
 
      if (cur_user.Id != ""){
        authorized_user = cur_user
+       authorized_user.Is_that_authorized_user = true
          http.Redirect(w, r, "/user_page/" + cur_user.Id, http.StatusSeeOther)
      }
 
    }
    t.ExecuteTemplate(w, "input_personal_account", nil)
 }
+
+
+
+
+
+func get_Unique_types_of_exercises_m() []string{
+  db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+  fmt.Printf("Подключено")
+  var Unique_types_of_exercises []string
+  //Установка данных
+ //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
+ var zapros = fmt.Sprintf("SELECT DISTINCT name_of_train FROM `trainings`")
+ res,err := db.Query(zapros)
+ fmt.Println(zapros)
+ for res.Next(){
+   var temp string
+   _ = res.Scan(&temp)
+   Unique_types_of_exercises = append(Unique_types_of_exercises, temp)
+
+ }
+ return Unique_types_of_exercises
+}
+
+
+
+
+
+
 
 func personal_account(w http.ResponseWriter, r *http.Request){
   t, _ := template.ParseFiles("templates/personal_page.html", "templates/header.html", "templates/footer.html")
@@ -306,9 +344,70 @@ data.Sport_achive = make(map[string]string)
      data.Sport_achive[type_training] = type_training + " " + strconv.Itoa(maximim_weight) + " for " + strconv.Itoa(count_for_maximim_weight) + " times"
    }
  }
+ data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
 
 
   t.ExecuteTemplate(w, "personal_page", data)
+}
+
+
+func submit_achive(w http.ResponseWriter, r *http.Request){
+  if r.Method == http.MethodPost {
+
+    type_training := r.FormValue("options")
+    type_of_sports_load := r.FormValue("options2")
+
+
+    fmt.Println(type_training, type_of_sports_load)
+    db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+    if err != nil{
+      panic(err)
+    }
+
+    defer db.Close()
+    fmt.Printf("Подключено")
+    //Установка данных
+   //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
+   result, err := db.Exec("insert into test.view_personal_achievements (id_user, type_training, type_of_sports_load) values (?, ?, ?)", authorized_user.Id, type_training, type_of_sports_load)
+   fmt.Println(result)
+   http.Redirect(w, r, "/", http.StatusSeeOther)
+ }
+}
+
+
+func create_train(w http.ResponseWriter, r *http.Request){
+  t, err := template.ParseFiles("templates/create_train.html", "templates/header.html", "templates/footer.html")
+  if err != nil{
+    fmt.Fprintf(w, err.Error())
+
+  }
+  var data Data_for_personal_page
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
+  if r.Method == http.MethodPost {
+
+    option_of_train := r.FormValue("option_of_train")
+    weight := r.FormValue("weight")
+    count := r.FormValue("count")
+
+    fmt.Println(option_of_train, weight, count)
+    db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+    if err != nil{
+      panic(err)
+    }
+
+    defer db.Close()
+    fmt.Printf("Подключено")
+    //Установка данных
+
+    var time_now [4]int = [4]int{1,2,3,4}
+   //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
+   result, err := db.Exec("insert into test.trainings (id_person, name_of_train, weight, count, year, month, day, seconds) values (?, ?, ?, ?, ? ,? ,? , ?)", authorized_user.Id, option_of_train, weight, count, time_now[0], time_now[1], time_now[2], time_now[3])
+   fmt.Println(result, "   RES345")
+   http.Redirect(w, r, "/", http.StatusSeeOther)
+ }
+
+
+  t.ExecuteTemplate(w, "create_train", data)
 }
 
  func main() {
@@ -318,7 +417,10 @@ data.Sport_achive = make(map[string]string)
  r.HandleFunc("/", home_page)
 r.HandleFunc("/create_personal_page", create_personal_account)
 r.HandleFunc("/input_personal_account", authorization)
+r.HandleFunc("/submit_achive", submit_achive)
 r.HandleFunc("/user_page/{id_user}", personal_account)
+r.HandleFunc("/create_train", create_train)
+
 
  fmt.Println()
  http.Handle ("/", r)

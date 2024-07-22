@@ -10,7 +10,7 @@
 
 
                 <select id="dropdown" name="option_of_train" >
-                  {{range .Unique_types_of_exercises_m}}
+                  {{range .Unique_types_of_exercises}}
                         <option value="{{.}}">{{.}}</option>
                   {{end}}
                 </select>
@@ -31,7 +31,7 @@
             </div>
 
         </form>
-    
+
 
     {{template "footer"}}
 {{end}}
