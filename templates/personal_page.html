@@ -5,76 +5,109 @@
 
 
 
-<div class="block_for_aside">
 
-                <div class="container">
-                  <video class="backgroundvideo"  autoplay loop muted>
-                    <source src="\{{.Background_video}}" type="video/mp4">
+  <div class="block_for_aside">
+    <div class="row">
+            <div class="col-12 padd-0">
+                    <video class="backgroundvideo"  autoplay loop muted>
+                      <source src="\{{.Background_video}}" type="video/mp4">
 
-                    Ваш браузер не поддерживает тег видео.
-                  </video>
+                      Ваш браузер не поддерживает тег видео.
+                    </video>
+            </div>
+
+
+              <div class="col padd-0">
+                  <p><img id="icon1" src="\{{.Icon1}}" alt="Image!!" style="width:200px;height:200px;"></p>
+              </div>
+
+              <div class="col padd-0">
+                    <h1  id="textForName">{{.Persona.Name}} {{.Persona.Surname}} </h1>
+              </div>
+
+              <div class="col-6">
+                <ul class="nav_pers">
+                    <li>
+                        <div class="block_for_right_aside">
+                          <div class = "block_for_text">
+                                  <a class="nav-link" href="/create_train" >Добавить сделанное упражнение</a>
+                          </div>
+                        </div>
+                    </li>
+
+
+                    <li>
+                        <div class="block_for_right_aside">
+                          <div class = "block_for_text">
+                                  <a class="nav-link" href="/personal_statistic/{{.Persona.Id}}"  >Моя статистика</a>
+                          </div>
+                        </div>
+                  </li>
+                </ul>
+            </div>
 
 
 
 
-          <p><img id="icon1" src="\{{.Icon1}}" alt="Image!!" style="width:200px;height:200px;"><h1  id="textForName">{{.Persona.Name}} {{.Persona.Surname}} </h1> </p>
 
-          <div id="mid_text">
-              Силовые
+            <div class="col-12 padd-0">
+              <div id="mid_text">
+                  Силовые
+              </div>
+            </div>
+            <div class="col-12 padd-0">
+              <ul>
+              {{range $key, $value := .Sport_achive}}
+
+                    <li>{{$key}}: {{$value}}</li>
+                </div>
+              {{end}}
+              </ul>
+            </div>
+
+  {{.Persona.Is_that_authorized_user}}
+  {{ if .Persona.Is_that_authorized_user }}
+  <div class="col-6 order-1 padd-0">
+            <h1 class="cover-heading">Форма добавления достижений</h1>
+            <form action="/submit_achive" method="post">
+                <label for="dropdown">Выберите упражнение:</label>
+                <select id="dropdown" name="options">
+                  {{range .Unique_types_of_exercises}}
+                        <option value="{{.}}">{{.}}</option>
+                  {{end}}
+
+                </select>
+
+                <br><br>
+
+                <label for="dropdown2">Выберите по какому результатау отображать:</label>
+                <select id="dropdown2" name="options2">
+                    <option value="absolute_power">Самый большой вес</option>
+                    <option value="most_repetitions">Наибольшее кол-во повторений</option>
+                    <option value="most_distence">Дистанция</option>
+                </select>
+
+                <br><br>
+
+                <input type="submit" value="Отправить">
+          </form>
           </div>
-          <div>
-            {{range $key, $value := .Sport_achive}}
-              <li>{{$key}}: {{$value}}</li>
-            {{end}}
+  {{else}}
+           bfjeefn
+          {{end}}
+  <br><br><br>
+
           </div>
-{{.Persona.Is_that_authorized_user}}
-{{ if .Persona.Is_that_authorized_user }}
-          <h1 class="cover-heading">Форма добавления достижений</h1>
-          <form action="/submit_achive" method="post">
-              <label for="dropdown">Выберите упражнение:</label>
-              <select id="dropdown" name="options">
-                {{range .Unique_types_of_exercises}}
-                      <option value="{{.}}">{{.}}</option>
-                {{end}}
-
-              </select>
-
-              <br><br>
-
-              <label for="dropdown2">Выберите по какому результатау отображать:</label>
-              <select id="dropdown2" name="options2">
-                  <option value="absolute_power">Самый большой вес</option>
-                  <option value="most_repetitions">Наибольшее кол-во повторений</option>
-                  <option value="most_distence">Дистанция</option>
-              </select>
-
-              <br><br>
-
-              <input type="submit" value="Отправить">
-        </form>
-{{else}}
-         bfjeefn
-        {{end}}
-<br><br><br>
-
-        </div>
 
 
 
 
-</div>
 
-{{ if .Persona.Is_that_authorized_user }}
-<div class="block_for_right_aside">
-  <div class = "block_for_text">
-          <a class="nav-link" href="/create_train" >Добавить сделанное упражнение</a>
-  </div>
-</div>
-<div class="block_for_right_aside">
-  <div class = "block_for_text">
-          <a class="nav-link" href="/personal_statistic/{{.Persona.Id}}"  >Моя статистика</a>
-  </div>
-</div>
-{{end}}
+
+
+
+
+
+    </div>
 {{template "footer"}}
-{{end}}
+ {{end}}

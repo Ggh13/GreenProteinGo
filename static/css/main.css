@@ -50,6 +50,7 @@ html{
 
 }
 #text1{
+  line-height: 0.6;
     margin: 0;
     padding: 0;
     text-align: left;
@@ -59,7 +60,7 @@ html{
     font-weight: 1000;
     -webkit-text-stroke: 0px #7b9f20;
     position: absolute;
-    top:34px
+    top:58px
 
 }
 
@@ -82,8 +83,7 @@ html{
   position: relative;
   text-align: center;
   float: left;
-  top: -200px;
-  left: 260px;
+
 }
 .block_for_text{
   display: flex;
@@ -176,15 +176,14 @@ html{
 .block_for_aside{
   float: left;
   position: relative;
-  left: -120px;
   margin: 0 1.5%;
 }
+
 .block_for_right_aside{
   float: right;
   position: relative;
   margin: 0 1.5%;
-  top: -550px;
-  left: 150px;
+
 
 }
 #aside{
@@ -330,3 +329,55 @@ html{
      margin-top: 10px;
      color: #4CAF50;
  }
+
+
+
+
+
+
+
+
+ .aside{
+
+             background:#7b9f20;
+         }
+
+
+
+
+.nav_pers li{
+    margin-bottom: 20px !important;
+    overflow: hidden;
+}
+
+
+
+ @media (max-width: 540px) {
+            ul.hr {
+                /* Обнуляем значение отступов и полей */
+                margin: 0;
+                padding: 0;
+            }
+
+                ul.hr li {
+                    display: inline-block !important; /* Строчно-блочный элемент */
+                    border: 1px solid #000; /* Рамка вокруг текста */
+                    padding: 3px; /* Поля вокруг текста */
+                }
+                #nav{
+                  width: 100%;
+
+                }
+                #nav li{
+                  margin:0px !important;
+                  overflow: hidden;
+                }
+
+                #text1{
+                  line-height: 0.6;
+                  top:34px;
+                }
+                .nav-link{
+                  line-height: 1;
+                }
+        }

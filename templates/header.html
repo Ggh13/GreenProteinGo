@@ -16,15 +16,19 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </head>
 <body>
+  <div class="row">
+    <div class="col">
+      <div id="header">
+          <div id="mid_block"></div>
+           <p id="text1">Высшая школа массы набора</p>
+           <p id="text1">Высшая школа массы набора</p>
+           <p id="text2">  {{.Persona.Name}} </p>
+           <a class="nav-link" href="/exit" >Выйти из личного аккаунта</a>
+        </div>
 
-  <div id="header">
-      <div id="mid_block"></div>
-       <p id="text1">Высшая школа массы набора</p>
-       <p id="text2">  {{.Persona.Name}} </p>
-       <a class="nav-link" href="/exit" >Выйти из личного аккаунта</a>
-      </div>
-
+    </div>
 </div>
+
 <!--
       <div id="aside">
           <ul id="nav">
@@ -41,26 +45,22 @@
       </div>
 -->
 
-    <div class="container-fluid">
+
       <div class="row">
-        <div class="col-2 bg-green">
-          <div class="custom">
-            <ul id="nav">
+            <div class="col-12 col-sm-2  order-1  aside container-fluid">
+                    <ul id="nav" class="hr">
+                        <li> <a class="nav-link" href="/">Главная</a> </li>
+                        <li> <a class="nav-link" href="/search_people">Лента новостей2</a> </li>
+                        <li> <a class="nav-link" href="/input_personal_account">Личный кабинет</a> </li>
+                        <li> <a class="nav-link" href="/user_page/7">Личный кабинет22222</a> </li>
+                        <li> <a class="nav-link" href="/create_personal_page">Создать аккаунт </a></li>
+                        <li> Контакты </li>
+                    </ul>
 
-              <li> <a class="nav-link" href="/" >Главная</a> </li>
-              <li> <a class="nav-link" href="/search_people_page" >Лента новостей</a> </li>
-              <li> <a class="nav-link" href="/input_personal_account" >Личный кабинет</a> </li>
-              <li> <a class="nav-link" href="/user_page/7" >Личный кабинет22222</a> </li>
-            <!--  <li> <a>Создать программу тренеровок</a> </li>
-              <li> <a>Программы питания </a></li>
-            -->
-              <li> <a class="nav-link" href="/create_personal_page">Создать аккаунт </a></li>
-              <li> Контакты </li>
+            </div>
 
-          </ul>
-        </div>
-      </div>
-        <div class="col padd-0">
+
+        <div class="col order-3 padd-0">
           <div class="background-block">
 
             <div class="custom">

@@ -23,21 +23,21 @@
              <br>
              <br>
              <br>
-             {{range .Persons}}
+            <!-- {{range .Personas}}
               <tr>
                   <button type="button" name="button">
                     <div id="block_for_personal_view" onclick="redirectToNewPage('{{.Id}}')">
                         <p><img id="image_for_searching" src="\{{.Icon_photo}}" alt="Image!!">
 
-                        <td>{{.Name}}</td>
-                        <td>{{.Surname}}</td>
+                        <td>{{Persona.Name}}</td>
+                        <td>{{Persona.Surname}}</td>
 
                     </div>
                   </button>
 
               </tr><br><br>
               {{end}}
-          
+
               <script>
                   function redirectToNewPage(param) {
                       // Формируем URL с параметром
@@ -46,5 +46,6 @@
                       window.location.href = url;
                   }
               </script>
+              -->
 {{template "footer"}}
 {{end}}

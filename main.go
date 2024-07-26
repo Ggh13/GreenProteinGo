@@ -34,6 +34,12 @@ type Data_for_personal_page struct{
   Background_video string
   Sport_achive map[string]string
   Unique_types_of_exercises []string
+  Error string
+}
+type Data_for_searching_personal_page struct{
+  Personas []Data_for_personal_page
+  Name_of_searching, Surname_of_searching, Nickname_of_searching string
+  Error string
 }
 var authorized_user User
 func home_page(w http.ResponseWriter, r *http.Request){
@@ -511,8 +517,54 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
 
 
 
+func search_people(w http.ResponseWriter, r *http.Request){
+  t, _ := template.ParseFiles("templates/search_people_page.html", "templates/header.html", "templates/footer.html")
+  //var data Data_for_searching_personal_page
 
 
+  /*if r.Method == http.MethodPost {
+    name := r.FormValue("name")
+    surname := r.FormValue("surname")
+    nickname := r.FormValue("nickname")
+    if(name == "" && surname == "" && nickname == "" ){
+      data.Error = "Введите имя, фамилию или никнейм"
+    }else{
+      db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+      if err != nil{
+        panic(err)
+      }
+      var zapros string
+      zapros = fmt.Sprintf("SELECT id, name, surname, nickname FROM `persons` WHERE")
+      defer db.Close()
+      fmt.Printf("Подключено")
+      if(name != ""){
+        zapros = zapros + fmt.Sprintf("name='%s'", name)
+      }
+      if(surname != ""){
+        zapros = zapros + fmt.Sprintf("surname='%s'", surname)
+      }
+      if(nickname != ""){
+        zapros = zapros + fmt.Sprintf("nickname='%s'", nickname)
+      }
+
+      //Установка данных
+     //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
+     //var zapros = fmt.Sprintf("SELECT id, name, surname, nickname FROM `persons` WHERE id_user = '%s'", current_user_id)
+     res,err := db.Query(zapros)
+     fmt.Println(zapros)
+
+     for res.Next(){
+       var temp Data_for_personal_page
+       err = res.Scan(&temp.Persona.Id, &temp.Persona.Name, &temp.Persona.Surname, &temp.Persona.Nickname)
+       temp.Icon1 = "./static/personal_static/" + temp.Persona.Name+"_"+temp.Persona.Surname+"_"+ temp.Persona.Id
+       data.Personas = append(data.Personas, temp)
+     }
+    }
+  }*/
+
+
+  t.ExecuteTemplate(w, "search_people_page", nil)
+}
  func main() {
  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
  r := mux.NewRouter()
@@ -523,6 +575,7 @@ r.HandleFunc("/input_personal_account", authorization)
 r.HandleFunc("/submit_achive", submit_achive)
 r.HandleFunc("/user_page/{id_user}", personal_account)
 r.HandleFunc("/create_train", create_train)
+r.HandleFunc("/search_people", search_people)
 r.HandleFunc("/personal_statistic/{id_user}", personal_statistic)
 
  fmt.Println()
