@@ -1,0 +1,42 @@
+
+{{define "create_train_programm"}}
+    {{template "header"}}
+
+
+
+        <h1 class="cover-heading">Тренaровка</h1>
+        <form action="/create_train_programm_step_1" method="post">
+            <label for="dropdown">Выберите упражнение:</label>
+
+
+
+
+
+
+            <div class="form-group">
+                <label for="name_of_train_programm">Название программы тренировок</label>
+                <input type="text" id="name_of_train_programm" name="name_of_train_programm" required>
+            </div>
+
+
+
+            <select id="dropdown" name="option_of_style_training" >
+
+                    <option value="Bodybuilding">Bodybuilding</option>
+                    <option value="Powerlifting">Powerlifting</option>
+                    <option value="Crossfit">Crossfit</option>
+
+            </select>
+
+
+
+
+            <div class="form-group">
+                <input type="submit" value="Отправить">
+            </div>
+
+        </form>
+
+
+    {{template "footer"}}
+{{end}}

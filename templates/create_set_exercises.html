@@ -1,0 +1,51 @@
+
+{{define "create_set_exercises"}}
+    {{template "header"}}
+
+
+
+        <h1 class="cover-heading">Тренaровка</h1>
+        <form action="/create_train_programm_step_2/{{.Id_train_programm}}"  method="post">
+            <label for="dropdown">Выберите упражнение:</label>
+
+
+                <select id="dropdown" name="option_of_train" >
+                  {{range .Unique_types_of_exercises}}
+                        <option value="{{.}}">{{.}}</option>
+                  {{end}}
+                </select>
+
+           <div class="form-group">
+              <label for="code">Укажите дату</label>
+              <input type="date" id="date" name="date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="code">Укажите вес</label>
+                <input type="text" id="weight" name="weight" required>
+            </div>
+
+            <div class="form-group">
+                <label for="code">Укажите количество повторений</label>
+                <input type="text" id="count" name="count" required>
+            </div>
+
+            <div class="form-group">
+                <label for="code">Укажите очередь выполнения</label>
+                <input type="text" id="queue" name="queue" required>
+            </div>
+
+          <div class="form-group">
+              <label for="code">Время отдыха перед следующим подходом</label>
+              <input type="text" id="time_to_chill_before_next" name="time_to_chill_before_next" required>
+          </div>
+          
+            <div class="form-group">
+                <input type="submit" value="Отправить">
+            </div>
+
+        </form>
+
+
+    {{template "footer"}}
+{{end}}
