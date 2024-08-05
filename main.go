@@ -50,19 +50,20 @@ type Data_for_create_training_programm struct{
 
 
 type part_of_training_programm struct{
-  type_of_train []string
-  weight []string
-  count []string
-  queue []string
-  time_to_chill []string
+  Type_of_train string
+  Weight string
+  Count string
+  Queue string
+  Time_to_chill string
 }
 
 
 type Data_for_watch_training_programm struct{
   Id_train_programm string
-  style_sport string
-
-  parts_training_programm []part_of_training_programm
+  Style_sport string
+  Name_training_program string
+  Current_data string
+  Parts_training_programm []part_of_training_programm
 
   Error string
 }
@@ -545,7 +546,26 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
 }
 
 
+func verification_of_authorization(w http.ResponseWriter, r *http.Request){
+  t, _ := template.ParseFiles("templates/need_authorization.html", "templates/header.html", "templates/footer.html")
+  path := r.URL.Path
+  fmt.Println(path)
+  if(authorized_user.Is_that_authorized_user){
+    if(path == "/create_train_programm_step_1"){
+      fmt.Println("All good")
+      create_train_programm_step_1(w,r)
 
+    }
+    if(path == "/create_train_programm_step_1"){
+      fmt.Println("All good")
+      create_train_programm_step_1(w,r)
+
+    }
+
+  }else{
+    t.ExecuteTemplate(w, "need_authorization", nil)
+  }
+}
 func search_people(w http.ResponseWriter, r *http.Request){
   t, _ := template.ParseFiles("templates/search_people_page.html", "templates/header.html", "templates/footer.html")
   //var data Data_for_searching_personal_page
@@ -656,7 +676,7 @@ func create_train_programm_step_2(w http.ResponseWriter, r *http.Request){
     defer db.Close()
 
 
-   result, err := db.Exec("insert into test.Exercises_in_training_programs (`id_of_programm`, `name_of_train`,	`weight`,	`count`,	`number_o_execution_sequence`,	`time_to_chill_before_next`) values (?, ?, ?, ?, ?, ?)",data.Id_train_programm, option_of_train, weight, count, queue, time_to_chill_before_next)
+   result, err := db.Exec("insert into test.Exercises_in_training_programs (`id_of_programm`, `name_of_train`,	`weight`,	`count`,	`number_o_execution_sequence`,	`time_to_chill_before_next`, `date`) values (?, ?, ?, ?, ?, ?, ?)",data.Id_train_programm, option_of_train, weight, count, queue, time_to_chill_before_next, date)
    fmt.Println(result)
 
 
@@ -664,12 +684,24 @@ func create_train_programm_step_2(w http.ResponseWriter, r *http.Request){
   t.ExecuteTemplate(w, "create_set_exercises", data)
 }
 
+func getCurrentDate() string {
+    now := time.Now()
+    year, month, day := now.Date()
+    return fmt.Sprintf("%d-%02d-%02d", year, int(month), day)
+}
+
 func watch_training_programm(w http.ResponseWriter, r *http.Request){
-  t, _ := template.ParseFiles("templates/create_set_exercises.html", "templates/header.html", "templates/footer.html")
+  t, err := template.ParseFiles("templates/watch_training_programm.html", "templates/header.html", "templates/footer.html")
   vars := mux.Vars(r)
-  //w.WriteHeader(http.StatusOK)
+  if err != nil{
+    panic(err)
+  }
+
   var data Data_for_watch_training_programm
   data.Id_train_programm = vars["id_training_programm"]
+  data.Current_data = getCurrentDate()
+  fmt.Println("Зайцик зайцик RAAAABBBITT")
+
 
 
   db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
@@ -683,15 +715,18 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   var zapros = fmt.Sprintf("SELECT name_of_train, weight, count, number_o_execution_sequence, time_to_chill_before_next  FROM `Exercises_in_training_programs` WHERE id_of_programm = '%s' ", data.Id_train_programm)
   res,err := db.Query(zapros)
   fmt.Println(zapros)
-  var id_programm string
-  var part parts_training_programm
+
+  var part part_of_training_programm
   for res.Next(){
-    err = res.Scan(&part.name_of_train, &part.weight, part.count, part.queue, part.time_to_chill)
-    data.parts_training_programm = append(data.parts_training_programm, part)
+    err = res.Scan(&part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill)
+    fmt.Println(part)
+    data.Parts_training_programm = append(data.Parts_training_programm, part)
   }
+  fmt.Println(data)
 
 //  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
-  t.ExecuteTemplate(w, "create_set_exercises", data)
+  t.ExecuteTemplate(w, "watch_training_programm", data)
+
 }
 
 
@@ -699,18 +734,18 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
  r := mux.NewRouter()
 
- r.HandleFunc("/", home_page)
-r.HandleFunc("/create_personal_page", create_personal_account)
-r.HandleFunc("/input_personal_account", authorization)
-r.HandleFunc("/submit_achive", submit_achive)
-r.HandleFunc("/user_page/{id_user}", personal_account)
-r.HandleFunc("/create_train", create_train)
-r.HandleFunc("/search_people", search_people)
-r.HandleFunc("/personal_statistic/{id_user}", personal_statistic)
-r.HandleFunc("/create_train_programm_step_1", create_train_programm_step_1)
-r.HandleFunc("/create_train_programm_step_2/{id_training_programm}", create_train_programm_step_2)
-r.HandleFunc("/create_train_programm_step_2/{id_training_programm}", create_train_programm_step_2)
-r.HandleFunc("/watch_training_programm/{id_training_programm}", watch_training_programm)
+  r.HandleFunc("/", home_page)
+  r.HandleFunc("/create_personal_page", create_personal_account)
+  r.HandleFunc("/input_personal_account", authorization)
+  r.HandleFunc("/submit_achive", submit_achive)
+  r.HandleFunc("/user_page/{id_user}", personal_account)
+  r.HandleFunc("/create_train", create_train)
+  r.HandleFunc("/search_people", search_people)
+  r.HandleFunc("/personal_statistic/{id_user}", personal_statistic)
+  r.HandleFunc("/create_train_programm_step_1", verification_of_authorization)
+  r.HandleFunc("/create_train_programm_step_2/{id_training_programm}", create_train_programm_step_2)
+
+  r.HandleFunc("/watch_training_programm/{id_training_programm}", watch_training_programm)
 
 
  fmt.Println()

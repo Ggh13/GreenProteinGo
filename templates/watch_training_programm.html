@@ -1,0 +1,30 @@
+
+{{define "watch_training_programm"}}
+{{template "header"}}
+
+
+
+
+
+
+    <div class="row">
+            <div class="col-12 padd-0">
+              <p> {{.Id_train_programm}}<p>
+          </div>
+
+          <div class="col-12 padd-0">
+            <p> {{.Current_data}}<p>
+          </div>
+
+          {{ range .Parts_training_programm }}
+            <div class="col-12 padd-0 block_training">
+              <p> {{.Queue}}  </p>
+              <p> {{.Type_of_train}} </p>
+              <p> Вес: {{.Weight}}    Кол-во: {{.Count}}</p>
+              <p> Отдых после подхода: {{.Time_to_chill}} </p>
+            </div>
+          {{ end }}
+    </div>
+
+{{template "footer"}}
+ {{end}}

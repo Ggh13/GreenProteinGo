@@ -19,7 +19,11 @@ html{
 
 
 
-
+.block_training{
+  width: 500px;
+  height: 150px;
+  background: blue;
+}
 
 
 
