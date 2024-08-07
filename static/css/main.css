@@ -22,7 +22,13 @@ html{
 .block_training{
   width: 500px;
   height: 150px;
-  background: blue;
+  background: #d4c7b6;
+  margin-bottom: 50px;
+  border-radius: 10px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #8c8377;
+  padding: 10px;
 }
 
 

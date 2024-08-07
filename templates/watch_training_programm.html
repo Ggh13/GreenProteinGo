@@ -17,13 +17,40 @@
           </div>
 
           {{ range .Parts_training_programm }}
-            <div class="col-12 padd-0 block_training">
-              <p> {{.Queue}}  </p>
-              <p> {{.Type_of_train}} </p>
-              <p> Вес: {{.Weight}}    Кол-во: {{.Count}}</p>
-              <p> Отдых после подхода: {{.Time_to_chill}} </p>
+          <div class="col-12 padd-0 ">
+            <div class="row block_training">
+                <div class="col-6 padd-0 ">
+                    <p> {{.Queue}}  {{.Type_of_train}} Отдых после подхода: {{.Time_to_chill}}</p>
+                    <p> Вес: {{.Weight}} </p>
+                    <p> Кол-во: {{.Count}}</p>
+
+                </div>
+                <div class="col-6 padd-0">
+
+                  {{if not .Have_this_id_in_bd}}
+                    <form action="/watch_training_programm/{{.Id_train_programm}}" method="post">
+                      <input type="hidden" name="hiddenFieldID" value="{{.Id_train}}">
+                      <input type="hidden" name="hiddenFieldOption" value="{{.Type_of_train}}">
+                      <label for="count">Количество повторений:</label>
+                      <input type="number" id="count" name="count" min="1" required>
+                      <br>
+                      <label for="weight">Вес (в кг):</label>
+                      <input type="number" id="weight" name="weight" min="0" step="0.1" required>
+                      <br>
+                      <button type="submit">Отправить</button>
+                    </form>
+
+                    {{else}}
+                      <p> Выполненно </p>
+                      <p> {{.WeightDone}} кг </p>
+                      <p> {{.CountDone}}  повторений</p>
+                    {{end}}
+                </div>
             </div>
+          </div>
           {{ end }}
+
+
     </div>
 
 {{template "footer"}}

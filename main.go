@@ -18,7 +18,7 @@ _ "github.com/go-sql-driver/mysql"
 "gonum.org/v1/plot/vg"
 "gonum.org/v1/plot/vg/draw"
 //"log"
-
+"strings"
 
 )
 
@@ -50,11 +50,18 @@ type Data_for_create_training_programm struct{
 
 
 type part_of_training_programm struct{
+  Id_train_programm string
+  Id_train string
+
   Type_of_train string
   Weight string
   Count string
   Queue string
   Time_to_chill string
+
+  Have_this_id_in_bd bool
+  WeightDone int
+  CountDone int
 }
 
 
@@ -450,9 +457,9 @@ func create_train(w http.ResponseWriter, r *http.Request){
     fmt.Printf("Подключено")
     //Установка данных
 
-    var time_now  = getTimeInfo()
+    var time_now  = getCurrentDate()
    //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
-   result, err := db.Exec("insert into test.trainings (id_person, name_of_train, weight, count, year, month, day, seconds) values (?, ?, ?, ?, ? ,? ,? , ?)", authorized_user.Id, option_of_train, weight, count, time_now[0], time_now[1], time_now[2], time_now[3])
+   result, err := db.Exec("insert into test.trainings (id_person, name_of_train, weight, count, date) values (?, ?, ?, ?, ? )", authorized_user.Id, option_of_train, weight, count, time_now)
    fmt.Println(result, "   RES345")
    http.Redirect(w, r, "/", http.StatusSeeOther)
  }
@@ -561,6 +568,13 @@ func verification_of_authorization(w http.ResponseWriter, r *http.Request){
       create_train_programm_step_1(w,r)
 
     }
+     if strings.Contains(path, "/watch_training_programm") {
+       fmt.Println("All good")
+       watch_training_programm(w,r)
+     }
+
+
+
 
   }else{
     t.ExecuteTemplate(w, "need_authorization", nil)
@@ -711,15 +725,53 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
   defer db.Close()
 
+    if r.Method == http.MethodPost {
+      weight := r.FormValue("weight")
+      count := r.FormValue("count")
+      option_of_train := r.FormValue("hiddenFieldOption")
+      id_of_train := r.FormValue("hiddenFieldID")
+      date := getCurrentDate()
+      fmt.Println(weight, count, option_of_train, id_of_train, date)
 
-  var zapros = fmt.Sprintf("SELECT name_of_train, weight, count, number_o_execution_sequence, time_to_chill_before_next  FROM `Exercises_in_training_programs` WHERE id_of_programm = '%s' ", data.Id_train_programm)
+      result, _ := db.Exec("insert into test. trainings (`id_of_all_train`, `name_of_train`,	`weight`,	`count`,	`id_person`,	`date`) values (?, ?, ?, ?, ?, ?)",id_of_train ,option_of_train, weight, count, authorized_user.Id, date)
+      fmt.Println(result)
+
+    }
+  var zapros = fmt.Sprintf("SELECT id, name_of_train, weight, count, number_o_execution_sequence, time_to_chill_before_next FROM `Exercises_in_training_programs` WHERE id_of_programm = '%s' ORDER BY number_o_execution_sequence ASC", data.Id_train_programm)
   res,err := db.Query(zapros)
   fmt.Println(zapros)
 
   var part part_of_training_programm
   for res.Next(){
-    err = res.Scan(&part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill)
+    err = res.Scan(&part.Id_train, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill)
     fmt.Println(part)
+    part.Id_train_programm = data.Id_train_programm
+
+    var exists bool
+    query := "SELECT EXISTS(SELECT 1 FROM trainings WHERE id_of_all_train = ?)"
+
+    // Выполнение запроса
+    err = db.QueryRow(query, part.Id_train).Scan(&exists)
+    if err != nil {
+        panic(err)
+    }
+
+    // Вывод результата
+    if exists {
+        part.Have_this_id_in_bd = true
+        var zapros2 = fmt.Sprintf("SELECT  weight, count FROM `trainings` WHERE id_of_all_train = '%s' ", part.Id_train)
+        res2,_ := db.Query(zapros2)
+        fmt.Println(zapros2)
+        for res2.Next(){
+            err = res2.Scan(&part.WeightDone, &part.CountDone)
+            fmt.Println(part.WeightDone, part.CountDone)
+
+        }
+    } else {
+        part.Have_this_id_in_bd = false
+    }
+
+
     data.Parts_training_programm = append(data.Parts_training_programm, part)
   }
   fmt.Println(data)
@@ -745,7 +797,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   r.HandleFunc("/create_train_programm_step_1", verification_of_authorization)
   r.HandleFunc("/create_train_programm_step_2/{id_training_programm}", create_train_programm_step_2)
 
-  r.HandleFunc("/watch_training_programm/{id_training_programm}", watch_training_programm)
+  r.HandleFunc("/watch_training_programm/{id_training_programm}", verification_of_authorization)
 
 
  fmt.Println()
