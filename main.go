@@ -77,6 +77,9 @@ type Data_for_watch_training_programm struct{
 
 var authorized_user User
 
+var adress_data_base = "root:@tcp(127.127.126.50)/test"
+
+
 
 
 func home_page(w http.ResponseWriter, r *http.Request){
@@ -103,7 +106,7 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
       nickname := r.FormValue("nickname")
 
       fmt.Println(name, surname)
-      db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+      db, err := sql.Open("mysql", adress_data_base)
       if err != nil{
         panic(err)
       }
@@ -226,7 +229,7 @@ func saveFile(fileName string, file multipart.File, dir string) error {
 }
 
 func get_user_data_by_id(id_user_cur string) User{
-  db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+  db, err := sql.Open("mysql", adress_data_base)
   if err != nil{
     panic(err)
   }
@@ -261,7 +264,7 @@ func authorization(w http.ResponseWriter, r *http.Request){
       email := r.FormValue("email")
       password := r.FormValue("password")
 
-      db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+      db, err := sql.Open("mysql", adress_data_base)
       if err != nil{
         panic(err)
       }
@@ -294,7 +297,7 @@ func authorization(w http.ResponseWriter, r *http.Request){
 
 
 func get_Unique_types_of_exercises_m() []string{
-  db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+  db, err := sql.Open("mysql", adress_data_base)
   if err != nil{
     panic(err)
   }
@@ -348,7 +351,7 @@ func personal_account(w http.ResponseWriter, r *http.Request){
   data.Icon1 = "./static/personal_static/" + data.Persona.Name+"_"+data.Persona.Surname+"_"+ data.Persona.Id + "/icon_1.jpg"
   data.Background_video = "./static/personal_static/" + data.Persona.Name+"_"+data.Persona.Surname+"_"+ data.Persona.Id + "/background_video.mp4"
 
-  db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+  db, err := sql.Open("mysql", adress_data_base)
   if err != nil{
     panic(err)
   }
@@ -408,7 +411,7 @@ func submit_achive(w http.ResponseWriter, r *http.Request){
 
 
     fmt.Println(type_training, type_of_sports_load)
-    db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+    db, err := sql.Open("mysql", adress_data_base)
     if err != nil{
       panic(err)
     }
@@ -448,7 +451,7 @@ func create_train(w http.ResponseWriter, r *http.Request){
     count := r.FormValue("count")
 
     fmt.Println(option_of_train, weight, count)
-    db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+    db, err := sql.Open("mysql", adress_data_base)
     if err != nil{
       panic(err)
     }
@@ -515,7 +518,7 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
 
 
-  db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+  db, err := sql.Open("mysql", adress_data_base)
   if err != nil{
     panic(err)
   }
@@ -638,7 +641,7 @@ func create_train_programm_step_1(w http.ResponseWriter, r *http.Request){
     option_of_style_training := r.FormValue("option_of_style_training")
     fmt.Println(name_of_train_programm, option_of_style_training)
 
-    db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+    db, err := sql.Open("mysql", adress_data_base)
     if err != nil{
       panic(err)
     }
@@ -682,7 +685,7 @@ func create_train_programm_step_2(w http.ResponseWriter, r *http.Request){
     queue := r.FormValue("queue")
     fmt.Println(date)
 
-    db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+    db, err := sql.Open("mysql", adress_data_base)
     if err != nil{
       panic(err)
     }
@@ -718,7 +721,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
 
 
-  db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+  db, err := sql.Open("mysql", adress_data_base)
   if err != nil{
     panic(err)
   }
