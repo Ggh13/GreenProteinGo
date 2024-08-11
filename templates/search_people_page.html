@@ -7,7 +7,7 @@
 
 
 
-            <form action="/search_people_page" method="post">
+            <form action="/search_people" method="post">
                  <label for="firstName">Имя:</label>
                  <input type="text" id="firstName" name="firstName">
 
@@ -17,20 +17,20 @@
                  <label for="nickname">Никнейм:</label>
                  <input type="text" id="nickname" name="nickname">
 
-                 <input type="submit" value="Отправить"><br></br>
+                 <input type="submit" value="Отправить"><br><br>
              </form>
-             <p>Поиск по запросу: {{.Name_of_serching}} {{.Surname_of_serching}} {{.Nickname_of_serching}} {{.Error}}</p>
+             <p>Поиск по запросу: {{.Name_of_searching}} {{.Surname_of_searching}} {{.Nickname_of_searching}} {{.Error}}</p>
              <br>
              <br>
              <br>
-            <!-- {{range .Personas}}
+             {{range .Personas}}
               <tr>
                   <button type="button" name="button">
-                    <div id="block_for_personal_view" onclick="redirectToNewPage('{{.Id}}')">
-                        <p><img id="image_for_searching" src="\{{.Icon_photo}}" alt="Image!!">
+                    <div id="block_for_personal_view" onclick="redirectToNewPage('{{.Persona.Id}}')">
+                        <p><img id="image_for_searching" src="{{.Icon1}}" alt="Image!!">
 
-                        <td>{{Persona.Name}}</td>
-                        <td>{{Persona.Surname}}</td>
+                        <td>{{.Persona.Name}}</td>
+                        <td>{{.Persona.Surname}}</td>
 
                     </div>
                   </button>
@@ -46,6 +46,6 @@
                       window.location.href = url;
                   }
               </script>
-              -->
+
 {{template "footer"}}
 {{end}}

@@ -8,7 +8,7 @@ import (
 
 func main() {
     // Строка подключения
-    var addressDataBase = "user:password@tcp(147.45.163.58:3306)/test"
+    var addressDataBase = "root:@tcp(127.127.126.50)/test"
 
     // Открытие соединения с базой данных
     db, err := sql.Open("mysql", addressDataBase)

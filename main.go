@@ -19,7 +19,7 @@ _ "github.com/go-sql-driver/mysql"
 "gonum.org/v1/plot/vg/draw"
 //"log"
 "strings"
-
+"github.com/gorilla/sessions"
 )
 
 
@@ -75,9 +75,78 @@ type Data_for_watch_training_programm struct{
   Error string
 }
 
-var authorized_user User
-
+//var authorized_user User
+var session_name = "name_session"
 var adress_data_base = "root:@tcp(127.127.126.50)/test"
+
+var store = sessions.NewCookieStore([]byte("super-secret-key"))
+
+
+
+
+func populateUserFromSession(r *http.Request, sessionName string) (User, error) {
+    session, _ := store.Get(r, sessionName)
+
+
+    user := User{
+        Id:                    getSessionValueAsString(session, "curret_user_id"),
+        Name:                  getSessionValueAsString(session, "name"),
+        Surname:               getSessionValueAsString(session, "surname"),
+        Email:                 getSessionValueAsString(session, "email"),
+        Password:              getSessionValueAsString(session, "password"),
+        Nickname:              getSessionValueAsString(session, "nickname"),
+        Is_that_authorized_user: getSessionValueAsBool(session, "is_authorized"),
+    }
+
+    return user, nil
+}
+
+func saveUserToSession(r *http.Request, w http.ResponseWriter, sessionName string, user User) error {
+    session, err := store.Get(r, sessionName)
+    if err != nil {
+        return err
+    }
+
+    session.Values["curret_user_id"] = user.Id
+    session.Values["name"] = user.Name
+    session.Values["surname"] = user.Surname
+    session.Values["email"] = user.Email
+    session.Values["password"] = user.Password
+    session.Values["nickname"] = user.Nickname
+    session.Values["is_authorized"] = user.Is_that_authorized_user
+
+    return session.Save(r, w)
+}
+
+func PrintSessionData(w http.ResponseWriter, r *http.Request) {
+    // Получаем сессию
+    session, err := store.Get(r, "session-name")
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    // Проходим по всем данным в сессии и выводим их
+    fmt.Println(w, "Session Data:")
+    for key, value := range session.Values {
+       fmt.Println(w, "%s: %v\n", key, value)
+    }
+}
+
+func getSessionValueAsString(session *sessions.Session, key string) string {
+    if val, ok := session.Values[key].(string); ok {
+        return val
+    }
+    return ""
+}
+
+func getSessionValueAsBool(session *sessions.Session, key string) bool {
+    if val, ok := session.Values[key].(bool); ok {
+        return val
+    }
+    return false
+}
+
 
 
 
@@ -97,6 +166,7 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
     fmt.Fprintf(w, err.Error())
 
   }
+  authorized_user, err  := populateUserFromSession(r, session_name)
     if r.Method == http.MethodPost {
 
       name := r.FormValue("name")
@@ -196,6 +266,7 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
       authorized_user.Password = password
       authorized_user.Id = strconv.Itoa(idC)
       authorized_user.Is_that_authorized_user = true
+      saveUserToSession(r, w, session_name, authorized_user)
       http.Redirect(w, r, "/", http.StatusSeeOther)
 
 
@@ -257,6 +328,10 @@ func authorization(w http.ResponseWriter, r *http.Request){
     fmt.Fprintf(w, err.Error())
 
   }
+  fmt.Println("Start authorized")
+  PrintSessionData(w,r)
+  authorized_user, err  := populateUserFromSession(r, session_name)
+  fmt.Println(authorized_user)
   if(authorized_user.Is_that_authorized_user){
     http.Redirect(w, r, "/user_page/" + authorized_user.Id, http.StatusSeeOther)
   }
@@ -282,14 +357,22 @@ func authorization(w http.ResponseWriter, r *http.Request){
        err = res.Scan(&cur_user.Id, &cur_user.Name, &cur_user.Surname, &cur_user.Email, &cur_user.Password, &cur_user.Nickname)
      }
 
+
+
      if (cur_user.Id != ""){
        authorized_user = cur_user
        authorized_user.Is_that_authorized_user = true
+       fmt.Print("after input: ")
+       fmt.Println(cur_user)
+       fmt.Println()
+       saveUserToSession(r, w, session_name, authorized_user)
+       PrintSessionData(w,r)
+
          http.Redirect(w, r, "/user_page/" + cur_user.Id, http.StatusSeeOther)
      }
 
    }
-   t.ExecuteTemplate(w, "input_personal_account", nil)
+  t.ExecuteTemplate(w, "input_personal_account", nil)
 }
 
 
@@ -327,6 +410,8 @@ func get_Unique_types_of_exercises_m() []string{
 
 func personal_account(w http.ResponseWriter, r *http.Request){
   t, _ := template.ParseFiles("templates/personal_page.html", "templates/header.html", "templates/footer.html")
+
+  authorized_user, err  := populateUserFromSession(r, session_name)
 
   vars := mux.Vars(r)
   w.WriteHeader(http.StatusOK)
@@ -405,7 +490,7 @@ data.Sport_achive = make(map[string]string)
 
 func submit_achive(w http.ResponseWriter, r *http.Request){
   if r.Method == http.MethodPost {
-
+    authorized_user, err  := populateUserFromSession(r, session_name)
     type_training := r.FormValue("options")
     type_of_sports_load := r.FormValue("options2")
 
@@ -445,7 +530,7 @@ func create_train(w http.ResponseWriter, r *http.Request){
   var data Data_for_personal_page
   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
   if r.Method == http.MethodPost {
-
+    authorized_user, err  := populateUserFromSession(r, session_name)
     option_of_train := r.FormValue("option_of_train")
     weight := r.FormValue("weight")
     count := r.FormValue("count")
@@ -461,8 +546,9 @@ func create_train(w http.ResponseWriter, r *http.Request){
     //Установка данных
 
     var time_now  = getCurrentDate()
+    var seconds = SecondsSinceStartOfDay()
    //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
-   result, err := db.Exec("insert into test.trainings (id_person, name_of_train, weight, count, date) values (?, ?, ?, ?, ? )", authorized_user.Id, option_of_train, weight, count, time_now)
+   result, err := db.Exec("insert into test.trainings (id_person, name_of_train, weight, count, date, second) values (?, ?, ?, ?, ?,? )", authorized_user.Id, option_of_train, weight, count, time_now, seconds)
    fmt.Println(result, "   RES345")
    http.Redirect(w, r, "/", http.StatusSeeOther)
  }
@@ -486,7 +572,7 @@ func graphic(times []time.Time, values []float64) {
 
     // Настройка оси X для отображения дат
     p.X.Label.Text = "Дата"
-    p.X.Tick.Marker = plot.TimeTicks{Format: "02.01.2006"}
+    p.X.Tick.Marker = plot.TimeTicks{Format: "2006-01-02"}
 
     // Добавление точек на график
     line, points, err := plotter.NewLinePoints(pts)
@@ -560,6 +646,7 @@ func verification_of_authorization(w http.ResponseWriter, r *http.Request){
   t, _ := template.ParseFiles("templates/need_authorization.html", "templates/header.html", "templates/footer.html")
   path := r.URL.Path
   fmt.Println(path)
+  authorized_user, _  := populateUserFromSession(r, session_name)
   if(authorized_user.Is_that_authorized_user){
     if(path == "/create_train_programm_step_1"){
       fmt.Println("All good")
@@ -584,13 +671,17 @@ func verification_of_authorization(w http.ResponseWriter, r *http.Request){
   }
 }
 func search_people(w http.ResponseWriter, r *http.Request){
-  t, _ := template.ParseFiles("templates/search_people_page.html", "templates/header.html", "templates/footer.html")
-  //var data Data_for_searching_personal_page
+  t, err := template.ParseFiles("templates/search_people_page.html", "templates/header.html", "templates/footer.html")
+  fmt.Println("---09090------")
+  if err != nil{
+    panic(err)
+  }
+  var data Data_for_searching_personal_page
 
 
-  /*if r.Method == http.MethodPost {
-    name := r.FormValue("name")
-    surname := r.FormValue("surname")
+  if r.Method == http.MethodPost {
+    name := r.FormValue("firstName")
+    surname := r.FormValue("lastName")
     nickname := r.FormValue("nickname")
     if(name == "" && surname == "" && nickname == "" ){
       data.Error = "Введите имя, фамилию или никнейм"
@@ -600,7 +691,7 @@ func search_people(w http.ResponseWriter, r *http.Request){
         panic(err)
       }
       var zapros string
-      zapros = fmt.Sprintf("SELECT id, name, surname, nickname FROM `persons` WHERE")
+      zapros = fmt.Sprintf("SELECT id, name, surname, nickname FROM `persons` WHERE ")
       defer db.Close()
       fmt.Printf("Подключено")
       if(name != ""){
@@ -622,14 +713,14 @@ func search_people(w http.ResponseWriter, r *http.Request){
      for res.Next(){
        var temp Data_for_personal_page
        err = res.Scan(&temp.Persona.Id, &temp.Persona.Name, &temp.Persona.Surname, &temp.Persona.Nickname)
-       temp.Icon1 = "./static/personal_static/" + temp.Persona.Name+"_"+temp.Persona.Surname+"_"+ temp.Persona.Id
+       temp.Icon1 = "/static/personal_static/" + temp.Persona.Name+"_"+temp.Persona.Surname+"_"+ temp.Persona.Id + "/icon_1.jpg"
        data.Personas = append(data.Personas, temp)
      }
     }
-  }*/
+  }
 
-
-  t.ExecuteTemplate(w, "search_people_page", nil)
+fmt.Println(data)
+t.ExecuteTemplate(w, "search_people_page", data)
 }
 
 
@@ -645,7 +736,7 @@ func create_train_programm_step_1(w http.ResponseWriter, r *http.Request){
     if err != nil{
       panic(err)
     }
-
+    authorized_user, err  := populateUserFromSession(r, session_name)
     defer db.Close()
     fmt.Printf("Подключено")
     //Установка данных
@@ -707,6 +798,13 @@ func getCurrentDate() string {
     return fmt.Sprintf("%d-%02d-%02d", year, int(month), day)
 }
 
+func SecondsSinceStartOfDay() int {
+    now := time.Now()                // Текущее время
+    midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()) // Начало дня (00:00:00)
+    seconds := int(now.Sub(midnight).Seconds()) // Количество секунд с начала дня
+    return seconds
+}
+
 func watch_training_programm(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/watch_training_programm.html", "templates/header.html", "templates/footer.html")
   vars := mux.Vars(r)
@@ -727,7 +825,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   }
 
   defer db.Close()
-
+  authorized_user, err  := populateUserFromSession(r, session_name)
     if r.Method == http.MethodPost {
       weight := r.FormValue("weight")
       count := r.FormValue("count")
@@ -784,6 +882,25 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
 }
 
+func constacs(w http.ResponseWriter, r *http.Request){
+      t, err := template.ParseFiles("templates/constacs.html", "templates/header.html", "templates/footer.html")
+      fmt.Println("!!!!!!!!")
+      if err != nil{
+        fmt.Fprintf(w, err.Error())
+
+      }
+      t.ExecuteTemplate(w, "constacs", nil)
+}
+
+func exit(w http.ResponseWriter, r *http.Request){
+    authorized_user, _  := populateUserFromSession(r, session_name)
+    authorized_user.Id = "-1"
+    authorized_user.Name = "-1"
+    authorized_user.Surname = "-1"
+    authorized_user.Is_that_authorized_user = false
+    saveUserToSession(r, w, session_name, authorized_user)
+    http.Redirect(w, r, "/", http.StatusSeeOther)
+}
 
  func main() {
  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
@@ -791,6 +908,8 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
   r.HandleFunc("/", home_page)
   r.HandleFunc("/create_personal_page", create_personal_account)
+  r.HandleFunc("/constacs", constacs)
+  r.HandleFunc("/exit", exit)
   r.HandleFunc("/input_personal_account", authorization)
   r.HandleFunc("/submit_achive", submit_achive)
   r.HandleFunc("/user_page/{id_user}", personal_account)
