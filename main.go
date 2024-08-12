@@ -75,6 +75,16 @@ type Data_for_watch_training_programm struct{
   Error string
 }
 
+type Training_programma struct{
+  Name_of_programma,Style_of_trainings, Description, Id  string
+
+}
+type Data_for_send_to_page_View_created_training_programms struct{
+  Training_programms []Training_programma
+  Author User
+  Is_this_Author bool
+  Authors_Icon1  string
+}
 //var authorized_user User
 var session_name = "name_session"
 var adress_data_base = "root:@tcp(127.127.126.50)/test"
@@ -663,15 +673,20 @@ func verification_of_authorization(w http.ResponseWriter, r *http.Request){
 
     }
     if(path == "/create_train_programm_step_1"){
-      fmt.Println("All good")
+
       create_train_programm_step_1(w,r)
 
     }
      if strings.Contains(path, "/watch_training_programm") {
-       fmt.Println("All good")
+
        watch_training_programm(w,r)
      }
-
+     if strings.Contains(path, "/view_created_training_programms") {
+       view_created_training_programms(w,r)
+     }
+     if strings.Contains(path, "/view_current_training_programm") {
+       view_current_training_programm(w,r)
+     }
 
 
 
@@ -739,6 +754,7 @@ func create_train_programm_step_1(w http.ResponseWriter, r *http.Request){
 
     name_of_train_programm := r.FormValue("name_of_train_programm")
     option_of_style_training := r.FormValue("option_of_style_training")
+    Description := r.FormValue("Description")
     fmt.Println(name_of_train_programm, option_of_style_training)
 
     db, err := sql.Open("mysql", adress_data_base)
@@ -748,10 +764,9 @@ func create_train_programm_step_1(w http.ResponseWriter, r *http.Request){
     authorized_user, err  := populateUserFromSession(r, session_name)
     defer db.Close()
     fmt.Printf("Подключено")
-    //Установка данных
-   //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
-   result, err := db.Exec("insert into test.Training_programms (id_author_of_training_program	, name_training_program, style_of_training) values (?, ?, ?)", authorized_user.Id, name_of_train_programm, option_of_style_training)
-   fmt.Println(result)
+
+    result, err := db.Exec("insert into test.Training_programms (id_author_of_training_program	, name_training_program, style_of_training, Description) values (?, ?, ?, ?)", authorized_user.Id, name_of_train_programm, option_of_style_training, Description)
+    fmt.Println(result)
 
    var zapros = fmt.Sprintf("SELECT id FROM `Training_programms` WHERE id_author_of_training_program = '%s' AND name_training_program = '%s'", authorized_user.Id, name_of_train_programm)
    res,err := db.Query(zapros)
@@ -824,7 +839,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   var data Data_for_watch_training_programm
   data.Id_train_programm = vars["id_training_programm"]
   data.Current_data = getCurrentDate()
-  fmt.Println("Зайцик зайцик RAAAABBBITT")
+
 
 
 
@@ -892,13 +907,12 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 }
 
 func constacs(w http.ResponseWriter, r *http.Request){
-      t, err := template.ParseFiles("templates/constacs.html", "templates/header.html", "templates/footer.html")
+      t, err := template.ParseFiles("templates/contacts.html", "templates/header.html", "templates/footer.html")
       fmt.Println("!!!!!!!!")
-      if err != nil{
-        fmt.Fprintf(w, err.Error())
-
+      if err != nil {
+          panic(err)
       }
-      t.ExecuteTemplate(w, "constacs", nil)
+      t.ExecuteTemplate(w, "contacts", nil)
 }
 
 func exit(w http.ResponseWriter, r *http.Request){
@@ -911,6 +925,57 @@ func exit(w http.ResponseWriter, r *http.Request){
     http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+ func view_created_training_programms(w http.ResponseWriter, r *http.Request){
+   t, err := template.ParseFiles("templates/View_created_training_programms.html", "templates/header.html", "templates/footer.html")
+
+   vars := mux.Vars(r)
+   //w.WriteHeader(http.StatusOK)
+  authorized_user, err  := populateUserFromSession(r, session_name)
+   author_id := vars["id_author"]
+   var data Data_for_send_to_page_View_created_training_programms
+   data.Author = get_user_data_by_id(author_id)
+   if(authorized_user.Id == author_id){
+     data.Is_this_Author = true
+   }else{
+     data.Is_this_Author = false
+   }
+   data.Authors_Icon1 = "/static/personal_static/" + data.Author.Name+"_"+data.Author.Surname+"_"+ data.Author.Id + "/icon_1.jpg"
+
+
+   if err != nil {
+       panic(err)
+   }
+
+   db, err := sql.Open("mysql", adress_data_base)
+   if err != nil{
+     panic(err)
+   }
+
+   defer db.Close()
+   var zapros2 = fmt.Sprintf("SELECT  id, name_training_program, style_of_training, Description FROM `Training_programms` WHERE 	id_author_of_training_program = '%s' ", author_id)
+   res2,_ := db.Query(zapros2)
+   fmt.Println(zapros2)
+   for res2.Next(){
+      var programma Training_programma
+      err = res2.Scan(&programma.Id, &programma.Name_of_programma, &programma.Style_of_trainings, &programma.Description)
+      data.Training_programms = append(data.Training_programms, programma)
+
+
+   }
+
+
+
+   t.ExecuteTemplate(w, "view_created_training_programms", data)
+ }
+
+ func view_current_training_programm(w http.ResponseWriter, r *http.Request){
+       t, err := template.ParseFiles("templates/View_current_training_programm.html", "templates/header.html", "templates/footer.html")
+       fmt.Println("!!!!!!!!")
+       if err != nil {
+           panic(err)
+       }
+       t.ExecuteTemplate(w, "View_current_training_programm", nil)
+ }
  func main() {
  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
  r := mux.NewRouter()
@@ -930,6 +995,8 @@ func exit(w http.ResponseWriter, r *http.Request){
 
   r.HandleFunc("/watch_training_programm/{id_training_programm}", verification_of_authorization)
 
+  r.HandleFunc("/view_created_training_programms/{id_author}", verification_of_authorization)
+  r.HandleFunc("/view_current_training_programm/{id_programm}", verification_of_authorization)
 
  fmt.Println()
  http.Handle ("/", r)

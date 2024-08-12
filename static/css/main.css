@@ -95,6 +95,33 @@ html{
   float: left;
 
 }
+
+
+
+
+
+.block_for_training_programm{
+  weight:flex;
+  height: 150px;
+  background-color: #e5c08f;
+
+  border-radius: 20px;
+  border-color: black;
+  border-style:solid;
+
+  margin-bottom: 30px;
+  padding:10px;
+}
+
+
+
+.center_text_for_div{
+  text-align: center;
+}
+
+
+
+
 .block_for_text{
   display: flex;
    justify-content: center;
@@ -224,14 +251,19 @@ html{
     padding: 0 20px;
     cursor: pointer;
     width: 100px;
-    height: 35px;
+    height: 40px;
 
 
     display: flex;
     justify-content: center;
     align-items: center;
+    line-height: 1.2;
 }
+.block_size_for_nav{
+  height: 50px;
+  width: 100px;
 
+}
 #nav li:not(:last-of-type){
     margin-bottom:20px;
 }
