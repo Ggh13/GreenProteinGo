@@ -615,10 +615,10 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
   if r.Method == http.MethodPost {
 
     option_of_train := r.FormValue("option_of_train")
-    zapros = fmt.Sprintf("WITH ranked_weights AS (SELECT weight, year, month, day, ROW_NUMBER() OVER (PARTITION BY year, month, day ORDER BY weight DESC) AS row_num FROM trainings WHERE name_of_train = '%s') SELECT weight, year, month, day FROM ranked_weights WHERE row_num = 1;", option_of_train)
+    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = 'your_name_of_train' AND id_person = 'your_id_person' GROUP BY date ORDER BY date ASC;", option_of_train, current_user_id)
 
   }else{
-    zapros = fmt.Sprintf("WITH ranked_weights AS (SELECT weight, year, month, day, ROW_NUMBER() OVER (PARTITION BY year, month, day ORDER BY weight DESC) AS row_num FROM trainings) SELECT weight, year, month, day FROM ranked_weights WHERE row_num = 1")
+    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC;",  "bench_press", current_user_id)
 
   }
   //Установка данных
@@ -631,9 +631,18 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
 
 
  for res.Next(){
-   var year, month, day, weight int
-   err = res.Scan(&weight, &year, &month, &day)
-   times = append(times, time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC))
+   var dateS string
+   var weight int
+   err = res.Scan(&dateS, &weight)
+
+   date, err := time.Parse("2006-01-02", dateS)
+    if err != nil {
+        fmt.Println("Ошибка при парсинге даты:", err)
+        return
+    }
+
+
+   times = append(times, date)
    weights = append(weights, float64(weight))
  }
  graphic(times, weights)
