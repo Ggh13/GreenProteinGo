@@ -4,13 +4,21 @@
 {{template "header"}}
 
     <div class="row">
-      <div class="col-12">
+      <div class="col-8">
         <h1> Программы тренировок {{.Author.Nickname}}</h1>
+      </div>
+
+
+
+      <div class="col-4">
+          <div class = "block_for_text center_text_for_div" style="margin-bottom: 30px; height:80px; width:250px; display: flex; align-items: center;">
+                  <a  href="/create_train_programm_step_1">Создать программу тренировок </a>
+          </div>
       </div>
 
         {{range .Training_programms}}
           <div class="col-12">
-            <div onclick="window.location.href='/view_current_training_programm/{{.Id}}';" style="cursor: pointer;" class="block_for_training_programm">
+            <div onclick="window.location.href='/watch_training_programm/{{.Id}}';" style="cursor: pointer;" class="block_for_training_programm">
               <div class="row">
                 <div class="col-12 center_text_for_div">
                   {{.Name_of_programma}}

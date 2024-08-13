@@ -8,15 +8,18 @@
 
 
     <div class="row">
+
             <div class="col-12 padd-0">
               <p> {{.Id_train_programm}}<p>
           </div>
 
           <div class="col-12 padd-0">
-            <p> {{.Current_data}}<p>
+            <p> Сегодня {{.Current_data}} и это отличный день чтобы порвать себе трицепс!<p>
           </div>
+          {{range $time, $event := .Parts_training_programm}}
+          {{$time}}
 
-          {{ range .Parts_training_programm }}
+          {{range $event}}
           <div class="col-12 padd-0 ">
             <div class="row block_training">
                 <div class="col-6 padd-0 ">
@@ -28,9 +31,11 @@
                 <div class="col-6 padd-0">
 
                   {{if not .Have_this_id_in_bd}}
-                    <form action="/watch_training_programm/{{.Id_train_programm}}" method="post">
+
+                    <form id="form1" action="/watch_training_programm/{{.Id_train_programm}}" method="post">
                       <input type="hidden" name="hiddenFieldID" value="{{.Id_train}}">
                       <input type="hidden" name="hiddenFieldOption" value="{{.Type_of_train}}">
+
                       <label for="count">Количество повторений:</label>
                       <input type="number" id="count" name="count" min="1" required>
                       <br>
@@ -49,9 +54,61 @@
             </div>
           </div>
           {{ end }}
+          {{ end }}
+
+
+
+
+          <div class="col-12 padd-0">
+            <button id="showDivButton">Показать блок</button>
+          </div>
+
+          <div class="col-12 padd-0">
+            <div id="myDiv" class="block_training" style="display: none; margin-top: 10px; height:100%;" >
+              <h1 class="cover-heading">Тренaровка2</h1>
+              <form id="form2" action="/create_train_set_exercises/{{.Id_train_programm}}" method="post">
+                  <select id="dropdown" name="option_of_train">
+                      {{range .Unique_types_of_exercises}}
+                          <option value="{{.}}">{{.}}</option>
+                      {{end}}
+                  </select>
+                  <div class="form-group">
+                      <label for="date">Укажите дату</label>
+                      <input type="date" id="date" name="date" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="weight">Укажите вес</label>
+                      <input type="text" id="weight" name="weight" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="count">Укажите количество повторений</label>
+                      <input type="text" id="count" name="count" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="queue">Укажите очередь выполнения</label>
+                      <input type="text" id="queue" name="queue" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="time_to_chill_before_next">Время отдыха перед следующим подходом</label>
+                      <input type="text" id="time_to_chill_before_next" name="time_to_chill_before_next" required>
+                  </div>
+                  <div class="form-group">
+                      <button type="submit">Отправить</button>
+                  </div>
+              </form>
+
+
+            </div>
+          </div>
+
 
 
     </div>
+    <script>
+      document.getElementById("showDivButton").onclick = function() {
+        document.getElementById("myDiv").style.display = "block";
+      };
+    </script>
 
 {{template "footer"}}
  {{end}}

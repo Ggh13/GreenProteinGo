@@ -51,6 +51,7 @@ type Data_for_create_training_programm struct{
 
 type part_of_training_programm struct{
   Id_train_programm string
+  Date string
   Id_train string
 
   Type_of_train string
@@ -62,16 +63,18 @@ type part_of_training_programm struct{
   Have_this_id_in_bd bool
   WeightDone int
   CountDone int
+
+
 }
-
-
 type Data_for_watch_training_programm struct{
   Id_train_programm string
   Style_sport string
   Name_training_program string
   Current_data string
-  Parts_training_programm []part_of_training_programm
 
+  Parts_training_programm map[string][]part_of_training_programm
+
+  Unique_types_of_exercises []string
   Error string
 }
 
@@ -85,6 +88,11 @@ type Data_for_send_to_page_View_created_training_programms struct{
   Is_this_Author bool
   Authors_Icon1  string
 }
+
+
+
+
+
 //var authorized_user User
 var session_name = "name_session"
 var adress_data_base = "root:@tcp(127.127.126.50)/test"
@@ -747,11 +755,9 @@ fmt.Println(data)
 t.ExecuteTemplate(w, "search_people_page", data)
 }
 
-
-func create_train_programm_step_1(w http.ResponseWriter, r *http.Request){
-  t, _ := template.ParseFiles("templates/create_train_programm.html", "templates/header.html", "templates/footer.html")
+func processing_create_train_programm_step_1(w http.ResponseWriter, r *http.Request){
   if r.Method == http.MethodPost {
-
+    fmt.Println("ПЕРВЫЙ !!! ____ ----____----____-____---____----____--__--_---__----_------_")
     name_of_train_programm := r.FormValue("name_of_train_programm")
     option_of_style_training := r.FormValue("option_of_style_training")
     Description := r.FormValue("Description")
@@ -775,46 +781,52 @@ func create_train_programm_step_1(w http.ResponseWriter, r *http.Request){
    for res.Next(){
      err = res.Scan(&id_programm)
    }
-   http.Redirect(w, r, "/create_train_programm_step_2/" + id_programm, http.StatusSeeOther)
+   http.Redirect(w, r, "/view_created_training_programms/" + authorized_user.Id, http.StatusSeeOther)
   }
-  t.ExecuteTemplate(w, "create_train_programm", nil)
 }
-
-func create_train_programm_step_2(w http.ResponseWriter, r *http.Request){
-  t, _ := template.ParseFiles("templates/create_set_exercises.html", "templates/header.html", "templates/footer.html")
-  vars := mux.Vars(r)
-  //w.WriteHeader(http.StatusOK)
-  var data Data_for_create_training_programm
-  data.Id_train_programm = vars["id_training_programm"]
-  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
-
-//  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
-  //var current_user_id =
+func create_train_programm_step_1(w http.ResponseWriter, r *http.Request){
+  t, _ := template.ParseFiles("templates/create_train_programm.html", "templates/header.html", "templates/footer.html")
   if r.Method == http.MethodPost {
-
-    weight := r.FormValue("weight")
-    count := r.FormValue("count")
-    option_of_train := r.FormValue("option_of_train")
-    date := r.FormValue("date")
-    time_to_chill_before_next := r.FormValue("time_to_chill_before_next")
-    queue := r.FormValue("queue")
-    fmt.Println(date)
+        log.Println("Начало обработки POST-запроса")
+        // Остальной код...
+    } else {
+        log.Println("Обработка GET-запроса")
+    }
+    t.ExecuteTemplate(w, "create_train_programm", nil)
+/*
+  if r.Method == http.MethodPost {
+    fmt.Println("ПЕРВЫЙ !!! ____ ----____----____-____---____----____--__--_---__----_------_")
+    name_of_train_programm := r.FormValue("name_of_train_programm")
+    option_of_style_training := r.FormValue("option_of_style_training")
+    Description := r.FormValue("Description")
+    fmt.Println(name_of_train_programm, option_of_style_training)
 
     db, err := sql.Open("mysql", adress_data_base)
     if err != nil{
       panic(err)
     }
-
+    authorized_user, err  := populateUserFromSession(r, session_name)
     defer db.Close()
+    fmt.Printf("Подключено")
 
+    result, err := db.Exec("insert into test.Training_programms (id_author_of_training_program	, name_training_program, style_of_training, Description) values (?, ?, ?, ?)", authorized_user.Id, name_of_train_programm, option_of_style_training, Description)
+    fmt.Println(result)
 
-   result, err := db.Exec("insert into test.Exercises_in_training_programs (`id_of_programm`, `name_of_train`,	`weight`,	`count`,	`number_o_execution_sequence`,	`time_to_chill_before_next`, `date`) values (?, ?, ?, ?, ?, ?, ?)",data.Id_train_programm, option_of_train, weight, count, queue, time_to_chill_before_next, date)
-   fmt.Println(result)
+   var zapros = fmt.Sprintf("SELECT id FROM `Training_programms` WHERE id_author_of_training_program = '%s' AND name_training_program = '%s'", authorized_user.Id, name_of_train_programm)
+   res,err := db.Query(zapros)
+   fmt.Println(zapros)
+   var id_programm string
+   for res.Next(){
+     err = res.Scan(&id_programm)
+   }
+   http.Redirect(w, r, "/view_created_training_programms/" + authorized_user.Id, http.StatusSeeOther)
+  }else{
+    t.ExecuteTemplate(w, "create_train_programm", nil)
+  }*/
 
-
-  }
-  t.ExecuteTemplate(w, "create_set_exercises", data)
 }
+
+
 
 func getCurrentDate() string {
     now := time.Now()
@@ -831,16 +843,19 @@ func SecondsSinceStartOfDay() int {
 
 func watch_training_programm(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/watch_training_programm.html", "templates/header.html", "templates/footer.html")
+
+
   vars := mux.Vars(r)
   if err != nil{
     panic(err)
   }
 
   var data Data_for_watch_training_programm
+  data.Parts_training_programm = make(map[string][]part_of_training_programm)
   data.Id_train_programm = vars["id_training_programm"]
   data.Current_data = getCurrentDate()
 
-
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
 
 
   db, err := sql.Open("mysql", adress_data_base)
@@ -850,6 +865,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
   defer db.Close()
   authorized_user, err  := populateUserFromSession(r, session_name)
+
     if r.Method == http.MethodPost {
       weight := r.FormValue("weight")
       count := r.FormValue("count")
@@ -862,21 +878,22 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
       fmt.Println(result)
 
     }
-  var zapros = fmt.Sprintf("SELECT id, name_of_train, weight, count, number_o_execution_sequence, time_to_chill_before_next FROM `Exercises_in_training_programs` WHERE id_of_programm = '%s' ORDER BY number_o_execution_sequence ASC", data.Id_train_programm)
+
+  var zapros = fmt.Sprintf("SELECT id, name_of_train, weight, count, number_o_execution_sequence, time_to_chill_before_next, date FROM `Exercises_in_training_programs` WHERE id_of_programm = '%s' ORDER BY  date ASC, number_o_execution_sequence ASC", data.Id_train_programm)
   res,err := db.Query(zapros)
   fmt.Println(zapros)
 
   var part part_of_training_programm
   for res.Next(){
-    err = res.Scan(&part.Id_train, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill)
+    err = res.Scan(&part.Id_train, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &part.Date)
     fmt.Println(part)
     part.Id_train_programm = data.Id_train_programm
 
     var exists bool
-    query := "SELECT EXISTS(SELECT 1 FROM trainings WHERE id_of_all_train = ?)"
+    query := "SELECT EXISTS(SELECT 1 FROM trainings WHERE id_of_all_train = ? AND id_person = ?)"
 
     // Выполнение запроса
-    err = db.QueryRow(query, part.Id_train).Scan(&exists)
+    err = db.QueryRow(query, part.Id_train, authorized_user.Id).Scan(&exists)
     if err != nil {
         panic(err)
     }
@@ -884,7 +901,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
     // Вывод результата
     if exists {
         part.Have_this_id_in_bd = true
-        var zapros2 = fmt.Sprintf("SELECT  weight, count FROM `trainings` WHERE id_of_all_train = '%s' ", part.Id_train)
+        var zapros2 = fmt.Sprintf("SELECT  weight, count FROM `trainings` WHERE id_of_all_train = '%s' AND id_person = '%s' ", part.Id_train,  authorized_user.Id)
         res2,_ := db.Query(zapros2)
         fmt.Println(zapros2)
         for res2.Next(){
@@ -897,7 +914,8 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
     }
 
 
-    data.Parts_training_programm = append(data.Parts_training_programm, part)
+    data.Parts_training_programm[part.Date] = append(data.Parts_training_programm[part.Date], part)
+    fmt.Println(data.Parts_training_programm[part.Date])
   }
   fmt.Println(data)
 
@@ -968,6 +986,46 @@ func exit(w http.ResponseWriter, r *http.Request){
    t.ExecuteTemplate(w, "view_created_training_programms", data)
  }
 
+
+
+ func create_train_set_exercises(w http.ResponseWriter, r *http.Request){
+
+   vars := mux.Vars(r)
+   //w.WriteHeader(http.StatusOK)
+   var data Data_for_create_training_programm
+   data.Id_train_programm = vars["id_programm"]
+   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
+
+ //  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
+   //var current_user_id =
+   if r.Method == http.MethodPost {
+
+     weight := r.FormValue("weight")
+     count := r.FormValue("count")
+     option_of_train := r.FormValue("option_of_train")
+     date := r.FormValue("date")
+     time_to_chill_before_next := r.FormValue("time_to_chill_before_next")
+     queue := r.FormValue("queue")
+     fmt.Println(date)
+
+     db, err := sql.Open("mysql", adress_data_base)
+     if err != nil{
+       panic(err)
+     }
+
+     defer db.Close()
+
+
+    result, err := db.Exec("insert into test.Exercises_in_training_programs (`id_of_programm`, `name_of_train`,	`weight`,	`count`,	`number_o_execution_sequence`,	`time_to_chill_before_next`, `date`) values (?, ?, ?, ?, ?, ?, ?)",data.Id_train_programm, option_of_train, weight, count, queue, time_to_chill_before_next, date)
+    fmt.Println(result)
+    http.Redirect(w, r, "/watch_training_programm/" + data.Id_train_programm, http.StatusSeeOther)
+
+   }
+
+ }
+
+
+
  func view_current_training_programm(w http.ResponseWriter, r *http.Request){
        t, err := template.ParseFiles("templates/View_current_training_programm.html", "templates/header.html", "templates/footer.html")
        fmt.Println("!!!!!!!!")
@@ -976,6 +1034,14 @@ func exit(w http.ResponseWriter, r *http.Request){
        }
        t.ExecuteTemplate(w, "View_current_training_programm", nil)
  }
+
+ func handlerTTT(w http.ResponseWriter, r *http.Request) {
+    // Извлечение заголовка Referer
+    referer := r.Header.Get("Referer")
+
+    // Вывод страницы-источника
+    fmt.Fprintf(w, "Переадресация произошла с: %s", referer)
+}
  func main() {
  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
  r := mux.NewRouter()
@@ -991,13 +1057,20 @@ func exit(w http.ResponseWriter, r *http.Request){
   r.HandleFunc("/search_people", search_people)
   r.HandleFunc("/personal_statistic/{id_user}", personal_statistic)
   r.HandleFunc("/create_train_programm_step_1", verification_of_authorization)
-  r.HandleFunc("/create_train_programm_step_2/{id_training_programm}", create_train_programm_step_2)
+  r.HandleFunc("/create_train_programm_step_2/{id_training_programm}", handlerTTT)
 
   r.HandleFunc("/watch_training_programm/{id_training_programm}", verification_of_authorization)
 
   r.HandleFunc("/view_created_training_programms/{id_author}", verification_of_authorization)
+
   r.HandleFunc("/view_current_training_programm/{id_programm}", verification_of_authorization)
 
+
+
+
+  r.HandleFunc("/create_train_set_exercises/{id_programm}", create_train_set_exercises)
+
+  r.HandleFunc("/processing_create_train_programm_step_1", processing_create_train_programm_step_1)
  fmt.Println()
  http.Handle ("/", r)
  http.ListenAndServe(":8080", nil)
