@@ -1,4 +1,4 @@
-package main
+package main // v1 work
 
 import ("fmt";"net/http";"html/template")
 import( "github.com/gorilla/mux"
