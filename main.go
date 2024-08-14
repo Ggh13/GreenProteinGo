@@ -95,7 +95,7 @@ type Data_for_send_to_page_View_created_training_programms struct{
 
 //var authorized_user User
 var session_name = "name_session"
-var adress_data_base = "root:@tcp(127.127.126.50)/test"
+var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -103,8 +103,10 @@ var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
 
 func populateUserFromSession(r *http.Request, sessionName string) (User, error) {
-    session, _ := store.Get(r, sessionName)
-
+    session, err := store.Get(r, sessionName)
+    if err != nil{
+      panic(err)
+    }
 
     user := User{
         Id:                    getSessionValueAsString(session, "curret_user_id"),
@@ -119,7 +121,7 @@ func populateUserFromSession(r *http.Request, sessionName string) (User, error) 
     return user, nil
 }
 
-func saveUserToSession(r *http.Request, w http.ResponseWriter, sessionName string, user User) error {
+func saveUserToSession(r *http.Request, w http.ResponseWriter, sessionName string, user User) error{
     session, err := store.Get(r, sessionName)
     if err != nil {
         return err
@@ -133,6 +135,10 @@ func saveUserToSession(r *http.Request, w http.ResponseWriter, sessionName strin
     session.Values["nickname"] = user.Nickname
     session.Values["is_authorized"] = user.Is_that_authorized_user
 
+
+
+    fmt.Println("Данные о сохранении:  : : :")
+    fmt.Println("------------")
     return session.Save(r, w)
 }
 
@@ -146,9 +152,13 @@ func PrintSessionData(w http.ResponseWriter, r *http.Request) {
 
     // Проходим по всем данным в сессии и выводим их
     fmt.Println(w, "Session Data:")
-    for key, value := range session.Values {
-       fmt.Println(w, "%s: %v\n", key, value)
-    }
+    fmt.Println(session.Values["curret_user_id"])
+    fmt.Println(session.Values["name"] )
+    fmt.Println(session.Values["surname"] )
+    fmt.Println(session.Values["email"])
+    fmt.Println(session.Values["password"])
+    fmt.Println(session.Values["nickname"] )
+    fmt.Println(session.Values["is_authorized"] )
 }
 
 func getSessionValueAsString(session *sessions.Session, key string) string {
@@ -371,7 +381,6 @@ func authorization(w http.ResponseWriter, r *http.Request){
      fmt.Println(zapros)
      var cur_user User
      for res.Next(){
-
        err = res.Scan(&cur_user.Id, &cur_user.Name, &cur_user.Surname, &cur_user.Email, &cur_user.Password, &cur_user.Nickname)
      }
 
@@ -381,9 +390,10 @@ func authorization(w http.ResponseWriter, r *http.Request){
        authorized_user = cur_user
        authorized_user.Is_that_authorized_user = true
        fmt.Print("after input: ")
-       fmt.Println(cur_user)
+       fmt.Println(authorized_user)
        fmt.Println()
-       saveUserToSession(r, w, session_name, authorized_user)
+       err = saveUserToSession(r, w, session_name, authorized_user)
+       fmt.Println(err)
        PrintSessionData(w,r)
 
          http.Redirect(w, r, "/user_page/" + cur_user.Id, http.StatusSeeOther)
@@ -750,7 +760,7 @@ func search_people(w http.ResponseWriter, r *http.Request){
     if(name == "" && surname == "" && nickname == "" ){
       data.Error = "Введите имя, фамилию или никнейм"
     }else{
-      db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+      db, err := sql.Open("mysql", adress_data_base)
       if err != nil{
         panic(err)
       }
@@ -782,7 +792,7 @@ func search_people(w http.ResponseWriter, r *http.Request){
      }
     }
   }else{
-    db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+    db, err := sql.Open("mysql", adress_data_base)
     if err != nil{
       panic(err)
     }
@@ -1124,6 +1134,15 @@ func training_summary(w http.ResponseWriter, r *http.Request){
     fmt.Fprintf(w, "Переадресация произошла с: %s", referer)
 }
  func main() {
+
+   store.Options = &sessions.Options{
+        Path:     "/",       // Путь для куков
+        MaxAge:   86400 * 7, // Время жизни куков - 7 дней
+        HttpOnly: true,      // Запрет доступа к кукам через JavaScript
+        Secure:   false,     // Для HTTP должен быть false
+    }
+
+
  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
  r := mux.NewRouter()
 
