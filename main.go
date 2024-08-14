@@ -17,6 +17,8 @@ _ "github.com/go-sql-driver/mysql"
 "gonum.org/v1/plot/plotutil"
 "gonum.org/v1/plot/vg"
 "gonum.org/v1/plot/vg/draw"
+
+
 //"log"
 "strings"
 "github.com/gorilla/sessions"
@@ -88,8 +90,6 @@ type Data_for_send_to_page_View_created_training_programms struct{
   Is_this_Author bool
   Authors_Icon1  string
 }
-
-
 
 
 
@@ -577,20 +577,46 @@ func create_train(w http.ResponseWriter, r *http.Request){
 
 
 func graphic(times []time.Time, values []float64) {
-    // Создание точек для графика
-    pts := make(plotter.XYs, len(times))
+    // Определяем начальную и конечную даты
+    start := times[0]
+    end := times[len(times)-1]
+
+    // Создаем мапу для хранения данных с датами
+    data := make(map[time.Time]float64)
     for i, t := range times {
-        pts[i].X = float64(t.Unix())
-        pts[i].Y = values[i]
+        data[t] = values[i]
     }
+
+    // Создаем точки для графика
+    var pts plotter.XYs
+    var lastValue float64
+
+    for t := start; !t.After(end); t = t.AddDate(0, 0, 1) { // Двигаемся по каждому дню
+        if value, exists := data[t]; exists {
+            lastValue = value
+        }
+        pts = append(pts, plotter.XY{
+            X: float64(t.Unix()),
+            Y: lastValue,
+        })
+    }
+
+    // Обязательно включаем последний день
+    pts = append(pts, plotter.XY{
+        X: float64(end.Unix()),
+        Y: values[len(values)-1],
+    })
 
     // Создание нового графика
     p := plot.New()
 
-
     // Настройка оси X для отображения дат
     p.X.Label.Text = "Дата"
     p.X.Tick.Marker = plot.TimeTicks{Format: "2006-01-02"}
+
+    // Настройка пределов оси X
+    p.X.Min = float64(start.Unix())
+    p.X.Max = float64(end.Unix())
 
     // Добавление точек на график
     line, points, err := plotter.NewLinePoints(pts)
@@ -609,6 +635,11 @@ func graphic(times []time.Time, values []float64) {
     fmt.Println(times, values)
     println("График успешно сохранен в plot.png")
 }
+
+
+
+
+
 
 
 func personal_statistic(w http.ResponseWriter, r *http.Request){
@@ -633,7 +664,7 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
   if r.Method == http.MethodPost {
 
     option_of_train := r.FormValue("option_of_train")
-    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = 'your_name_of_train' AND id_person = 'your_id_person' GROUP BY date ORDER BY date ASC;", option_of_train, current_user_id)
+    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC;", option_of_train, current_user_id)
 
   }else{
     zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC;",  "bench_press", current_user_id)
@@ -663,6 +694,7 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
    times = append(times, date)
    weights = append(weights, float64(weight))
  }
+ fmt.Println(times, weights)
  graphic(times, weights)
 
   t.ExecuteTemplate(w, "personal_statistic", data)
@@ -748,6 +780,21 @@ func search_people(w http.ResponseWriter, r *http.Request){
        temp.Icon1 = "/static/personal_static/" + temp.Persona.Name+"_"+temp.Persona.Surname+"_"+ temp.Persona.Id + "/icon_1.jpg"
        data.Personas = append(data.Personas, temp)
      }
+    }
+  }else{
+    db, err := sql.Open("mysql", "root:@tcp(127.127.126.50:3306)/test")
+    if err != nil{
+      panic(err)
+    }
+    zapros := fmt.Sprintf("SELECT id, name, surname, nickname FROM `persons` ")
+    res,err := db.Query(zapros)
+    fmt.Println(zapros)
+
+    for res.Next(){
+      var temp Data_for_personal_page
+      err = res.Scan(&temp.Persona.Id, &temp.Persona.Name, &temp.Persona.Surname, &temp.Persona.Nickname)
+      temp.Icon1 = "/static/personal_static/" + temp.Persona.Name+"_"+temp.Persona.Surname+"_"+ temp.Persona.Id + "/icon_1.jpg"
+      data.Personas = append(data.Personas, temp)
     }
   }
 
@@ -1026,7 +1073,7 @@ func exit(w http.ResponseWriter, r *http.Request){
 
 
 
- func view_current_training_programm(w http.ResponseWriter, r *http.Request){
+ func view_current_training_programm(w http.ResponseWriter, r *http.Request){ // удалить через неделю после 14.08.2024
        t, err := template.ParseFiles("templates/View_current_training_programm.html", "templates/header.html", "templates/footer.html")
        fmt.Println("!!!!!!!!")
        if err != nil {
@@ -1034,6 +1081,40 @@ func exit(w http.ResponseWriter, r *http.Request){
        }
        t.ExecuteTemplate(w, "View_current_training_programm", nil)
  }
+
+func training_summary(w http.ResponseWriter, r *http.Request){
+  t, err := template.ParseFiles("templates/training_summary.html", "templates/header.html", "templates/footer.html")
+  vars := mux.Vars(r)
+  //w.WriteHeader(http.StatusOK)
+  Person := get_user_data_by_id(vars["id_person"])
+  var data Data_for_watch_training_programm
+  data.Parts_training_programm = make(map[string][]part_of_training_programm)
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+
+  var zapros = fmt.Sprintf("SELECT name_of_train, weight, count, date FROM `trainings` WHERE 	id_person = '%s' ", Person.Id)
+  res,err := db.Query(zapros)
+  fmt.Println(zapros)
+
+  var part part_of_training_programm
+  var date string
+  for res.Next(){
+    err = res.Scan(&part.Type_of_train, &part.Weight, &part.Count, &date)
+    data.Parts_training_programm[date] = append(data.Parts_training_programm[date], part)
+
+
+  }
+
+  fmt.Println("!!!!!!!!")
+  if err != nil {
+      panic(err)
+  }
+  t.ExecuteTemplate(w, "training_summary", data)
+}
 
  func handlerTTT(w http.ResponseWriter, r *http.Request) {
     // Извлечение заголовка Referer
@@ -1062,8 +1143,8 @@ func exit(w http.ResponseWriter, r *http.Request){
   r.HandleFunc("/watch_training_programm/{id_training_programm}", verification_of_authorization)
 
   r.HandleFunc("/view_created_training_programms/{id_author}", verification_of_authorization)
-
-  r.HandleFunc("/view_current_training_programm/{id_programm}", verification_of_authorization)
+  r.HandleFunc("/training_summary/{id_person}", training_summary)
+  //r.HandleFunc("/view_current_training_programm/{id_programm}", verification_of_authorization)
 
 
 

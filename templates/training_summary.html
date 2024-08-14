@@ -1,0 +1,39 @@
+{{define "training_summary"}}
+{{template "header"}}
+
+
+
+  <div class="row">
+    <div class="col-12">
+      Тренировочная сводка
+    </div>
+
+    <div class="col-12">
+      {{range $time, $event := .Parts_training_programm}}
+        {{$time}}
+
+          <div class="col-12 block_training" style="height: auto;">
+              <div class="row">
+                {{range $event}}
+                <div class="col-12">
+                  {{.Type_of_train}} {{.Weight}}кг {{.Count}} повторений
+                </div>
+                {{end}}
+              </div>
+          </div>
+
+
+      {{end}}
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+
+{{template "footer"}}
+{{end}}

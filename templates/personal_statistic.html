@@ -3,33 +3,46 @@
     {{template "header"}}
 
 
+        <div class="row">
+          <div class="col-12">
+            <h1 class="cover-heading">Тренировочная статистика ( в разработке , неккоректно работает при более одном ползователе на данной странице)</h1>
 
-        <h1 class="cover-heading">Тренировочная статистика ( в разработке , неккоректно работает при более одном ползователе на данной странице)</h1>
-        <form action="/personal_statistic/{{.Persona.Id}}" method="post">
-            <label for="dropdown">Выберите упражнение:</label>
+          </div>
 
+          <div class="col-12">
+            <h1>Для корректной работы графике, рекомендуем провести минимум 3 дня тренировок</h1>
+          </div>
 
-                <select id="dropdown" name="option_of_train" >
-                  {{range .Unique_types_of_exercises}}
-                        <option value="{{.}}">{{.}}</option>
-                  {{end}}
-                </select>
-
-
-                <label for="dropdown2">Выберите по какому результатау отображать:</label>
-                <select id="dropdown2" name="options2">
-                    <option value="absolute_power">Самый большой вес</option>
-                    <option value="most_repetitions">Наибольшее кол-во повторений (Требует доработки)</option>
-                    <option value="most_distence">Дистанция (Требует доработки)</option>
-                </select>
-
-            <div class="form-group">
-                <input type="submit" value="Отправить">
-            </div>
+          <div class="col-12">
+          <form action="/personal_statistic/{{.Persona.Id}}" method="post">
+              <label for="dropdown">Выберите упражнение:</label>
 
 
-        </form>
+                  <select id="dropdown" name="option_of_train" >
+                    {{range .Unique_types_of_exercises}}
+                          <option value="{{.}}">{{.}}</option>
+                    {{end}}
+                  </select>
 
-        <img src="\static\plot.jpg" alt="Растешь">
+
+                  <label for="dropdown2">Выберите по какому результатау отображать:</label>
+                  <select id="dropdown2" name="options2">
+                      <option value="absolute_power">Самый большой вес</option>
+                      <option value="most_repetitions">Наибольшее кол-во повторений (Требует доработки)</option>
+                      <option value="most_distence">Дистанция (Требует доработки)</option>
+                  </select>
+
+              <div class="form-group">
+                  <input type="submit" value="Отправить">
+              </div>
+
+
+          </form>
+          </div>
+          <div class="col-12">
+            <img src="\static\plot.jpg" alt="Тут должна была быть кратинка с твоим прогрессом, но ее нет, но я вижу как ты растешь. Честно....">
+
+          </div>
+        </div>
     {{template "footer"}}
 {{end}}
