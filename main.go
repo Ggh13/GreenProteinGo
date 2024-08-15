@@ -57,6 +57,7 @@ type part_of_training_programm struct{
   Id_train string
 
   Type_of_train string
+  Type_of_train_translated string
   Weight string
   Count string
   Queue string
@@ -477,7 +478,8 @@ func personal_account(w http.ResponseWriter, r *http.Request){
 
 
 
-
+  data.Unique_types_of_exercises = make(map [string] string)
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
 
 
   fmt.Println(current_user_id)
@@ -528,14 +530,12 @@ data.Sport_achive = make(map[string]string)
          count_for_maximim_weight = max(count, count_for_maximim_weight)
        }
      }
-     data.Sport_achive[type_training] = type_training + " " + strconv.Itoa(maximim_weight) + " for " + strconv.Itoa(count_for_maximim_weight) + " times"
+
+     trans_type_training := data.Unique_types_of_exercises[type_training]
+     data.Sport_achive[trans_type_training] =  strconv.Itoa(maximim_weight) + " на " + strconv.Itoa(count_for_maximim_weight) + " повторений"
    }
  }
- data.Unique_types_of_exercises = make(map [string] string)
- fmt.Println("Strart exyt ytri hfdkoe:  ")
- fmt.Println(get_session_lang_user(r, session_name))
- fmt.Println(get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name)))
- data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
+
 
 
   t.ExecuteTemplate(w, "personal_page", data)
@@ -705,7 +705,7 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
     zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC;", option_of_train, current_user_id)
 
   }else{
-    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC;",  "bench_press", current_user_id)
+    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC;",  "bench press", current_user_id)
 
   }
   //Установка данных
@@ -955,6 +955,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
       weight := r.FormValue("weight")
       count := r.FormValue("count")
       option_of_train := r.FormValue("hiddenFieldOption")
+      //
       id_of_train := r.FormValue("hiddenFieldID")
       date := getCurrentDate()
       fmt.Println(weight, count, option_of_train, id_of_train, date)
@@ -964,13 +965,13 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
     }
 
-  var zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, e.date FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_programm = %s;", data.Id_train_programm)
+  var zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, n.eng_name AS name_of_train,  e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, e.date FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_programm = %s;", data.Id_train_programm)
   res,err := db.Query(zapros)
   fmt.Println(zapros)
 
   var part part_of_training_programm
   for res.Next(){
-    err = res.Scan(&part.Id_train, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &part.Date)
+    err = res.Scan(&part.Id_train, &part.Type_of_train_translated, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &part.Date)
     fmt.Println(part)
     part.Id_train_programm = data.Id_train_programm
 
@@ -1128,6 +1129,8 @@ func training_summary(w http.ResponseWriter, r *http.Request){
   Person := get_user_data_by_id(vars["id_person"])
   var data Data_for_watch_training_programm
   data.Parts_training_programm = make(map[string][]part_of_training_programm)
+  Unique_types_of_exercises := make(map[string]string)
+  Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
   db, err := sql.Open("mysql", adress_data_base)
   if err != nil{
     panic(err)
@@ -1143,6 +1146,7 @@ func training_summary(w http.ResponseWriter, r *http.Request){
   var date string
   for res.Next(){
     err = res.Scan(&part.Type_of_train, &part.Weight, &part.Count, &date)
+    part.Type_of_train_translated = Unique_types_of_exercises[part.Type_of_train]
     data.Parts_training_programm[date] = append(data.Parts_training_programm[date], part)
 
 
