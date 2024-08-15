@@ -35,7 +35,7 @@ type Data_for_personal_page struct{
   Icon1 string
   Background_video string
   Sport_achive map[string]string
-  Unique_types_of_exercises []string
+  Unique_types_of_exercises map [string] string
   Error string
 }
 type Data_for_searching_personal_page struct{
@@ -46,7 +46,7 @@ type Data_for_searching_personal_page struct{
 
 type Data_for_create_training_programm struct{
   Id_train_programm string
-  Unique_types_of_exercises []string
+  Unique_types_of_exercises map [string] string
   Error string
 }
 
@@ -76,7 +76,7 @@ type Data_for_watch_training_programm struct{
 
   Parts_training_programm map[string][]part_of_training_programm
 
-  Unique_types_of_exercises []string
+  Unique_types_of_exercises map [string] string
   Error string
 }
 
@@ -92,10 +92,11 @@ type Data_for_send_to_page_View_created_training_programms struct{
 }
 
 
-
+//"root:@tcp(127.127.126.50)/test"
+//"user:password@tcp(147.45.163.58:3306)/test"
 //var authorized_user User
 var session_name = "name_session"
-var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
+var adress_data_base = "root:@tcp(127.127.126.50)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -142,6 +143,22 @@ func saveUserToSession(r *http.Request, w http.ResponseWriter, sessionName strin
     return session.Save(r, w)
 }
 
+func save_session_lang_user(r *http.Request, w http.ResponseWriter, sessionName string, lang string) error{
+  session, err := store.Get(r, sessionName)
+  if err != nil {
+      return err
+  }
+  session.Values["lang"] = lang
+  return session.Save(r, w)
+}
+
+func get_session_lang_user(r *http.Request, sessionName string) string{
+  session, err := store.Get(r, sessionName)
+  if err != nil{
+    panic(err)
+  }
+  return  getSessionValueAsString(session, "lang")
+}
 func PrintSessionData(w http.ResponseWriter, r *http.Request) {
     // Получаем сессию
     session, err := store.Get(r, "session-name")
@@ -407,24 +424,29 @@ func authorization(w http.ResponseWriter, r *http.Request){
 
 
 
-func get_Unique_types_of_exercises_m() []string{
+func get_Unique_types_of_exercises_m(lang string ) (map [string] string){
   db, err := sql.Open("mysql", adress_data_base)
+  if lang == ""{
+    lang = "rus"
+  }
   if err != nil{
     panic(err)
   }
 
   defer db.Close()
   fmt.Printf("Подключено")
-  var Unique_types_of_exercises []string
+
   //Установка данных
+  lang_name := lang + "_name"
  //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
- var zapros = fmt.Sprintf("SELECT DISTINCT name_of_train FROM `trainings`")
+ var zapros = fmt.Sprintf("SELECT DISTINCT eng_name, %s FROM `names_of_exercises`", lang_name)
  res,err := db.Query(zapros)
  fmt.Println(zapros)
+ Unique_types_of_exercises := make(map [string] string)
  for res.Next(){
-   var temp string
-   _ = res.Scan(&temp)
-   Unique_types_of_exercises = append(Unique_types_of_exercises, temp)
+   var temp1, temp2 string
+   _ = res.Scan(&temp1, &temp2)
+   Unique_types_of_exercises[temp1] = temp2
 
  }
  return Unique_types_of_exercises
@@ -509,7 +531,11 @@ data.Sport_achive = make(map[string]string)
      data.Sport_achive[type_training] = type_training + " " + strconv.Itoa(maximim_weight) + " for " + strconv.Itoa(count_for_maximim_weight) + " times"
    }
  }
- data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
+ data.Unique_types_of_exercises = make(map [string] string)
+ fmt.Println("Strart exyt ytri hfdkoe:  ")
+ fmt.Println(get_session_lang_user(r, session_name))
+ fmt.Println(get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name)))
+ data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
 
 
   t.ExecuteTemplate(w, "personal_page", data)
@@ -556,7 +582,8 @@ func create_train(w http.ResponseWriter, r *http.Request){
 
   }
   var data Data_for_personal_page
-  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
+  data.Unique_types_of_exercises = make(map [string] string)
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
   if r.Method == http.MethodPost {
     authorized_user, err  := populateUserFromSession(r, session_name)
     option_of_train := r.FormValue("option_of_train")
@@ -660,7 +687,8 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
 //  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
   var current_user_id = vars["id_user"]
   data.Persona.Id = current_user_id
-  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
+  data.Unique_types_of_exercises = make(map [string] string)
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
 
 
   db, err := sql.Open("mysql", adress_data_base)
@@ -911,8 +939,8 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   data.Parts_training_programm = make(map[string][]part_of_training_programm)
   data.Id_train_programm = vars["id_training_programm"]
   data.Current_data = getCurrentDate()
-
-  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
+  data.Unique_types_of_exercises = make(map [string] string)
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
 
 
   db, err := sql.Open("mysql", adress_data_base)
@@ -936,7 +964,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
     }
 
-  var zapros = fmt.Sprintf("SELECT id, name_of_train, weight, count, number_o_execution_sequence, time_to_chill_before_next, date FROM `Exercises_in_training_programs` WHERE id_of_programm = '%s' ORDER BY  date ASC, number_o_execution_sequence ASC", data.Id_train_programm)
+  var zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, e.date FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_programm = %s;", data.Id_train_programm)
   res,err := db.Query(zapros)
   fmt.Println(zapros)
 
@@ -1051,7 +1079,8 @@ func exit(w http.ResponseWriter, r *http.Request){
    //w.WriteHeader(http.StatusOK)
    var data Data_for_create_training_programm
    data.Id_train_programm = vars["id_programm"]
-   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m()
+   data.Unique_types_of_exercises = make(map [string] string)
+   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
 
  //  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
    //var current_user_id =

@@ -10,9 +10,9 @@
 
 
                 <select id="dropdown" name="option_of_train" >
-                  {{range .Unique_types_of_exercises}}
-                        <option value="{{.}}">{{.}}</option>
-                  {{end}}
+                  {{ range $key, $value := .Unique_types_of_exercises }}
+                    <option value="{{$key}}">{{$value}}</option>
+                  {{ end }}
                 </select>
 
 

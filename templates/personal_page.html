@@ -16,9 +16,11 @@
                     </video>
             </div>
 
+            <div class="col-1 padd-0">
 
-              <div class="col padd-0">
-                  <p><img id="icon1" src="\{{.Icon1}}" alt="Image!!" style="width:200px;height:200px;"></p>
+            </div>
+              <div class="col-2 padd-0">
+                  <p><img src="\{{.Icon1}}" alt="Image!!" style="width:200px;height:200px;"></p>
               </div>
 
               <div class="col padd-0">
@@ -86,9 +88,10 @@
             <form action="/submit_achive" method="post">
                 <label for="dropdown">Выберите упражнение:</label>
                 <select id="dropdown" name="options">
-                  {{range .Unique_types_of_exercises}}
-                        <option value="{{.}}">{{.}}</option>
-                  {{end}}
+                  {{ range $key, $value := .Unique_types_of_exercises }}
+                    <option value="{{$key}}">{{$value}}</option>
+                  {{ end }}
+
 
                 </select>
 

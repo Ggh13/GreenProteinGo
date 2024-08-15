@@ -10,9 +10,9 @@
 
 
                 <select id="dropdown" name="option_of_train" >
-                  {{range .Unique_types_of_exercises}}
-                        <option value="{{.}}">{{.}}</option>
-                  {{end}}
+                  {{ range $key, $value := .Unique_types_of_exercises }}
+                    <option value="{{$key}}">{{$value}}</option>
+                  {{ end }}
                 </select>
 
            <div class="form-group">
@@ -39,7 +39,7 @@
               <label for="code">Время отдыха перед следующим подходом</label>
               <input type="text" id="time_to_chill_before_next" name="time_to_chill_before_next" required>
           </div>
-          
+
             <div class="form-group">
                 <input type="submit" value="Отправить">
             </div>
