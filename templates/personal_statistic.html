@@ -1,6 +1,6 @@
 
 {{define "personal_statistic"}}
-    {{template "header"}}
+    {{template "header" .}}
 
 
         <div class="row">
@@ -22,7 +22,7 @@
                     {{ range $key, $value := .Unique_types_of_exercises }}
                       <option value="{{$key}}">{{$value}}</option>
                     {{ end }}
-                    
+
                   </select>
 
 

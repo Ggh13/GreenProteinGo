@@ -31,6 +31,7 @@ type User struct{
 }
 
 type Data_for_personal_page struct{
+  Authorized_user_data User
   Persona User
   Icon1 string
   Background_video string
@@ -39,12 +40,14 @@ type Data_for_personal_page struct{
   Error string
 }
 type Data_for_searching_personal_page struct{
+  Authorized_user_data User
   Personas []Data_for_personal_page
   Name_of_searching, Surname_of_searching, Nickname_of_searching string
   Error string
 }
 
 type Data_for_create_training_programm struct{
+  Authorized_user_data User
   Id_train_programm string
   Unique_types_of_exercises map [string] string
   Error string
@@ -52,6 +55,7 @@ type Data_for_create_training_programm struct{
 
 
 type part_of_training_programm struct{
+
   Id_train_programm string
   Date string
   Id_train string
@@ -70,6 +74,8 @@ type part_of_training_programm struct{
 
 }
 type Data_for_watch_training_programm struct{
+  Authorized_user_data User
+
   Id_train_programm string
   Style_sport string
   Name_training_program string
@@ -86,6 +92,8 @@ type Training_programma struct{
 
 }
 type Data_for_send_to_page_View_created_training_programms struct{
+  Authorized_user_data User
+
   Training_programms []Training_programma
   Author User
   Is_this_Author bool
@@ -96,8 +104,8 @@ type Data_for_send_to_page_View_created_training_programms struct{
 //"root:@tcp(127.127.126.50)/test"
 //"user:password@tcp(147.45.163.58:3306)/test"
 //var authorized_user User
-var session_name = "name_session"
-var adress_data_base = "root:@tcp(127.127.126.50)/test"
+var sessionName = "name_session"
+var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -122,6 +130,8 @@ func populateUserFromSession(r *http.Request, sessionName string) (User, error) 
 
     return user, nil
 }
+
+
 
 func saveUserToSession(r *http.Request, w http.ResponseWriter, sessionName string, user User) error{
     session, err := store.Get(r, sessionName)
@@ -160,6 +170,7 @@ func get_session_lang_user(r *http.Request, sessionName string) string{
   }
   return  getSessionValueAsString(session, "lang")
 }
+
 func PrintSessionData(w http.ResponseWriter, r *http.Request) {
     // Получаем сессию
     session, err := store.Get(r, "session-name")
@@ -203,7 +214,11 @@ func home_page(w http.ResponseWriter, r *http.Request){
         fmt.Fprintf(w, err.Error())
 
       }
-      t.ExecuteTemplate(w, "index", nil)
+      var data Data_for_personal_page
+
+      authorized_user, err  := populateUserFromSession(r, sessionName)
+      data.Authorized_user_data  = authorized_user
+      t.ExecuteTemplate(w, "index", data)
 }
 
 func create_personal_account(w http.ResponseWriter, r *http.Request){
@@ -212,7 +227,7 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
     fmt.Fprintf(w, err.Error())
 
   }
-  authorized_user, err  := populateUserFromSession(r, session_name)
+  authorized_user, err  := populateUserFromSession(r, sessionName)
     if r.Method == http.MethodPost {
 
       name := r.FormValue("name")
@@ -312,7 +327,7 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
       authorized_user.Password = password
       authorized_user.Id = strconv.Itoa(idC)
       authorized_user.Is_that_authorized_user = true
-      saveUserToSession(r, w, session_name, authorized_user)
+      saveUserToSession(r, w, sessionName, authorized_user)
       http.Redirect(w, r, "/", http.StatusSeeOther)
 
 
@@ -376,7 +391,7 @@ func authorization(w http.ResponseWriter, r *http.Request){
   }
   fmt.Println("Start authorized")
   PrintSessionData(w,r)
-  authorized_user, err  := populateUserFromSession(r, session_name)
+  authorized_user, err  := populateUserFromSession(r, sessionName)
   fmt.Println(authorized_user)
   if(authorized_user.Is_that_authorized_user){
     http.Redirect(w, r, "/user_page/" + authorized_user.Id, http.StatusSeeOther)
@@ -410,7 +425,7 @@ func authorization(w http.ResponseWriter, r *http.Request){
        fmt.Print("after input: ")
        fmt.Println(authorized_user)
        fmt.Println()
-       err = saveUserToSession(r, w, session_name, authorized_user)
+       err = saveUserToSession(r, w, sessionName, authorized_user)
        fmt.Println(err)
        PrintSessionData(w,r)
 
@@ -462,7 +477,7 @@ func get_Unique_types_of_exercises_m(lang string ) (map [string] string){
 func personal_account(w http.ResponseWriter, r *http.Request){
   t, _ := template.ParseFiles("templates/personal_page.html", "templates/header.html", "templates/footer.html")
 
-  authorized_user, err  := populateUserFromSession(r, session_name)
+  authorized_user, err  := populateUserFromSession(r, sessionName)
 
   vars := mux.Vars(r)
   w.WriteHeader(http.StatusOK)
@@ -479,7 +494,7 @@ func personal_account(w http.ResponseWriter, r *http.Request){
 
 
   data.Unique_types_of_exercises = make(map [string] string)
-  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
 
 
   fmt.Println(current_user_id)
@@ -537,14 +552,14 @@ data.Sport_achive = make(map[string]string)
  }
 
 
-
+ data.Authorized_user_data = authorized_user
   t.ExecuteTemplate(w, "personal_page", data)
 }
 
 
 func submit_achive(w http.ResponseWriter, r *http.Request){
   if r.Method == http.MethodPost {
-    authorized_user, err  := populateUserFromSession(r, session_name)
+    authorized_user, err  := populateUserFromSession(r, sessionName)
     type_training := r.FormValue("options")
     type_of_sports_load := r.FormValue("options2")
 
@@ -583,9 +598,9 @@ func create_train(w http.ResponseWriter, r *http.Request){
   }
   var data Data_for_personal_page
   data.Unique_types_of_exercises = make(map [string] string)
-  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
   if r.Method == http.MethodPost {
-    authorized_user, err  := populateUserFromSession(r, session_name)
+    authorized_user, err  := populateUserFromSession(r, sessionName)
     option_of_train := r.FormValue("option_of_train")
     weight := r.FormValue("weight")
     count := r.FormValue("count")
@@ -608,7 +623,7 @@ func create_train(w http.ResponseWriter, r *http.Request){
    http.Redirect(w, r, "/", http.StatusSeeOther)
  }
 
-
+ data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
   t.ExecuteTemplate(w, "create_train", data)
 }
 
@@ -688,7 +703,7 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
   var current_user_id = vars["id_user"]
   data.Persona.Id = current_user_id
   data.Unique_types_of_exercises = make(map [string] string)
-  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
 
 
   db, err := sql.Open("mysql", adress_data_base)
@@ -734,7 +749,7 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
  }
  fmt.Println(times, weights)
  graphic(times, weights)
-
+ data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
   t.ExecuteTemplate(w, "personal_statistic", data)
 }
 
@@ -743,7 +758,7 @@ func verification_of_authorization(w http.ResponseWriter, r *http.Request){
   t, _ := template.ParseFiles("templates/need_authorization.html", "templates/header.html", "templates/footer.html")
   path := r.URL.Path
   fmt.Println(path)
-  authorized_user, _  := populateUserFromSession(r, session_name)
+  authorized_user, _  := populateUserFromSession(r, sessionName)
   if(authorized_user.Is_that_authorized_user){
     if(path == "/create_train_programm_step_1"){
       fmt.Println("All good")
@@ -837,6 +852,7 @@ func search_people(w http.ResponseWriter, r *http.Request){
   }
 
 fmt.Println(data)
+data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
 t.ExecuteTemplate(w, "search_people_page", data)
 }
 
@@ -852,7 +868,7 @@ func processing_create_train_programm_step_1(w http.ResponseWriter, r *http.Requ
     if err != nil{
       panic(err)
     }
-    authorized_user, err  := populateUserFromSession(r, session_name)
+    authorized_user, err  := populateUserFromSession(r, sessionName)
     defer db.Close()
     fmt.Printf("Подключено")
 
@@ -890,7 +906,7 @@ func create_train_programm_step_1(w http.ResponseWriter, r *http.Request){
     if err != nil{
       panic(err)
     }
-    authorized_user, err  := populateUserFromSession(r, session_name)
+    authorized_user, err  := populateUserFromSession(r, sessionName)
     defer db.Close()
     fmt.Printf("Подключено")
 
@@ -940,7 +956,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   data.Id_train_programm = vars["id_training_programm"]
   data.Current_data = getCurrentDate()
   data.Unique_types_of_exercises = make(map [string] string)
-  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
 
 
   db, err := sql.Open("mysql", adress_data_base)
@@ -949,7 +965,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   }
 
   defer db.Close()
-  authorized_user, err  := populateUserFromSession(r, session_name)
+  authorized_user, err  := populateUserFromSession(r, sessionName)
 
     if r.Method == http.MethodPost {
       weight := r.FormValue("weight")
@@ -1006,6 +1022,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   fmt.Println(data)
 
 //  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
+data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
   t.ExecuteTemplate(w, "watch_training_programm", data)
 
 }
@@ -1016,16 +1033,22 @@ func constacs(w http.ResponseWriter, r *http.Request){
       if err != nil {
           panic(err)
       }
-      t.ExecuteTemplate(w, "contacts", nil)
+
+      var data Data_for_personal_page
+
+      authorized_user, err  := populateUserFromSession(r, sessionName)
+      data.Authorized_user_data  = authorized_user
+
+      t.ExecuteTemplate(w, "contacts", data)
 }
 
 func exit(w http.ResponseWriter, r *http.Request){
-    authorized_user, _  := populateUserFromSession(r, session_name)
+    authorized_user, _  := populateUserFromSession(r, sessionName)
     authorized_user.Id = "-1"
     authorized_user.Name = "-1"
     authorized_user.Surname = "-1"
     authorized_user.Is_that_authorized_user = false
-    saveUserToSession(r, w, session_name, authorized_user)
+    saveUserToSession(r, w, sessionName, authorized_user)
     http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -1034,7 +1057,7 @@ func exit(w http.ResponseWriter, r *http.Request){
 
    vars := mux.Vars(r)
    //w.WriteHeader(http.StatusOK)
-  authorized_user, err  := populateUserFromSession(r, session_name)
+  authorized_user, err  := populateUserFromSession(r, sessionName)
    author_id := vars["id_author"]
    var data Data_for_send_to_page_View_created_training_programms
    data.Author = get_user_data_by_id(author_id)
@@ -1068,7 +1091,7 @@ func exit(w http.ResponseWriter, r *http.Request){
    }
 
 
-
+   data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
    t.ExecuteTemplate(w, "view_created_training_programms", data)
  }
 
@@ -1081,7 +1104,7 @@ func exit(w http.ResponseWriter, r *http.Request){
    var data Data_for_create_training_programm
    data.Id_train_programm = vars["id_programm"]
    data.Unique_types_of_exercises = make(map [string] string)
-   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
+   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
 
  //  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
    //var current_user_id =
@@ -1130,7 +1153,7 @@ func training_summary(w http.ResponseWriter, r *http.Request){
   var data Data_for_watch_training_programm
   data.Parts_training_programm = make(map[string][]part_of_training_programm)
   Unique_types_of_exercises := make(map[string]string)
-  Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, session_name))
+  Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
   db, err := sql.Open("mysql", adress_data_base)
   if err != nil{
     panic(err)
@@ -1156,6 +1179,7 @@ func training_summary(w http.ResponseWriter, r *http.Request){
   if err != nil {
       panic(err)
   }
+  data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
   t.ExecuteTemplate(w, "training_summary", data)
 }
 

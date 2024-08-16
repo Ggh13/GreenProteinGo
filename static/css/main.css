@@ -1,14 +1,13 @@
-html,body {
-  font-family: "Russo One", sans-serif !important;
-
-  font-style: normal;
-
-  width: 100%;
-  height: 100%;
+body, html{
+  /* #D0F0C0  #ADFF6F */
+  background-color:#F3FEEB  !important;
 }
-.Russo_One {
+
+.fonts_Russo_One{
   font-family: "Russo One", sans-serif;
+  font-style: normal;
 }
+
 .custom{
   display:flex;
   min-height: 100vh;
@@ -20,6 +19,45 @@ html{
   background:  white; <!--antiquewhite;--!>
 }
 
+.center_text_in_div{
+  height: auto;
+  width: 100%;
+  display: flex; /* Flexbox для центрирования */
+  justify-content: center; /* Центрирование по горизонтали */
+  align-items: center; /* Центрирование по вертикали */
+}
+
+.block_button_header{
+  width: 100%;
+  height: 50px;
+  background-color: greenyellow;
+  padding: 5px;
+
+
+}
+
+.input_personal_account_button{
+  width: 150px;
+  height: 100%;
+  background-color: #7d32cd;
+  width: 50%;
+  height: 30px;
+  padding: 5px;
+  margin: 10px;
+  border-radius: 5px;
+}
+
+.block_for_authorized_user_mini_prof_in_header{
+  height: 44px;
+  width: 150px;
+  background-color: #4720a2;
+  border-radius: 5px;
+  border-width: 2px;
+  padding: 3px;
+  margin: 3px;
+  font-size: 10px;
+  color: antiquewhite;
+}
 
 
 .block_training{
@@ -44,6 +82,7 @@ html{
 
 
 
+
 *{
     margin: 0px;
     padding: 0px;
@@ -56,24 +95,24 @@ html{
     padding: 0;
     background: #7b9f20;
     width: 100%;
-    height: 50px;
+    height: 40px;
     float: left;
     position: absolute;
-    top:50px;
+    top:15px;
 
 }
-#text1{
+.Text_for_header{
   line-height: 0.6;
-    margin: 0;
-    padding: 0;
-    text-align: left;
-    justify-content: left;
-    color: antiquewhite;
-    font-size: 50px;
-    font-weight: 1000;
-    -webkit-text-stroke: 0px #7b9f20;
-    position: absolute;
-    top:58px
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  justify-content: left;
+  color: antiquewhite;
+  font-size: 45px;
+  font-weight: 1000;
+  -webkit-text-stroke: 0px #7b9f20;
+  position: absolute;
+  top:15px
 
 }
 
@@ -98,33 +137,6 @@ html{
   float: left;
 
 }
-
-
-
-
-
-.block_for_training_programm{
-  weight:flex;
-  height: 150px;
-  background-color: #e5c08f;
-
-  border-radius: 20px;
-  border-color: black;
-  border-style:solid;
-
-  margin-bottom: 30px;
-  padding:10px;
-}
-
-
-
-.center_text_for_div{
-  text-align: center;
-}
-
-
-
-
 .block_for_text{
   display: flex;
    justify-content: center;
@@ -166,9 +178,9 @@ html{
     margin: 0;
     padding: 0;
 
-    background: greenyellow;
+    background:#7b9f20;
     width: 100%;
-    height: 150px;
+    height: 70px;
 
     position: relative;
     /*float: top;*/
@@ -177,22 +189,24 @@ html{
     display: flex;
     */
 }
+.bottom_of_header{
+  background-color: greenyellow;
+  height: auto;
+  width: 100%;
+}
 
-
-#main{
-    margin: 5px;
-    object-fit: fill;
-    width: flex;
-    height: flex;
+.main{
+    width: 100%;
+    height: auto;
+    min-height: 800px;
     background: #faebd7;
-    justify-content: center;
-    align-items: center;
-    border-radius:20px 20px 0 0 ;
+
+    border-radius:20px;
     border-style: solid;
     border-color: #e5c08f;
-     border-width: 2px ; /* Толщина границы */
-
-
+    border-width: 2px ; /* Толщина границы */
+    padding: 25px 25px !important;
+    box-sizing: border-box;
 
 }
 
@@ -222,7 +236,46 @@ html{
 .block_for_right_aside{
   float: right;
   position: relative;
-  margin: 0 1.5%;
+  margin: 10px;
+}
+.row.block_right_place_for_button{
+
+  height:auto;
+  width:80%;
+  background: #faebd7;
+  position:sticky;
+  top: 350px;
+  padding:10px;
+  border-radius:20px;
+  border-style: solid;
+  border-color: #e5c08f;
+  border-width: 2px ; /* Толщина границы */
+  margin-left:10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }
@@ -254,19 +307,14 @@ html{
     padding: 0 20px;
     cursor: pointer;
     width: 100px;
-    height: 40px;
+    height: 35px;
 
 
     display: flex;
     justify-content: center;
     align-items: center;
-    line-height: 1.2;
 }
-.block_size_for_nav{
-  height: 50px;
-  width: 100px;
 
-}
 #nav li:not(:last-of-type){
     margin-bottom:20px;
 }

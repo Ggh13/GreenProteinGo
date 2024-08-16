@@ -1,6 +1,6 @@
 
 {{define "create"}}
-    {{template "header"}}
+    {{template "header" .}}
 
 
 
@@ -12,7 +12,7 @@
               <textarea name="full_text" id="full_text" class="form-control" placeholder="Текст статьи"></textarea> <br>
               <button class="btn btn-warning">Добавить</button>
         </form>
-    
+
 
     {{template "footer"}}
 {{end}}

@@ -1,6 +1,6 @@
 
   {{define "personal_page"}}
-{{template "header"}}
+{{template "header" .}}
 
 
 
@@ -27,40 +27,7 @@
                     <h1  id="textForName">{{.Persona.Name}} {{.Persona.Surname}} </h1>
               </div>
 
-              <div class="col-6">
-                <ul class="nav_pers">
-                    <li>
-                        <div class="block_for_right_aside">
-                          <div class = "block_for_text">
-                                  <a class="nav-link" href="/create_train" >Добавить сделанное упражнение</a>
-                          </div>
-                        </div>
-                    </li>
 
-
-                    <li>
-                        <div class="block_for_right_aside">
-                          <div class = "block_for_text">
-                                  <a class="nav-link" href="/personal_statistic/{{.Persona.Id}}"  >Статистика</a>
-                          </div>
-                        </div>
-                  </li>
-                  <li>
-                      <div class="block_for_right_aside">
-                        <div class = "block_for_text">
-                                <a class="nav-link" href="/view_created_training_programms/{{.Persona.Id}}"  >Программы тренировок</a>
-                        </div>
-                      </div>
-                </li>
-                <li>
-                    <div class="block_for_right_aside">
-                      <div class = "block_for_text">
-                              <a class="nav-link" href="/training_summary/{{.Persona.Id}}"  >Тренировочная сводка</a>
-                      </div>
-                    </div>
-              </li>
-                </ul>
-            </div>
 
 
 
@@ -121,10 +88,55 @@
 
 
 
+</div>
+    <div class = "col-3" >
+        <div class="row block_right_place_for_button ">
+          <div class="col-12">
+            <div class="row">
+                <div class="col-12 block_for_right_aside">
+
+                        <div class = "block_for_text">
+                            <a class="nav-link" href="/create_train" >Добавить сделанное упражнение</a>
+                        </div>
+
+                </div>
+                <div class="col-12 block_for_right_aside">
+
+                    <div class = "block_for_text">
+                            <a class="nav-link" href="/personal_statistic/{{.Persona.Id}}"  >Статистика</a>
+
+                  </div>
+                </div>
+                <div class="col-12 block_for_right_aside">
+
+                    <div class = "block_for_text">
+                            <a class="nav-link" href="/view_created_training_programms/{{.Persona.Id}}"  >Программы тренировок</a>
+
+                  </div>
+                </div>
+
+                <div class="col-12 block_for_right_aside">
+
+                    <div class = "block_for_text">
+                            <a class="nav-link" href="/training_summary/{{.Persona.Id}}"  >Тренировочная сводка</a>
+                    </div>
+
+                </div>
+
+                <div class="col-12 block_for_right_aside">
+
+                    <div class = "block_for_text">
+                          <a class="nav-link" href="/exit" >Выйти из личного аккаунта</a>
+                    </div>
+
+                </div>
 
 
 
 
+            </div>
+        </div>
+      </div>
     </div>
 {{template "footer"}}
  {{end}}
