@@ -254,9 +254,28 @@ html{
 }
 
 
+.img_center_on_main{
+  display: grid;
+  place-items: center; /* Центрирует по горизонтали и вертикали */
+}
+
+.img_border{
+  border-radius:20px;
+  border: 5px solid #e5c08f;
+}
 
 
+.block_for_personal_view{
+  background-color: #faebd7;
+  width: 800px;
+  height: 250px;
 
+
+  border-radius:20px;
+  border: 2px solid #e5c08f;
+
+  
+}
 
 
 
@@ -334,16 +353,7 @@ html{
   top: 25px;
   left: 25px;
 }
-#block_for_personal_view{
-  background: #ffd700;
 
-  text-align: center;
-  justify-content: center;
-  align-items: center;
-
-  width: 800px;
-  height: 250px;
-}
 
 
 

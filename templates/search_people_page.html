@@ -5,47 +5,66 @@
 
 
 
-
-
-            <form action="/search_people" method="post">
-                 <label for="firstName">Имя:</label>
-                 <input type="text" id="firstName" name="firstName">
-
-                 <label for="lastName">Фамилия:</label>
-                 <input type="text" id="lastName" name="lastName">
-
-                 <label for="nickname">Никнейм:</label>
-                 <input type="text" id="nickname" name="nickname">
-
-                 <input type="submit" value="Отправить"><br><br>
-             </form>
-             <p>Поиск по запросу: {{.Name_of_searching}} {{.Surname_of_searching}} {{.Nickname_of_searching}} {{.Error}}</p>
-             <br>
-             <br>
-             <br>
-             {{range .Personas}}
-              <tr>
-                  <button type="button" name="button">
-                    <div id="block_for_personal_view" onclick="redirectToNewPage('{{.Persona.Id}}')">
-                        <p><img id="image_for_searching" src="{{.Icon1}}" alt="Image!!">
-
-                        <td>{{.Persona.Name}}</td>
-                        <td>{{.Persona.Surname}}</td>
-
+        <div class="row">
+          <div class="col-12 ">
+              <form action="/search_people" method="post">
+                <div class="row">
+                    <div class="col-1 center_text_in_div">
+                       Имя:
                     </div>
-                  </button>
+                    <div class="col-2">
+                       <input type="text" id="firstName" name="firstName">
+                    </div>
+                    <div class="col-1 center_text_in_div">
+                      Фамилия:
+                    </div>
+                    <div class="col-2">
+                      <input type="text" id="lastName" name="lastName">
+                    </div>
 
-              </tr><br><br>
-              {{end}}
+                    <div class="col-1 center_text_in_div">
+                      Никнейм:
+                    </div>
+                    <div class="col-2">
+                      <input type="text" id="nickname" name="nickname">
+                    </div>
+                    <div class="col-1">
+                      <input type="submit" value="Отправить">
+                    </div>
+                </div>
 
-              <script>
-                  function redirectToNewPage(param) {
-                      // Формируем URL с параметром
-                      var url = '/user_page/' + encodeURIComponent(param);
-                      // Переходим на новую страницу
-                      window.location.href = url;
-                  }
-              </script>
+               </form>
+          </div>
 
+               <div class="col-2">
+                    <p>Поиск по запросу: {{.Name_of_searching}} {{.Surname_of_searching}} {{.Nickname_of_searching}} {{.Error}}</p>
+
+
+               {{range .Personas}}
+
+                  <div class="col-12">
+                    <a class="nav-link" href="/user_page/{{.Persona.Id}}">
+                      <div class="block_for_personal_view">
+                        <div class="row" style="height:100%;">
+                          <div class="col-3 img_center_on_main">
+                            <p><img class= "img_border" style="height:250px; position: relative; top: -2px;" src="{{.Icon1}}" alt="Image!!"></p>
+                          </div>
+
+                          <div class="col offset-md-1">
+                            <div class="row">
+                              <div class="col-3">{{.Persona.Name}} {{.Persona.Surname}}</div>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+
+
+                {{end}}
+
+
+        </div>
 {{template "footer"}}
 {{end}}
