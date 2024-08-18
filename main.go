@@ -274,10 +274,14 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
     //  }
     //  defer file.Close()
 
+
       // Путь для сохранения изображения (папка "uploads" в текущей директории)
-      uploadsDir := "./static/personal_static/" + name+"_"+surname+"_"+ strconv.Itoa(idC)
+      uploadsDir := "../personal_static/" + name+"_"+surname+"_"+ strconv.Itoa(idC)
       fmt.Println("WAY TO :  ",uploadsDir)
-      os.Mkdir(uploadsDir, os.FileMode(0522))
+      err = os.Mkdir(uploadsDir, os.FileMode(0755))
+      if err != nil{
+        panic(err)
+      }
       // Сохраняем изображение
 
 
@@ -532,8 +536,8 @@ func personal_account(w http.ResponseWriter, r *http.Request){
   fmt.Println(current_user_id)
 
 
-  data.Icon1 = "./static/personal_static/" + data.Persona.Name+"_"+data.Persona.Surname+"_"+ data.Persona.Id + "/icon_1.jpg"
-  data.Background_video = "./static/personal_static/" + data.Persona.Name+"_"+data.Persona.Surname+"_"+ data.Persona.Id + "/background_video.mp4"
+  data.Icon1 = "/personal_static/" + data.Persona.Name+"_"+data.Persona.Surname+"_"+ data.Persona.Id + "/icon_1.jpg"
+  data.Background_video = "/personal_static/" + data.Persona.Name+"_"+data.Persona.Surname+"_"+ data.Persona.Id + "/background_video.mp4"
 
   db, err := sql.Open("mysql", adress_data_base)
   if err != nil{
@@ -864,7 +868,7 @@ func search_people(w http.ResponseWriter, r *http.Request){
      for res.Next(){
        var temp Data_for_personal_page
        err = res.Scan(&temp.Persona.Id, &temp.Persona.Name, &temp.Persona.Surname, &temp.Persona.Nickname)
-       temp.Icon1 = "/static/personal_static/" + temp.Persona.Name+"_"+temp.Persona.Surname+"_"+ temp.Persona.Id + "/icon_1.jpg"
+       temp.Icon1 = "/personal_static/" + temp.Persona.Name+"_"+temp.Persona.Surname+"_"+ temp.Persona.Id + "/icon_1.jpg"
        data.Personas = append(data.Personas, temp)
      }
     }
@@ -880,7 +884,7 @@ func search_people(w http.ResponseWriter, r *http.Request){
     for res.Next(){
       var temp Data_for_personal_page
       err = res.Scan(&temp.Persona.Id, &temp.Persona.Name, &temp.Persona.Surname, &temp.Persona.Nickname)
-      temp.Icon1 = "/static/personal_static/" + temp.Persona.Name+"_"+temp.Persona.Surname+"_"+ temp.Persona.Id + "/icon_1.jpg"
+      temp.Icon1 = "/personal_static/" + temp.Persona.Name+"_"+temp.Persona.Surname+"_"+ temp.Persona.Id + "/icon_1.jpg"
       data.Personas = append(data.Personas, temp)
     }
   }
@@ -1100,7 +1104,7 @@ func exit(w http.ResponseWriter, r *http.Request){
    }else{
      data.Is_this_Author = false
    }
-   data.Authors_Icon1 = "/static/personal_static/" + data.Author.Name+"_"+data.Author.Surname+"_"+ data.Author.Id + "/icon_1.jpg"
+   data.Authors_Icon1 = "/personal_static/" + data.Author.Name+"_"+data.Author.Surname+"_"+ data.Author.Id + "/icon_1.jpg"
 
 
    if err != nil {
@@ -1235,7 +1239,20 @@ func training_summary(w http.ResponseWriter, r *http.Request){
 
 
  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+
+ fs := http.FileServer(http.Dir("../personal_static"))
+ http.Handle("/personal_static/", http.StripPrefix("/personal_static/", fs))
+
+
+
+
  r := mux.NewRouter()
+
+
+
+
+
+
 
   r.HandleFunc("/", home_page)
   r.HandleFunc("/create_personal_page", create_personal_account)
