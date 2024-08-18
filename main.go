@@ -29,7 +29,9 @@ type User struct{
    Id, Name, Surname, Email, Password, Nickname string
    Is_that_authorized_user bool
 }
-
+type anthropometry_data_for_person struct{
+  Height, Weight, Neck_size, Shoulder_size, Chest_size, Waist_size, Bicep_size, Forearm_size, Thigh_size, Quadriceps_size, Calf_size, Wrist_size, Ankle_size string
+}
 type Data_for_personal_page struct{
   Authorized_user_data User
   Persona User
@@ -37,6 +39,9 @@ type Data_for_personal_page struct{
   Background_video string
   Sport_achive map[string]string
   Unique_types_of_exercises map [string] string
+
+  Anthropometry anthropometry_data_for_person
+
   Error string
 }
 type Data_for_searching_personal_page struct{
@@ -105,7 +110,7 @@ type Data_for_send_to_page_View_created_training_programms struct{
 //"user:password@tcp(147.45.163.58:3306)/test"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
+var adress_data_base = "root:@tcp(127.127.126.50)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -382,6 +387,33 @@ func get_user_data_by_id(id_user_cur string) User{
 
 }
 
+func get_anthropometry_data_for_person_by_id(person_id string) (anthropometry_data_for_person) {
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+  fmt.Printf("Подключено")
+  var anthropometry anthropometry_data_for_person
+  //Установка данных
+ //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
+  var zapros = fmt.Sprintf("SELECT height, weight, neck_size, shoulder_size, chest_size, waist_size, bicep_size, forearm_size, thigh_size, quadriceps_size, calf_size, wrist_size, ankle_size FROM `anthropometria_sportsmen` WHERE person_id='%s'", person_id)
+  res,err := db.Query(zapros)
+  fmt.Println(zapros)
+  fmt.Println(res)
+  for res.Next(){
+    err = res.Scan(&anthropometry.Height, &anthropometry.Weight, &anthropometry.Neck_size, &anthropometry.Shoulder_size, &anthropometry.Chest_size, &anthropometry.Waist_size, &anthropometry.Bicep_size, &anthropometry.Forearm_size, &anthropometry.Thigh_size, &anthropometry.Quadriceps_size, &anthropometry.Calf_size, &anthropometry.Wrist_size, &anthropometry.Ankle_size)
+    if err != nil{
+      panic(err)
+    }
+  }
+
+  fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+  fmt.Println(anthropometry)
+  return anthropometry
+}
+
 
 func authorization(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/input_personal_account.html", "templates/header.html", "templates/footer.html")
@@ -492,7 +524,7 @@ func personal_account(w http.ResponseWriter, r *http.Request){
   }
 
 
-
+  data.Anthropometry = get_anthropometry_data_for_person_by_id(current_user_id)
   data.Unique_types_of_exercises = make(map [string] string)
   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
 
@@ -717,26 +749,28 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
   if r.Method == http.MethodPost {
 
     option_of_train := r.FormValue("option_of_train")
-    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC;", option_of_train, current_user_id)
+    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC", option_of_train, current_user_id)
 
   }else{
-    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC;",  "bench press", current_user_id)
+    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC",  "bench press", current_user_id)
 
   }
+
   //Установка данных
  //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
-  res,err := db.Query(zapros)
+ res,err := db.Query(zapros)
  fmt.Println(zapros)
 
  var times []time.Time
  var weights []float64
 
+ fmt.Println(res)
 
  for res.Next(){
    var dateS string
    var weight int
    err = res.Scan(&dateS, &weight)
-
+   fmt.Println(dateS, weight)
    date, err := time.Parse("2006-01-02", dateS)
     if err != nil {
         fmt.Println("Ошибка при парсинге даты:", err)
