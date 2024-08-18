@@ -3,15 +3,29 @@
     {{template "header" .}}
 
 
+        <div class="row">
+          <div class="col-12">Вход в личный кабинет</div>
+          <form action="/input_personal_account" method="post">
 
-        Вход в личный кабинет
-        <form action="/input_personal_account" method="post">
-              <input name="email" id="email" placeholder="почта"
-              class="form-control"><br>
-              <input name="password" id="password" class="form-control" placeholder="Пароль"></input> <br>
-              <button class="btn btn-warning">Войти</button>
-        </form>
+                <div class="col-12" style="margin-bottom:15px;">
+                  <input name="email" id="email" placeholder="почта"class="form-control">
+                </div>
+                <div class="col-12" style="margin-bottom:15px;">
+                  <input name="password" id="password" class="form-control" placeholder="Пароль"></input>
+                </div>
+                <div class="col-4" style="margin-bottom:15px;">
+                  <button class="btn btn-warning">Войти</button>
+                </div>
 
+
+          </form>
+          <div class = "col">
+            <a class="nav-link" href="/create_personal_page">
+              <div class = "block_for_text standart_border_radius"  style="margin-bottom:15px;">
+                 Создать аккаунт
+              </div>
+            </a>
+          </div>
 
     {{template "footer"}}
 {{end}}

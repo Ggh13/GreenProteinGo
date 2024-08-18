@@ -139,18 +139,18 @@ html{
 
 }
 .block_for_text{
-  display: flex;
+   display: flex;
    justify-content: center;
    align-items: center;
    width:  fit-content;
    height: fit-content;
    padding: 10px;
-  background: #ADFF2F;
-  text-align: center;
-  border-radius: 10px;
-  border-color: #67991C;
-  border-width: 3px;
-  border-style: solid;
+   background: #ADFF2F;
+   text-align: center;
+   border-radius: 10px;
+   border-color: #67991C;
+   border-width: 3px;
+   border-style: solid;
 }
 .container{
   padding: 5px;
@@ -261,7 +261,7 @@ html{
 
 .img_border{
   border-radius:20px;
-  border: 5px solid #e5c08f;
+  border: 2px solid #e5c08f;
 }
 
 
