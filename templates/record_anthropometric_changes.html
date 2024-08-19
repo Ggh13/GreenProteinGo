@@ -1,0 +1,110 @@
+{{define "record_anthropometric_changes"}}
+{{template "header" .}}
+
+    <div class="row">
+      <div class = "col-12 center_text_in_div">
+        Фиксация антропометрических изменений
+      </div>
+      <div class = "col-12 center_text_in_div">
+        Перед замерами рекомендуем запампиться и просмотреть видео о том как правильно производить замеры тела
+      </div>
+      <form action="/record_anthropometric_changes/{{.Authorized_user_data.Id}}"  method="post">
+            <div class="row">
+              <div class = "col-1">
+                <div class="form-group">
+                    <label for="name">Рост: </label>
+                    <input type="text" id="Height" name="Height" required>
+                </div>
+              </div>
+              <div class = "col-11"></div>
+              <div class = "col-1">
+                <div class="form-group">
+                    <label for="name">Вес: </label>
+                    <input type="text" id="Weight" name="Weight" required>
+                </div>
+              </div>
+              <div class = "col-11"></div>
+              <div class = "col-3">
+                <div class="form-group">
+                    <label for="name">Обхват шеи: </label>
+                    <input type="text" id="Neck_size" name="Neck_size" required>
+                </div>
+              </div>
+              <div class = "col-3">
+                <div class="form-group">
+                    <label for="name">Обхват плеч: </label>
+                    <input type="text" id="Shoulder_size" name="Shoulder_size" required>
+                </div>
+              </div>
+
+              <div class = "col-3">
+                <div class="form-group">
+                    <label for="name">Обхват груди: </label>
+                    <input type="text" id="Chest_size" name="Chest_size" required>
+                </div>
+              </div>
+
+              <div class = "col-3">
+                <div class="form-group">
+                    <label for="name">Обхват бицепса: </label>
+                    <input type="text" id="Bicep_size" name="Bicep_size" required>
+                </div>
+              </div>
+
+              <div class = "col-3">
+                <div class="form-group">
+                    <label for="name">Обхват предплечий: </label>
+                    <input type="text" id="Forearm_size" name="Forearm_size" required>
+                </div>
+              </div>
+
+              <div class = "col-3">
+                <div class="form-group">
+                    <label for="name">Обхват запястий: </label>
+                    <input type="text" id="Wrist_size" name="Wrist_size" required>
+                </div>
+              </div>
+
+              <div class = "col-3">
+                <div class="form-group">
+                    <label for="name">Обхват талии: </label>
+                    <input type="text" id="Waist_size" name="Waist_size" required>
+                </div>
+              </div>
+
+              <div class = "col-3">
+                <div class="form-group">
+                    <label for="name">Обхват бедер: </label>
+                    <input type="text" id="Thigh_size" name="Thigh_size" required>
+                </div>
+              </div>
+
+              <div class = "col-3">
+                <div class="form-group">
+                    <label for="name">Обхват квадрицепса: </label>
+                    <input type="text" id="Quadriceps_size" name="Quadriceps_size" required>
+                </div>
+              </div>
+              <div class = "col-3">
+                <div class="form-group">
+                    <label for="name">Обхват икр: </label>
+                    <input type="text" id="Calf_size" name="Calf_size" required>
+                </div>
+              </div>
+
+              <div class = "col-3">
+                <div class="form-group">
+                    <label for="name">Обхват лодыжки: </label>
+                    <input type="text" id="Ankle_size" name="Ankle_size" required>
+                </div>
+              </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Отправить">
+                </div>
+            </div>
+        </form>
+    </div>
+
+{{template "footer"}}
+{{end}}

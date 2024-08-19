@@ -60,6 +60,13 @@ html{
   color: antiquewhite;
 }
 
+.center_text_for_div {
+
+    justify-content: center;
+    align-items: center;
+    text-align: center; /* Центрирует текст по горизонтали внутри flex элемента */
+}
+
 
 .block_training{
   width: 500px;
@@ -76,7 +83,12 @@ html{
 
 
 
-
+.block_for_training_programm{
+  width: flex;
+  height: flex;
+  background-color:#e5c08f;
+  padding: 10px;
+}
 
 
 
@@ -201,7 +213,7 @@ html{
     height: auto;
     min-height: 800px;
     background: #faebd7;
-
+    padding: 10px;
     border-radius:20px;
     border-style: solid;
     border-color: #e5c08f;

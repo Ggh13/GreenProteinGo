@@ -29,8 +29,13 @@ type User struct{
    Id, Name, Surname, Email, Password, Nickname string
    Is_that_authorized_user bool
 }
+
 type anthropometry_data_for_person struct{
   Height, Weight, Neck_size, Shoulder_size, Chest_size, Waist_size, Bicep_size, Forearm_size, Thigh_size, Quadriceps_size, Calf_size, Wrist_size, Ankle_size string
+}
+type Data_for_record_anthropometry struct{
+  Authorized_user_data User
+  Anthropometry_data anthropometry_data_for_person
 }
 type Data_for_personal_page struct{
   Authorized_user_data User
@@ -82,6 +87,7 @@ type Data_for_watch_training_programm struct{
   Authorized_user_data User
 
   Id_train_programm string
+  Id_author_train_programm string
   Style_sport string
   Name_training_program string
   Current_data string
@@ -803,11 +809,7 @@ func verification_of_authorization(w http.ResponseWriter, r *http.Request){
       create_train_programm_step_1(w,r)
 
     }
-    if(path == "/create_train_programm_step_1"){
 
-      create_train_programm_step_1(w,r)
-
-    }
      if strings.Contains(path, "/watch_training_programm") {
 
        watch_training_programm(w,r)
@@ -932,37 +934,6 @@ func create_train_programm_step_1(w http.ResponseWriter, r *http.Request){
         log.Println("Обработка GET-запроса")
     }
     t.ExecuteTemplate(w, "create_train_programm", nil)
-/*
-  if r.Method == http.MethodPost {
-    fmt.Println("ПЕРВЫЙ !!! ____ ----____----____-____---____----____--__--_---__----_------_")
-    name_of_train_programm := r.FormValue("name_of_train_programm")
-    option_of_style_training := r.FormValue("option_of_style_training")
-    Description := r.FormValue("Description")
-    fmt.Println(name_of_train_programm, option_of_style_training)
-
-    db, err := sql.Open("mysql", adress_data_base)
-    if err != nil{
-      panic(err)
-    }
-    authorized_user, err  := populateUserFromSession(r, sessionName)
-    defer db.Close()
-    fmt.Printf("Подключено")
-
-    result, err := db.Exec("insert into test.Training_programms (id_author_of_training_program	, name_training_program, style_of_training, Description) values (?, ?, ?, ?)", authorized_user.Id, name_of_train_programm, option_of_style_training, Description)
-    fmt.Println(result)
-
-   var zapros = fmt.Sprintf("SELECT id FROM `Training_programms` WHERE id_author_of_training_program = '%s' AND name_training_program = '%s'", authorized_user.Id, name_of_train_programm)
-   res,err := db.Query(zapros)
-   fmt.Println(zapros)
-   var id_programm string
-   for res.Next(){
-     err = res.Scan(&id_programm)
-   }
-   http.Redirect(w, r, "/view_created_training_programms/" + authorized_user.Id, http.StatusSeeOther)
-  }else{
-    t.ExecuteTemplate(w, "create_train_programm", nil)
-  }*/
-
 }
 
 
@@ -988,21 +959,38 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   if err != nil{
     panic(err)
   }
-
-  var data Data_for_watch_training_programm
-  data.Parts_training_programm = make(map[string][]part_of_training_programm)
-  data.Id_train_programm = vars["id_training_programm"]
-  data.Current_data = getCurrentDate()
-  data.Unique_types_of_exercises = make(map [string] string)
-  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
-
-
   db, err := sql.Open("mysql", adress_data_base)
   if err != nil{
     panic(err)
   }
 
   defer db.Close()
+
+
+
+
+
+
+
+  var data Data_for_watch_training_programm
+  data.Parts_training_programm = make(map[string][]part_of_training_programm)
+  data.Id_train_programm = vars["id_training_programm"]
+
+
+  var zapros = fmt.Sprintf("SELECT id_author_of_training_program FROM `Training_programms` WHERE id = %s", data.Id_train_programm)
+  res,err := db.Query(zapros)
+  fmt.Println(zapros)
+  for res.Next(){
+    err = res.Scan(&data.Id_author_train_programm)
+  }
+
+
+  data.Current_data = getCurrentDate()
+  data.Unique_types_of_exercises = make(map [string] string)
+  data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
+
+
+
   authorized_user, err  := populateUserFromSession(r, sessionName)
 
     if r.Method == http.MethodPost {
@@ -1019,8 +1007,8 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
     }
 
-  var zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, n.eng_name AS name_of_train,  e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, e.date FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_programm = %s;", data.Id_train_programm)
-  res,err := db.Query(zapros)
+  zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, n.eng_name AS name_of_train,  e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, e.date FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_programm = %s;", data.Id_train_programm)
+  res,err = db.Query(zapros)
   fmt.Println(zapros)
 
   var part part_of_training_programm
@@ -1060,7 +1048,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   fmt.Println(data)
 
 //  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
-data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
+  data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
   t.ExecuteTemplate(w, "watch_training_programm", data)
 
 }
@@ -1228,6 +1216,52 @@ func training_summary(w http.ResponseWriter, r *http.Request){
     // Вывод страницы-источника
     fmt.Fprintf(w, "Переадресация произошла с: %s", referer)
 }
+
+
+
+func record_anthropometric_changes(w http.ResponseWriter, r *http.Request){
+  t, _ := template.ParseFiles("templates/record_anthropometric_changes.html", "templates/header.html", "templates/footer.html")
+  //vars := mux.Vars(r)
+  //w.WriteHeader(http.StatusOK)
+  //Person := get_user_data_by_id(vars["id_person"])
+  var data Data_for_record_anthropometry
+
+  data.Authorized_user_data, _ = populateUserFromSession(r, sessionName)
+
+  if r.Method == http.MethodPost {
+
+    data.Anthropometry_data.Height = r.FormValue("Height")
+    data.Anthropometry_data.Weight = r.FormValue("Weight")
+    data.Anthropometry_data.Neck_size = r.FormValue("Neck_size")
+    data.Anthropometry_data.Shoulder_size = r.FormValue("Shoulder_size")
+    data.Anthropometry_data.Chest_size = r.FormValue("Chest_size")
+    data.Anthropometry_data.Waist_size = r.FormValue("Waist_size")
+    data.Anthropometry_data.Bicep_size = r.FormValue("Bicep_size")
+    data.Anthropometry_data.Forearm_size = r.FormValue("Forearm_size")
+    data.Anthropometry_data.Thigh_size = r.FormValue("Thigh_size")
+    data.Anthropometry_data.Quadriceps_size = r.FormValue("Quadriceps_size")
+    data.Anthropometry_data.Calf_size = r.FormValue("Calf_size")
+    data.Anthropometry_data.Wrist_size = r.FormValue("Wrist_size")
+    data.Anthropometry_data.Ankle_size = r.FormValue("Ankle_size")
+
+
+    fmt.Println(data)
+
+    db, err := sql.Open("mysql", adress_data_base)
+    if err != nil{
+      panic(err)
+    }
+
+    defer db.Close()
+
+
+   result, err := db.Exec("insert into test.anthropometria_sportsmen (	`person_id`, `height`, `weight`, `neck_size`, `shoulder_size`, `chest_size`, `waist_size`, `bicep_size`, `forearm_size`, `thigh_size`, `quadriceps_size`, `calf_size`, `wrist_size`, `ankle_size`) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",data.Authorized_user_data.Id, data.Anthropometry_data.Height, data.Anthropometry_data.Weight, data.Anthropometry_data.Neck_size, data.Anthropometry_data.Shoulder_size, data.Anthropometry_data.Chest_size, data.Anthropometry_data.Waist_size, data.Anthropometry_data.Bicep_size, data.Anthropometry_data.Forearm_size, data.Anthropometry_data.Thigh_size, data.Anthropometry_data.Quadriceps_size, data.Anthropometry_data.Calf_size, data.Anthropometry_data.Wrist_size, data.Anthropometry_data.Ankle_size)
+   fmt.Println(result)
+ }
+
+  t.ExecuteTemplate(w, "record_anthropometric_changes", data)
+}
+
  func main() {
 
    store.Options = &sessions.Options{
@@ -1271,6 +1305,7 @@ func training_summary(w http.ResponseWriter, r *http.Request){
 
   r.HandleFunc("/view_created_training_programms/{id_author}", verification_of_authorization)
   r.HandleFunc("/training_summary/{id_person}", training_summary)
+  r.HandleFunc("/record_anthropometric_changes/{id_person}", record_anthropometric_changes)
   //r.HandleFunc("/view_current_training_programm/{id_programm}", verification_of_authorization)
 
 

@@ -9,18 +9,16 @@
 
     <div class="row">
 
-            <div class="col-12 padd-0">
-              <p> {{.Id_train_programm}}<p>
-          </div>
+            
 
-          <div class="col-12 padd-0">
+          <div class="col-12">
             <p> Сегодня {{.Current_data}} и это отличный день чтобы порвать себе трицепс!<p>
           </div>
           {{range $time, $event := .Parts_training_programm}}
-          {{$time}}
+          <div class="col-12">{{$time}}</div>
 
           {{range $event}}
-          <div class="col-12 padd-0 ">
+          <div class="col-12">
             <div class="row block_training" style="height:auto; width:600px;">
                 <div class="col-8 padd-0 ">
                     <p> {{.Queue}})  {{.Type_of_train_translated}}</p>
@@ -80,11 +78,11 @@
 
 
 
-
-          <div class="col-12 padd-0">
-            <button id="showDivButton">Показать блок</button>
-          </div>
-
+          {{if eq .Authorized_user_data.Id .Id_author_train_programm}}
+            <div class="col-12 padd-0">
+              <button id="showDivButton">Показать блок</button>
+            </div>
+          {{end}}
           <div class="col-12 padd-0">
             <div id="myDiv" class="block_training" style="display: none; margin-top: 10px; height:100%;" >
               <h1 class="cover-heading">Тренaровка23</h1>
