@@ -1,0 +1,56 @@
+{{define "record_anthropometric_changes"}}
+{{template "header" .}}
+
+    <div class="row">
+      <div class = "col-12 center_text_in_div">
+        Антропометрия
+      </div>
+      <div class="col-3 ">
+        Рост: {{.Anthropometry_data.Height}}
+      </div>
+      <div class="col-3 ">
+        Вес: {{.Anthropometry_data.Weight}}
+      </div>
+      <div class="col-6 center_text_in_div">
+
+      </div>
+      <div class="col-12 ">
+        Обхват шеи: {{.Anthropometry_data.Neck_size}}
+      </div>
+      <div class="col-12 ">
+        Обхват плеч: {{.Anthropometry_data.Shoulder_size}}
+      </div>
+      <div class="col-12 ">
+        Обхват груди: {{.Anthropometry_data.Chest_size}}
+      </div>
+      <div class="col-12 ">
+        Обхват талии: {{.Anthropometry_data.Waist_size}}
+      </div>
+      <div class="col-12 ">
+        Обхват бицепса: {{.Anthropometry_data.Bicep_size}}
+      </div>
+      <div class="col-12 ">
+        Обхват предплечья: {{.Anthropometry_data.Forearm_size}}
+      </div>
+      <div class="col-12 ">
+        Обхват бедра: {{.Anthropometry_data.Thigh_size}}
+      </div>
+      <div class="col-12 ">
+        Обхват квадрицепса: {{.Anthropometry_data.Quadriceps_size}}
+      </div>
+      <div class="col-12 ">
+        Обхват икры: {{.Anthropometry_data.Calf_size}}
+      </div>
+      <div class="col-12 ">
+        Обхват запястья: {{.Anthropometry_data.Wrist_size}}
+      </div>
+      <div class="col-12 ">
+        Обхват голеностопа: {{.Anthropometry_data.Ankle_size}}
+      </div>
+
+
+
+    </div>
+
+{{template "footer"}}
+{{end}}
