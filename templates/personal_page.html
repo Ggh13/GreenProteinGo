@@ -6,34 +6,40 @@
 
 
 
-  <div class="block_for_aside">
-    <div class="row">
-            <div class="col-12 padd-0">
-                    <video class="standart_border_radius backgroundvideo"  autoplay loop muted>
-                      <source  src="{{.Background_video}}" type="video/mp4">
 
-                      Ваш браузер не поддерживает тег видео.
-                    </video>
-            </div>
+           <div class="row">
+              <div class="col-12 padd-0">
+                      <video class="standart_border_radius backgroundvideo"  autoplay loop muted>
+                        <source  src="{{.Background_video}}" type="video/mp4">
 
-            <div class="col-1 padd-0">
-
-            </div>
-              <div class="col-2 padd-0 ">
-                  <img class="standart_border_radius" style="position:relative; top:-50px;width:100%;min-height:70px;" src="{{.Icon1}}" alt="Image!!" >
+                        Ваш браузер не поддерживает тег видео.
+                      </video>
               </div>
+            </div>
+            <div class="row adaptive_margin_bottom">
+                <div class="col-md-3 offset-md-1 col-4 offset-1 padd-0 ">
+                    <img class="standart_border_radius" style="position:relative; top:-50px;width:100%;" src="{{.Icon1}}" alt="Image!!" >
+                </div>
 
-              <div class="col">
-                <div class = "row">
-                  <div class = "col-7">
-                    <h1  id="textForName">{{.Persona.Name}} {{.Persona.Surname}} </h1>
+                <div class="col">
+                  <div class = "row">
+                    <div class = "col-7">
+                      <h1  id="textForName">{{.Persona.Name}} {{.Persona.Surname}} </h1>
+                    </div>
+                    <div class = "col-7">
+                      <h4 id="textForName"> Рост: {{.Anthropometry.Height}}  </h4>
+                    </div>
+                    <div class = "col-7">
+                      <h4 id="textForName">Вес: {{.Anthropometry.Weight}} </h4>
+                    </div>
                   </div>
-                  <div class = "col-7">
-                    <h4 id="textForName"> Рост: {{.Anthropometry.Height}}  </h4>
-                  </div>
-                  <div class = "col-7">
-                    <h4 id="textForName">Вес: {{.Anthropometry.Weight}} </h4>
-                  </div>
+
+                </div>
+
+                <div class="col-2 buttons_for_bottom_header_mobile">
+                  <button onclick="toggleDisplay('block_right_place_for_button_mobile')" style="width:50px;">
+                    <svg viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg" transform="matrix(1, 0, 0, 1, 0, 0)rotate(0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 6H20M4 12H20M4 18H20" stroke="#000000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                  </button>
                 </div>
 
               </div>
@@ -42,26 +48,27 @@
 
 
 
-
-
+          <div class="row">
             <div class="col-12 padd-0">
               <div id="mid_text">
                   <h2> Силовые </h2>
               </div>
             </div>
+          </div>
+          <div class="row">
             <div class="col-12 padd-0">
               <ul>
                 <div class="row">
                     {{range $key, $value := .Sport_achive}}
-
+                          <div class="row">
                             <li> <div class="col-7"> <h5>{{$key}}: {{$value}}</h5> </div></li>
-
+                          </div>
 
                     {{end}}
                 </div>
               </ul>
             </div>
-
+          </div>
 
   {{ if .Persona.Is_that_authorized_user }}
   <div class="col-9 order-1 padd-0">
@@ -95,16 +102,91 @@
           {{end}}
 
           </div>
-      </div>
-</div>
 
 
 
+        <div  id = "block_right_place_for_button_mobile"  style=" position:fixed; padding-left:20%;padding-right:0;width:100%;height:100%;z-index:100; display:none;">
+          <div class="standart_border_radius" style="background-color:green; width:103%;height:100%;z-index:101; padding:20px;">
 
+            <div class="row">
+              <div class="col-2">
+                <button onclick="toggleDisplay('block_right_place_for_button_mobile')" style="width:50px;">
+                  <svg viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg" transform="matrix(1, 0, 0, 1, 0, 0)rotate(0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 6H20M4 12H20M4 18H20" stroke="#000000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                </button>
+              </div>
+
+              <div class="col-10">
+                  <div class="row justify-content-end">
+                    <div class="col-auto block_for_right_aside">
+
+                        <div class = "block_for_text standart_border_radius">
+                                <a class="nav-link" href="/personal_statistic/{{.Persona.Id}}"  >Статистика</a>
+
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div class="row justify-content-end">
+                    <div class="col-auto block_for_right_aside">
+
+                        <div class = "block_for_text standart_border_radius">
+                                <a class="nav-link" href="/view_created_training_programms/{{.Persona.Id}}"  >Программы тренировок</a>
+
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div class="row justify-content-end">
+                    <div class="col-auto block_for_right_aside">
+                      <div class = "block_for_text standart_border_radius">
+                              <a class="nav-link" href="/training_summary/{{.Persona.Id}}"  >Тренировочная сводка</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row justify-content-end">
+                    <div class="col-auto block_for_right_aside">
+                      <div class = "block_for_text standart_border_radius">
+                              <a class="nav-link" href="/watch_anthropometric/{{.Persona.Id}}"  >Антропометрия</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {{ if .Persona.Is_that_authorized_user }}
+                  <div class="row justify-content-end">
+                    <div class="col-auto block_for_right_aside">
+                      <div class = "block_for_text standart_border_radius">
+                          <a class="nav-link" href="/create_train" >Добавить сделанное упражнение</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row justify-content-end">
+                    <div class="col-auto block_for_right_aside">
+                      <div class = "block_for_text standart_border_radius">
+                            <a class="nav-link" href="/record_anthropometric_changes/{{.Persona.Id}}">Фиксация антропометрических изменений</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row justify-content-end">
+                    <div class="col-auto block_for_right_aside">
+                      <div class = "block_for_text standart_border_radius">
+                            <a class="nav-link" href="/exit" >Выйти из личного аккаунта</a>
+                      </div>
+                    </div>
+                  </div>
+                  {{end}}
+            </div>
+            </div>
+          </div>
+        </div>
 
 
     <div class = "col-3" >
-        <div class="row standart_border_radius block_right_place_for_button ">
+        <div id="block_right_place_for_button"class="row standart_border_radius block_right_place_for_button ">
           <div class="col-12">
             <div class="row">
 

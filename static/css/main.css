@@ -205,6 +205,7 @@ html{
 .bottom_of_header{
   background-color: greenyellow;
   height: auto;
+  min-height: 30px;
   width: 100%;
 }
 
@@ -473,7 +474,26 @@ html{
 }
 
 
+
+.buttons_for_bottom_header_mobile{
+  display: none;
+}
+#side_bar_mobile{
+  display: block;
+}
+#block_right_place_for_button{
+  display: block;
+}
  @media (max-width: 540px) {
+            .buttons_for_bottom_header{
+              display: none;
+            }
+            #block_right_place_for_button{
+              display: none;
+            }
+            .buttons_for_bottom_header_mobile{
+              display: block;
+            }
             .adaptive_margin_bottom{
               margin-bottom: 50px;
             }

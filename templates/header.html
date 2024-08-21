@@ -21,81 +21,131 @@
       gtag('js', new Date());
 
       gtag('config', 'G-6WL36ZSTE9');
+
+
+      function toggleDisplay(id) {
+          var element = document.getElementById(id);
+          if (element.style.display === "none") {
+              element.style.display = "block"; // Если блок виден, скрываем его
+          } else {
+              element.style.display = "none"; // Если блок скрыт, показываем его
+          }
+      }
+
+
+
     </script>
     <meta name="yandex-verification" content="9a670512f6b1eea2" />
     <meta name="keywords" content="Высшая школа массы набора" />
 
 </head>
 <body>
-<div class="container-fluid fonts_Russo_One" style="margin-bottom:10px;">
-  <div class="row ">
-    <div class="col-12 padd-0" >
-      <div id="header" style="padding:15px;">
-        <p class="Text_for_header" >Высшая школа массы набора</p>
+  <div id="side_bar_mobile"class="row" style="display:none; padding-top: 10%; position:fixed; height:100%; width:90%; z-index:200;">
+    <div class = "col-12" style="height:100%;">
+      <div class="standart_border_radius" style="height:100%; width:100%;background-color: #F3FEEB;padding: 40px; ">
+        <div class="row" style="margin-bottom:10px;">
+          <div class="col-2 offset-7">
+            <button onclick="toggleDisplay('side_bar_mobile')" style="height:30px; width:30px;">X</button>
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:10px;">
+          <div class="col-10   block_button_header center_text_in_div">
+             <a class="nav-link" href="/">Главная</a>
+          </div>
+        </div>
 
+        <div class="row" style="margin-bottom:10px;">
+          <div class="col-10   block_button_header center_text_in_div">
+             <a class="nav-link" href="/constacs">Контакты</a>
+          </div>
+        </div>
+
+        <div class="row" style="margin-bottom:10px;">
+          <div class="col-10   block_button_header center_text_in_div">
+                  <a href="/input_personal_account" class="nav-link clickable">
+                    <div class = "text-decoration: none;"> Личный кабинет </div>
+                 </a>
+          </div>
+        </div>
 
       </div>
     </div>
+  </div>
 
-    <div class="col-12 bottom_of_header ">
-      <div class="row ">
-
-                 <div class="col-1 offset-md-1  block_button_header center_text_in_div">
-                    <a class="nav-link" href="/">Главная</a>
-                 </div>
-
-
-
-                 <!--<div class="col-1 block_button_header center_text_in_div">
-                    <a class="nav-link" href="/create_personal_page">Создать аккаунт </a>
-                 </div>-->
-                 <div class="col-1 block_button_header center_text_in_div">
-                    <a class="nav-link" href="/constacs">Контакты</a>
-                 </div>
-
-                 <div class="col-1 offset-md-4 align-self-end" >
-                   <a href="/search_people" class="clickable">
-                     <svg width="50"  viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                       <path fill-rule="evenodd" clip-rule="evenodd" d="M9.591 9.591a4 4 0 10-5.657-5.657 4 4 0 005.657 5.657zm1.06-6.717a5.502 5.502 0 01.915 6.57l2.732 2.733a1.5 1.5 0 11-2.121 2.12l-2.732-2.73a5.5 5.5 0 111.207-8.692z" fill="#000"></path>
-                     </svg>
-                    </a>
-                 </div>
-
-                 <div class="col-1 align-self-end ">
-                     {{if not .Authorized_user_data.Is_that_authorized_user}}
-                       <a href="/input_personal_account" class="nav-link clickable">
-                         <div class="input_personal_account_button center_text_in_div">
-                             <div class = "text-decoration: none;"> Войти </div>
-                         </div>
-                      </a>
-                     {{else}}
-                     <a href="/input_personal_account" class="clickable">
-                       <div class = "block_for_authorized_user_mini_prof_in_header" >
-                         <div class ="row">
-                           <div class="col">
-                             {{.Authorized_user_data.Name}} {{.Authorized_user_data.Surname}}
-                           </div>
-                         </div>
-                       </div>
-                    </a>
-                     {{end}}
-                 </div>
-
-              <!--  <li> <a class="nav-link" href="/user_page/7">Личный кабинет22222</a> </li> -->
-
-
-                <!--<li> <a class="nav-link" href="/watch_training_programm/1">Создать программу тренировок </a></li>-->
+  <div class="container-fluid fonts_Russo_One" style="margin-bottom:10px;">
+    <div class="row ">
+      <div class="col-12 padd-0" >
+        <div id="header" style="padding:15px;">
+          <p class="Text_for_header" >Высшая школа массы набора</p>
 
 
         </div>
+      </div>
+    </div>
+    <div class="row ">
+      <div class="col-12 bottom_of_header ">
+        <div class="row" >
+                   <div class="col-1 offset-md-1  block_button_header center_text_in_div buttons_for_bottom_header">
+                      <a class="nav-link" href="/">Главная</a>
+                   </div>
+
+
+
+                   <!--<div class="col-1 block_button_header center_text_in_div">
+                      <a class="nav-link" href="/create_personal_page">Создать аккаунт </a>
+                   </div>-->
+                   <div class="col-1 block_button_header center_text_in_div buttons_for_bottom_header">
+                      <a class="nav-link" href="/constacs">Контакты</a>
+                   </div>
+
+                   <div class="col-1 offset-md-4 align-self-end buttons_for_bottom_header" >
+                     <a href="/search_people" class="clickable">
+                       <svg width="50"  viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                         <path fill-rule="evenodd" clip-rule="evenodd" d="M9.591 9.591a4 4 0 10-5.657-5.657 4 4 0 005.657 5.657zm1.06-6.717a5.502 5.502 0 01.915 6.57l2.732 2.733a1.5 1.5 0 11-2.121 2.12l-2.732-2.73a5.5 5.5 0 111.207-8.692z" fill="#000"></path>
+                       </svg>
+                      </a>
+                   </div>
+
+                   <div class="col-1 align-self-end buttons_for_bottom_header">
+                       {{if not .Authorized_user_data.Is_that_authorized_user}}
+                         <a href="/input_personal_account" class="nav-link clickable">
+                           <div class="input_personal_account_button center_text_in_div">
+                               <div class = "text-decoration: none;"> Войти </div>
+                           </div>
+                        </a>
+                       {{else}}
+                       <a href="/input_personal_account" class="clickable">
+                         <div class = "block_for_authorized_user_mini_prof_in_header" >
+                           <div class ="row">
+                             <div class="col">
+                               {{.Authorized_user_data.Name}} {{.Authorized_user_data.Surname}}
+                             </div>
+                           </div>
+                         </div>
+                      </a>
+                       {{end}}
+                   </div>
+                   <div class="col-1 buttons_for_bottom_header_mobile">
+                     <button onclick="toggleDisplay('side_bar_mobile')" style="width:50px;">
+                       <svg viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg" transform="matrix(1, 0, 0, 1, 0, 0)rotate(0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 6H20M4 12H20M4 18H20" stroke="#000000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                     </button>
+                   </div>
+
+                  <!--  <li> <a class="nav-link" href="/user_page/7">Личный кабинет22222</a> </li> -->
+
+
+                  <!--<li> <a class="nav-link" href="/watch_training_programm/1">Создать программу тренировок </a></li>-->
+
+
+          </div>
+      </div>
     </div>
   </div>
-</div>
 
 
-<div class="container-fluid fonts_Russo_One" style="padding:20px;">
-  <div class="row">
-      <div  class = "col-md-8 offset-md-1 col-xs-12  main standart_border_radius" >
+  <div class="container-fluid fonts_Russo_One" style="padding:20px;">
+    <div class="row">
+        <div  class = "col-md-8 offset-md-1 col-xs-12  main standart_border_radius" >
 
 
 
