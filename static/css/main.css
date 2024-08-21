@@ -293,7 +293,9 @@ html{
 
 
 
-
+.adaptive_margin_bottom{
+  margin-bottom: 15px;
+}
 
 
 
@@ -472,6 +474,9 @@ html{
 
 
  @media (max-width: 540px) {
+            .adaptive_margin_bottom{
+              margin-bottom: 50px;
+            }
             ul.hr {
                 /* Обнуляем значение отступов и полей */
                 margin: 0;

@@ -116,7 +116,7 @@ type Data_for_send_to_page_View_created_training_programms struct{
 //"user:password@tcp(147.45.163.58:3306)/test"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "root:@tcp(127.127.126.50)/test"
+var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
