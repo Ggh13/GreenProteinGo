@@ -69,7 +69,7 @@ html{
 
 
 .block_training{
-  width: 500px;
+  width: 600px;
   height: 150px;
   background: #d4c7b6;
   margin-bottom: 50px;
@@ -485,6 +485,9 @@ html{
   display: block;
 }
  @media (max-width: 540px) {
+            .block_training{
+              width: 110%;
+            }
             .buttons_for_bottom_header{
               display: none;
             }

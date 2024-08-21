@@ -9,7 +9,7 @@
 
     <div class="row">
 
-            
+
 
           <div class="col-12">
             <p> Сегодня {{.Current_data}} и это отличный день чтобы порвать себе трицепс!<p>
@@ -19,7 +19,7 @@
 
           {{range $event}}
           <div class="col-12">
-            <div class="row block_training" style="height:auto; width:600px;">
+            <div class="row block_training" style="height:auto;">
                 <div class="col-8 padd-0 ">
                     <p> {{.Queue}})  {{.Type_of_train_translated}}</p>
                     <p>Отдых после подхода: {{.Time_to_chill}}</p>
@@ -84,8 +84,8 @@
             </div>
           {{end}}
           <div class="col-12 padd-0">
-            <div id="myDiv" class="block_training" style="display: none; margin-top: 10px; height:100%;" >
-              <h1 class="cover-heading">Тренaровка23</h1>
+            <div id="myDiv" class="block_training" style="display: none; margin-top: 10px; height:100%; width:100%;" >
+              <h1 class="cover-heading">Тренaровка</h1>
               <form id="form2" action="/create_train_set_exercises/{{.Id_train_programm}}" method="post">
                   <select id="dropdown" name="option_of_train">
                     {{ range $key, $value := .Unique_types_of_exercises }}
