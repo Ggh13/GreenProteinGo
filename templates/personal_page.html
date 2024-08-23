@@ -25,13 +25,13 @@
                 <div class="col">
                   <div class = "row">
                     <div class = "col-12">
-                      <h1  id="textForName">{{.Persona.Name}} {{.Persona.Surname}} </h1>
+                      <h2  id="textForName">{{.Persona.Name}} {{.Persona.Surname}} </h2>
                     </div>
                     <div class = "col-12">
-                      <h4 id="textForName"> Рост: {{.Anthropometry.Height}}  </h4>
+                      <h5 id="textForName"> Рост: {{.Anthropometry.Height}}  </h5>
                     </div>
                     <div class = "col-12">
-                      <h4 id="textForName">Вес: {{.Anthropometry.Weight}} </h4>
+                      <h5 id="textForName">Вес: {{.Anthropometry.Weight}} </h5>
                     </div>
                   </div>
 
@@ -52,7 +52,7 @@
           <div class="row">
             <div class="col-12 padd-0">
               <div id="mid_text">
-                  <h2> Силовые </h2>
+                  <h4> Силовые </h4>
               </div>
             </div>
           </div>
@@ -62,7 +62,7 @@
                 <div class="row">
                     {{range $key, $value := .Sport_achive}}
                           <div class="row">
-                            <li> <div class="col-7"> <h5>{{$key}}: {{$value}}</h5> </div></li>
+                            <li> <div class="col-12"> <h5>{{$key}}: {{$value}}</h5> </div></li>
                           </div>
 
                     {{end}}
@@ -73,7 +73,7 @@
 
   {{ if .Persona.Is_that_authorized_user }}
   <div class="col-10 offset-1 order-1 padd-0">
-            <h1 class="cover-heading">Форма добавления достижений</h1>
+            <h4 class="center_text_in_div" >Форма добавления достижений</h4>
             <form action="/submit_achive" method="post">
 
                 <label for="dropdown">Выберите упражнение:</label>
@@ -188,61 +188,76 @@
 
     <div class = "col-3" >
         <div id="block_right_place_for_button"class="row standart_border_radius block_right_place_for_button ">
-          <div class="col-12">
-            <div class="row">
+          <div class="col-12" style="padding-left:0;">
+            <div class="row" >
 
 
                 <div class="col-12 block_for_right_aside">
+                  <a class="nav-link" href="/personal_statistic/{{.Persona.Id}}"  >
+                    <div class = "block_for_text standart_border_radius" >
+                            Статистика
 
-                    <div class = "block_for_text standart_border_radius">
-                            <a class="nav-link" href="/personal_statistic/{{.Persona.Id}}"  >Статистика</a>
-
-                  </div>
-                </div>
-                <div class="col-12 block_for_right_aside">
-
-                    <div class = "block_for_text standart_border_radius">
-                            <a class="nav-link" href="/view_created_training_programms/{{.Persona.Id}}"  >Программы тренировок</a>
-
-                  </div>
-                </div>
-
-                <div class="col-12 block_for_right_aside">
-
-                    <div class = "block_for_text standart_border_radius">
-                            <a class="nav-link" href="/training_summary/{{.Persona.Id}}"  >Тренировочная сводка</a>
                     </div>
+                  </a>
+                </div>
+                <div class="col-12 block_for_right_aside">
+                  <a class="nav-link" href="/view_created_training_programms/{{.Persona.Id}}"  >
+                    <div class = "block_for_text standart_border_radius">
+                            Программы тренировок
+
+                    </div>
+                  </a>
+                </div>
+
+                <div class="col-12 block_for_right_aside">
+                    <a class="nav-link" href="/training_summary/{{.Persona.Id}}"  >
+                      <div class = "block_for_text standart_border_radius">
+                              Тренировочная сводка
+                      </div>
+                    </a>
+                </div>
+
+                <div class="col-12 block_for_right_aside">
+                  <a class="nav-link" href="/watch_anthropometric/{{.Persona.Id}}"  >
+                    <div class = "block_for_text standart_border_radius">
+                            Антропометрия
+                    </div>
+                  </a>
 
                 </div>
 
                 <div class="col-12 block_for_right_aside">
-
+                  <a class="nav-link" href="/articles_page/{{.Persona.Id}}"  >
                     <div class = "block_for_text standart_border_radius">
-                            <a class="nav-link" href="/watch_anthropometric/{{.Persona.Id}}"  >Антропометрия</a>
+                            Статьи
                     </div>
+                  </a>
 
                 </div>
+
                 {{ if .Persona.Is_that_authorized_user }}
                   <div class="col-12 block_for_right_aside">
+                    <a class="nav-link" href="/create_train" >
                           <div class = "block_for_text standart_border_radius">
-                              <a class="nav-link" href="/create_train" >Добавить сделанное упражнение</a>
+                              Добавить сделанное упражнение
                           </div>
+                    </a>
                   </div>
 
                   <div class="col-12 block_for_right_aside">
-
+                    <a class="nav-link" href="/record_anthropometric_changes/{{.Persona.Id}}">
                       <div class = "block_for_text standart_border_radius">
-                            <a class="nav-link" href="/record_anthropometric_changes/{{.Persona.Id}}">Фиксация антропометрических изменений</a>
+                            Фиксация антропометрических изменений
                       </div>
-
+                    </a>
                   </div>
 
                   <div class="col-12 block_for_right_aside">
-
-                      <div class = "block_for_text standart_border_radius">
-                            <a class="nav-link" href="/exit" >Выйти из личного аккаунта</a>
-                      </div>
-
+                      <a class="nav-link" href="/exit" >
+                        <div class = "block_for_text standart_border_radius">
+                              Выйти из личного аккаунта
+                        </div>
+                      </a>
                   </div>
                 {{end}}
 

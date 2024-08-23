@@ -2,7 +2,13 @@
 {{define "need_authorization"}}
     {{template "header" .}}
 
-        <p> Для просмотра данной страницы требуется авторизация <p>
-
+          <p class="adaptive_margin_bottom"> Для просмотра данной страницы требуется авторизация <p>
+          <div class="row">
+            <div class="col-4   block_button_header center_text_in_div">
+                    <a href="/input_personal_account" class="nav-link clickable">
+                      <div class = "text-decoration: none;"> Авторизация </div>
+                   </a>
+            </div>
+          </div>
     {{template "footer"}}
 {{end}}

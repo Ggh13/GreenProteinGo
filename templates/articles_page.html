@@ -1,0 +1,46 @@
+
+{{define "articles_page"}}
+
+{{template "header" .}}
+
+    <div class="row">
+      <div class="col-12 center_text_in_div">
+        <h1> Статьи </h1>
+      </div>
+    </div>
+  </div>
+<div class="col-3">
+  <div id="block_right_place_for_button" class="row standart_border_radius block_right_place_for_button ">
+
+
+    <div class="row">
+      Каталоги тем статей
+    </div>
+    <div class="row">
+      {{range .Themes}}
+        <div class="col-11" style="margin-bottom:15px;">
+          {{.}}
+           {{range index $.Themes_and_name_articles .}}
+                - {{.}}<br>
+            {{end}}
+        </div>
+
+      {{end}}
+    </div>
+    <form action="/personal_statistic/{{.Persona.Id}}" method="post">
+        <div class="row">
+          <div class="col-6" style="margin-bottom:15px;">
+            <input name="name_new_article" id="name_new_article" class="form-control"></input>
+          </div>
+          <div class="col-6" style="margin-bottom:15px;">
+            <div class="form-group">
+                <input type="submit" value="+">
+            </div>
+          </div>
+        </div>
+
+      </form>
+  </div>
+</div>
+{{template "footer"}}
+{{end}}

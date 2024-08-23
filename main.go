@@ -112,11 +112,17 @@ type Data_for_send_to_page_View_created_training_programms struct{
 }
 
 
+
+type Data_articles_page struct{
+  Authorized_user_data User
+  Themes []string
+  Themes_and_name_articles  map [string] []string
+}
 //"root:@tcp(127.127.126.50)/test"
 //"user:password@tcp(147.45.163.58:3306)/test"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
+var adress_data_base = "root:@tcp(127.127.126.50)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -1288,6 +1294,69 @@ func watch_anthropometric(w http.ResponseWriter, r *http.Request){
   t.ExecuteTemplate(w, "record_anthropometric_changes", data)
 
 }
+
+func create_name_of_theme_article(w http.ResponseWriter, r *http.Request){
+  db, err := sql.Open("mysql", adress_data_base)
+
+  vars := mux.Vars(r)
+  w.WriteHeader(http.StatusOK)
+  id_person := vars["id_person"]
+
+
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+
+  if r.Method == http.MethodPost {
+
+    name_new_article := r.FormValue("name_new_article")
+    _, _ = db.Exec("insert into test.theme_article ( `id_author`	`name_of_theme_article`) values (?, ?)",id_person, name_new_article)
+    http.Redirect(w, r, ("/articles_page/" + id_person), http.StatusSeeOther)
+  }
+
+}
+func articles_page(w http.ResponseWriter, r *http.Request){
+      t, err := template.ParseFiles("templates/articles_page.html", "templates/header.html", "templates/footer.html")
+      if err != nil{
+        fmt.Fprintf(w, err.Error())
+      }
+      var data Data_articles_page
+
+      data.Themes_and_name_articles = make(map[string] []string)
+      data.Themes = make([]string, 0)
+      db, err := sql.Open("mysql", adress_data_base)
+      if err != nil{
+        panic(err)
+      }
+      data.Authorized_user_data, _ = populateUserFromSession(r, sessionName)
+
+      defer db.Close()
+      vars := mux.Vars(r)
+      w.WriteHeader(http.StatusOK)
+      id_person := vars["id_person"]
+      fmt.Println(data)
+      var zapros = fmt.Sprintf("SELECT name_of_theme_article FROM `theme_article` WHERE id_author = '%s' ", id_person)
+      res,err := db.Query(zapros)
+      fmt.Println(zapros)
+      if err != nil{
+        panic(err)
+      }
+
+
+      for res.Next(){
+        var name_them string
+        err = res.Scan(&name_them)
+        if err != nil{
+          panic(err)
+        }
+        data.Themes = append(data.Themes, name_them)
+
+      }
+      fmt.Println(data)
+      t.ExecuteTemplate(w, "articles_page", data)
+}
  func main() {
 
    store.Options = &sessions.Options{
@@ -1334,7 +1403,8 @@ func watch_anthropometric(w http.ResponseWriter, r *http.Request){
   r.HandleFunc("/training_summary/{id_person}", training_summary)
   r.HandleFunc("/record_anthropometric_changes/{id_person}", record_anthropometric_changes)
   //r.HandleFunc("/view_current_training_programm/{id_programm}", verification_of_authorization)
-
+  r.HandleFunc("/articles_page/{id_person}", articles_page)
+  r.HandleFunc("/create_name_of_theme_article/{id_person}", articles_page)
 
 
 
