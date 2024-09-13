@@ -118,6 +118,14 @@ type Data_articles_page struct{
   Themes []string
   Themes_and_name_articles  map [string] []string
 }
+
+
+type Data_referals struct{
+  Authorized_user_data User
+  Points int
+
+}
+
 //"root:@tcp(127.127.126.50)/test"
 //"user:password@tcp(147.45.163.58:3306)/test"
 //var authorized_user User
@@ -646,6 +654,24 @@ func create_train(w http.ResponseWriter, r *http.Request){
   }
   var data Data_for_personal_page
   data.Unique_types_of_exercises = make(map [string] string)
+
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+  fmt.Printf("Подключено")
+  //Установка данных
+ //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
+ var zapros = fmt.Sprintf("SELECT name_of_train FROM `trainings` WHERE id = (SELECT MAX(id) FROM trains WHERE id_person = %s) AND id_person = %s;", current_user_id)
+ res,err := db.Query(zapros)
+ var temp string
+ for res.Next(){
+   _ = res.Scan(&temp)
+ }
+
+  data.Unique_types_of_exercises = append(data.Unique_types_of_exercises, temp)
   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
   if r.Method == http.MethodPost {
     authorized_user, err  := populateUserFromSession(r, sessionName)
@@ -1357,6 +1383,31 @@ func articles_page(w http.ResponseWriter, r *http.Request){
       fmt.Println(data)
       t.ExecuteTemplate(w, "articles_page", data)
 }
+
+func referal_page(w http.ResponseWriter, r *http.Request){
+  t, err := template.ParseFiles("templates/referal_page.html", "templates/header.html", "templates/footer.html")
+  fmt.Println("!!!!!!!!")
+  var Data_ref Data_referals
+  if err != nil {
+      panic(err)
+  }
+  authorized_user, err  := populateUserFromSession(r, sessionName)
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+
+  var zapros = fmt.Sprintf("SELECT points FROM `score_system` WHERE 	id_user = '%s' ", authorized_user.Id)
+  res,err := db.Query(zapros)
+  var points int
+  for res.Next(){
+    err = res.Scan(&points)
+  }
+  Data_ref.Points = points
+  t.ExecuteTemplate(w, "referal_page", Data_ref)
+}
  func main() {
 
    store.Options = &sessions.Options{
@@ -1411,6 +1462,7 @@ func articles_page(w http.ResponseWriter, r *http.Request){
   r.HandleFunc("/create_train_set_exercises/{id_programm}", create_train_set_exercises)
 
   r.HandleFunc("/processing_create_train_programm_step_1", processing_create_train_programm_step_1)
+  r.HandleFunc("/referal_page", referal_page)
  fmt.Println()
  http.Handle ("/", r)
  http.ListenAndServe(":8080", nil)

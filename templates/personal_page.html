@@ -195,7 +195,7 @@
                 <div class="col-12 block_for_right_aside">
                   <a class="nav-link" href="/personal_statistic/{{.Persona.Id}}"  >
                     <div class = "block_for_text standart_border_radius" >
-                            Статистика
+                            Статистика (КОМП)
 
                     </div>
                   </a>
@@ -226,7 +226,7 @@
 
                 </div>
 
-                <div class="col-12 block_for_right_aside">
+              <!--  <div class="col-12 block_for_right_aside">
                   <a class="nav-link" href="/articles_page/{{.Persona.Id}}"  >
                     <div class = "block_for_text standart_border_radius">
                             Статьи
@@ -234,7 +234,7 @@
                   </a>
 
                 </div>
-
+-->
                 {{ if .Persona.Is_that_authorized_user }}
                   <div class="col-12 block_for_right_aside">
                     <a class="nav-link" href="/create_train" >
@@ -252,6 +252,13 @@
                     </a>
                   </div>
 
+                  <div class="col-12 block_for_right_aside">
+                      <a class="nav-link" href="/referal_page" >
+                        <div class = "block_for_text standart_border_radius">
+                            referal_page
+                        </div>
+                      </a>
+                  </div>
                   <div class="col-12 block_for_right_aside">
                       <a class="nav-link" href="/exit" >
                         <div class = "block_for_text standart_border_radius">
