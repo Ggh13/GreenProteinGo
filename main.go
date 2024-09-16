@@ -663,16 +663,32 @@ func create_train(w http.ResponseWriter, r *http.Request){
   defer db.Close()
   fmt.Printf("Подключено")
   //Установка данных
+  data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
+  fmt.Println("temp")
  //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
- var zapros = fmt.Sprintf("SELECT name_of_train FROM `trainings` WHERE id = (SELECT MAX(id) FROM trains WHERE id_person = %s) AND id_person = %s;", current_user_id)
+ var zapros = fmt.Sprintf("SELECT name_of_train FROM `trainings` WHERE id = (SELECT MAX(id) FROM `trainings` WHERE id_person = '%s') AND id_person = '%s';", data.Authorized_user_data.Id, data.Authorized_user_data.Id)
+
  res,err := db.Query(zapros)
  var temp string
+ fmt.Println("temp2")
+ fmt.Println(res)
  for res.Next(){
    _ = res.Scan(&temp)
  }
+ fmt.Println(temp)
+  fmt.Println("temp3")
+  var zapros2 = fmt.Sprintf("SELECT rus_name  FROM `names_of_exercises` WHERE eng_name= '%s';", temp)
+  res2,err := db.Query(zapros2)
+  var temp2 string
+  fmt.Println(zapros2)
+  for res2.Next(){
+    _ = res2.Scan(&temp2)
+  }
+  fmt.Println("temp3")
 
-  data.Unique_types_of_exercises = append(data.Unique_types_of_exercises, temp)
   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
+  data.Unique_types_of_exercises["Last_ex_768"] = temp
+  fmt.Println(data.Unique_types_of_exercises)
   if r.Method == http.MethodPost {
     authorized_user, err  := populateUserFromSession(r, sessionName)
     option_of_train := r.FormValue("option_of_train")
@@ -709,6 +725,7 @@ func graphic(times []time.Time, values []float64) {
 
     // Создаем мапу для хранения данных с датами
     data := make(map[time.Time]float64)
+
     for i, t := range times {
         data[t] = values[i]
     }
@@ -791,10 +808,10 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
   if r.Method == http.MethodPost {
 
     option_of_train := r.FormValue("option_of_train")
-    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC", option_of_train, current_user_id)
+    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM `trainings` WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC", option_of_train, current_user_id)
 
   }else{
-    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM trainings WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC",  "bench press", current_user_id)
+    zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM `trainings` WHERE id_person = '%s' GROUP BY date ORDER BY date ASC", current_user_id)
 
   }
 
@@ -807,9 +824,10 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
  var weights []float64
 
  fmt.Println(res)
-
+ var dateS string
+ dateS = "Empty"
  for res.Next(){
-   var dateS string
+
    var weight int
    err = res.Scan(&dateS, &weight)
    fmt.Println(dateS, weight)
@@ -824,7 +842,10 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
    weights = append(weights, float64(weight))
  }
  fmt.Println(times, weights)
- graphic(times, weights)
+ if( dateS != "Empty"){
+   graphic(times, weights)
+ }
+
  data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
   t.ExecuteTemplate(w, "personal_statistic", data)
 }
@@ -1325,7 +1346,7 @@ func create_name_of_theme_article(w http.ResponseWriter, r *http.Request){
   db, err := sql.Open("mysql", adress_data_base)
 
   vars := mux.Vars(r)
-  w.WriteHeader(http.StatusOK)
+
   id_person := vars["id_person"]
 
 
@@ -1334,14 +1355,22 @@ func create_name_of_theme_article(w http.ResponseWriter, r *http.Request){
   }
 
   defer db.Close()
-
+  fmt.Println("1-art")
   if r.Method == http.MethodPost {
-
     name_new_article := r.FormValue("name_new_article")
-    _, _ = db.Exec("insert into test.theme_article ( `id_author`	`name_of_theme_article`) values (?, ?)",id_person, name_new_article)
-    http.Redirect(w, r, ("/articles_page/" + id_person), http.StatusSeeOther)
-  }
+    fmt.Println("2-art")
+    fmt.Println(id_person , name_new_article)
+    result, err := db.Exec("insert into test.theme_article ( `id_author`,	`name_of_theme_article`) values (?, ?)",id_person, name_new_article)
+    fmt.Println("4-art")
 
+    fmt.Println(result)
+    if(err != nil){
+      fmt.Println(err)
+    }
+
+  }
+  fmt.Println("new articles saved")
+  http.Redirect(w, r, "/articles_page/" + id_person, http.StatusSeeOther)
 }
 func articles_page(w http.ResponseWriter, r *http.Request){
       t, err := template.ParseFiles("templates/articles_page.html", "templates/header.html", "templates/footer.html")
@@ -1455,7 +1484,7 @@ func referal_page(w http.ResponseWriter, r *http.Request){
   r.HandleFunc("/record_anthropometric_changes/{id_person}", record_anthropometric_changes)
   //r.HandleFunc("/view_current_training_programm/{id_programm}", verification_of_authorization)
   r.HandleFunc("/articles_page/{id_person}", articles_page)
-  r.HandleFunc("/create_name_of_theme_article/{id_person}", articles_page)
+  r.HandleFunc("/create_name_of_theme_article/{id_person}", create_name_of_theme_article)
 
 
 

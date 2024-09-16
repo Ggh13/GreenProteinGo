@@ -4,14 +4,19 @@
 
 
 
-        <h1 class="cover-heading">Тренaровка</h1>
+        <h1 class="cover-heading">Тренировка</h1>
         <form action="/create_train" method="post">
+
             <label for="dropdown">Выберите упражнение:</label>
 
 
                 <select id="dropdown" name="option_of_train" >
                   {{ range $key, $value := .Unique_types_of_exercises }}
-                    <option value="{{$key}}">{{$value}}</option>
+                      {{if eq $key "Last_ex_768" }}
+                          <option value="{{$value}}" selected>{{index $.Unique_types_of_exercises $value}}</option>
+                      {{else}}
+                        <option value="{{$key}}">{{$value}}</option>
+                      {{ end }}
                   {{ end }}
                 </select>
 

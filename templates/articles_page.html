@@ -27,7 +27,8 @@
 
       {{end}}
     </div>
-    <form action="/personal_statistic/{{.Persona.Id}}" method="post">
+    <div>
+    <form action="/create_name_of_theme_article/{{.Authorized_user_data.Id}}" method="post">
         <div class="row">
           <div class="col-6" style="margin-bottom:15px;">
             <input name="name_new_article" id="name_new_article" class="form-control"></input>
@@ -40,6 +41,7 @@
         </div>
 
       </form>
+      </div>
   </div>
 </div>
 {{template "footer"}}
