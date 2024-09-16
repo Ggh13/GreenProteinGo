@@ -170,12 +170,13 @@ html{
 }
 
 .backgroundvideo {
-  object-fit: fill;
+  object-fit: cover;
   display: block;
   position: relative;
   width: 100%;
   height: 300px;
   text-align: center;
+
 }
 #icon1{
   display: block;
@@ -485,6 +486,18 @@ html{
   display: block;
 }
  @media (max-width: 540px) {
+
+             .backgroundvideo {
+               object-fit: cover;
+               display: block;
+               position: relative;
+               width: 100%;
+               height: 100px;
+               text-align: center;
+
+             }
+
+
             .block_training{
               width: 110%;
             }

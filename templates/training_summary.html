@@ -9,12 +9,13 @@
     </div>
 
     <div class="col-12">
-      {{range $time, $event := .Parts_training_programm}}
+
+      {{range $time := .Temp_mass}}
         {{$time}}
 
           <div class="col-12 block_training" style="height: auto;">
               <div class="row">
-                {{range $event}}
+                {{range index $.Parts_training_programm $time}}
                 <div class="col-12">
                   {{.Type_of_train_translated}} {{.Weight}}кг {{.Count}} повторений
                 </div>

@@ -18,7 +18,7 @@ _ "github.com/go-sql-driver/mysql"
 "gonum.org/v1/plot/vg"
 "gonum.org/v1/plot/vg/draw"
 
-
+"sort"
 //"log"
 "strings"
 "github.com/gorilla/sessions"
@@ -95,6 +95,8 @@ type Data_for_watch_training_programm struct{
   Parts_training_programm map[string][]part_of_training_programm
 
   Unique_types_of_exercises map [string] string
+
+  Temp_mass []string
   Error string
 }
 
@@ -1240,9 +1242,10 @@ func training_summary(w http.ResponseWriter, r *http.Request){
 
   defer db.Close()
 
-  var zapros = fmt.Sprintf("SELECT name_of_train, weight, count, date FROM `trainings` WHERE 	id_person = '%s' ", Person.Id)
+  var zapros = fmt.Sprintf("SELECT name_of_train, weight, count, date FROM `trainings` WHERE 	id_person = '%s'  ORDER BY date DESC ", Person.Id)
   res,err := db.Query(zapros)
   fmt.Println(zapros)
+
 
   var part part_of_training_programm
   var date string
@@ -1254,6 +1257,15 @@ func training_summary(w http.ResponseWriter, r *http.Request){
 
   }
 
+
+
+  data.Temp_mass = make([]string, 0, len(data.Parts_training_programm))
+    for k := range data.Parts_training_programm {
+        data.Temp_mass = append(data.Temp_mass, k)
+    }
+  sort.Sort(sort.Reverse(sort.StringSlice(data.Temp_mass)))
+
+  sort.Sort(sort.Reverse(sort.StringSlice(data.Temp_mass)))
   fmt.Println("!!!!!!!!")
   if err != nil {
       panic(err)
