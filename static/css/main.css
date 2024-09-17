@@ -42,11 +42,25 @@ html{
    background-color: #F3FEEB;
    padding: 40px;
    border-style: solid;
-   border-color: #DAE4D3;
+   border-color: #C2CBBC; /*#DAE4D3*/
    border-right-width: 4px;
    border-top-width: 4px;
    border-bottom-width: 4px;
    border-left-width: 0px;
+}
+
+.side_bar_on_personal_page_for_mobile{
+  background-color:#F3FEEB;
+  width:103%;
+  height:100%;
+  z-index:101;
+   padding:20px;
+   border-style: solid;
+   border-color: #C2CBBC;
+   border-right-width: 0px;
+   border-top-width: 4px;
+   border-bottom-width: 4px;
+   border-left-width: 4px;
 }
 .input_personal_account_button{
   width: 150px;
