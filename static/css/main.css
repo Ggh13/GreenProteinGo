@@ -1,6 +1,6 @@
 body, html{
-  /* #D0F0C0  #ADFF6F */
-  background-color:#F3FEEB  !important;
+  /* #D0F0C0  #ADFF6F  #FFFEEB #F3FEEB*/
+  background-color:#FFFEEB  !important;
 }
 
 .fonts_Russo_One{
@@ -36,7 +36,18 @@ html{
 
 
 }
-
+.side_block_main_for_mobile{
+  height:100%;
+   width:100%;
+   background-color: #F3FEEB;
+   padding: 40px;
+   border-style: solid;
+   border-color: #DAE4D3;
+   border-right-width: 4px;
+   border-top-width: 4px;
+   border-bottom-width: 4px;
+   border-left-width: 0px;
+}
 .input_personal_account_button{
   width: 150px;
   height: 100%;
@@ -492,7 +503,7 @@ html{
                display: block;
                position: relative;
                width: 100%;
-               height: 100px;
+               height: 170px;
                text-align: center;
 
              }

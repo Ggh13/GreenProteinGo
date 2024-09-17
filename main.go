@@ -326,12 +326,12 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
     	}
     	defer image1.Close()
 
-    	image2, _, err := r.FormFile("background_video")
-    	if err != nil {
-    		http.Error(w, "Failed to get image2", http.StatusBadRequest)
-    		return
-    	}
-    	defer image2.Close()
+    	//image2, _, err := r.FormFile("background_video")
+    //	if err != nil {
+    //		http.Error(w, "Failed to get image2", http.StatusBadRequest)
+    //		return
+    //	}
+    //	defer image2.Close()
 
     	// Создаем папку для сохранения файлов, если её нет
     	dir := uploadsDir
@@ -345,11 +345,11 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
     	}
 
     	// Сохраняем второе изображение
-    	err = saveFile("background_video.mp4", image2, dir)
-    	if err != nil {
-    		http.Error(w, "Failed to save image2", http.StatusInternalServerError)
-    		return
-    	}
+    //	err = saveFile("background_video.mp4", image2, dir)
+    //	if err != nil {
+    //		http.Error(w, "Failed to save image2", http.StatusInternalServerError)
+    //		return
+    //	}
 
     //	fmt.Fprintf(w, "Images uploaded successfully")
       authorized_user.Name = name
@@ -810,9 +810,13 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
   if r.Method == http.MethodPost {
 
     option_of_train := r.FormValue("option_of_train")
+    fmt.Println()
+    fmt.Println("!!!!!")
+    fmt.Println(option_of_train)
     zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM `trainings` WHERE name_of_train = '%s' AND id_person = '%s' GROUP BY date ORDER BY date ASC", option_of_train, current_user_id)
 
   }else{
+    fmt.Println("----------")
     zapros = fmt.Sprintf("SELECT date, MAX(weight) AS max_weight FROM `trainings` WHERE id_person = '%s' GROUP BY date ORDER BY date ASC", current_user_id)
 
   }
@@ -825,7 +829,7 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
  var times []time.Time
  var weights []float64
 
- fmt.Println(res)
+ //fmt.Println(res)
  var dateS string
  dateS = "Empty"
  for res.Next(){
@@ -839,12 +843,13 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
         return
     }
 
-
+    fmt.Println("12345678987654321")
    times = append(times, date)
    weights = append(weights, float64(weight))
  }
  fmt.Println(times, weights)
  if( dateS != "Empty"){
+   fmt.Println("----------------12345678987654321-----------------")
    graphic(times, weights)
  }
 
