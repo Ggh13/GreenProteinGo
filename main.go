@@ -1011,6 +1011,28 @@ func SecondsSinceStartOfDay() int {
     return seconds
 }
 
+
+
+
+func get_maximum_in_current_ex(id_person string, name_of_ex string ) string{
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+  var zapros = fmt.Sprintf("SELECT MAX(weight) AS max_weight FROM `trainings` WHERE name_of_train = '%s' AND id_person = '%s';", name_of_ex, id_person)
+  res,err := db.Query(zapros)
+  var max_w string
+  for res.Next(){
+    err = res.Scan(&max_w)
+  }
+  return max_w
+}
+
+
+
+
 func watch_training_programm(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/watch_training_programm.html", "templates/header.html", "templates/footer.html")
 
@@ -1044,7 +1066,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
     err = res.Scan(&data.Id_author_train_programm)
   }
 
-
+  data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
   data.Current_data = getCurrentDate()
   data.Unique_types_of_exercises = make(map [string] string)
   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
@@ -1067,13 +1089,21 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
     }
 
-  zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, n.eng_name AS name_of_train,  e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, e.date FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_programm = %s;", data.Id_train_programm)
+  zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, n.eng_name AS name_of_train,  e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, e.date, unit_of_measurement FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_programm = %s;", data.Id_train_programm)
   res,err = db.Query(zapros)
   fmt.Println(zapros)
 
   var part part_of_training_programm
   for res.Next(){
-    err = res.Scan(&part.Id_train, &part.Type_of_train_translated, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &part.Date)
+    var unit_of_measurement string
+    err = res.Scan(&part.Id_train, &part.Type_of_train_translated, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &part.Date, &unit_of_measurement)
+    if(unit_of_measurement == "per_cent"){
+      fmt.Println("PER CENT %%%%%%%%%%%%%%%")
+      fmt.Println(strconv.Atoi(get_maximum_in_current_ex(data.Authorized_user_data.Id, part.Type_of_train)))
+      var temp1, _ = strconv.Atoi(part.Weight)
+      var temp2, _ = strconv.Atoi(get_maximum_in_current_ex(data.Authorized_user_data.Id, part.Type_of_train))
+      part.Weight = strconv.Itoa(temp1 * (temp2/100)) + " (" + part.Weight + "%)"
+    }
     fmt.Println(part)
     part.Id_train_programm = data.Id_train_programm
 
@@ -1108,7 +1138,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   fmt.Println(data)
 
 //  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
-  data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
+
   t.ExecuteTemplate(w, "watch_training_programm", data)
 
 }
@@ -1200,6 +1230,7 @@ func exit(w http.ResponseWriter, r *http.Request){
      count := r.FormValue("count")
      option_of_train := r.FormValue("option_of_train")
      date := r.FormValue("date")
+     unit_of_measurement := r.FormValue("unit_of_measurement")
      time_to_chill_before_next := r.FormValue("time_to_chill_before_next")
      queue := r.FormValue("queue")
      fmt.Println(date)
@@ -1212,7 +1243,7 @@ func exit(w http.ResponseWriter, r *http.Request){
      defer db.Close()
 
 
-    result, err := db.Exec("insert into test.Exercises_in_training_programs (`id_of_programm`, `name_of_train`,	`weight`,	`count`,	`number_o_execution_sequence`,	`time_to_chill_before_next`, `date`) values (?, ?, ?, ?, ?, ?, ?)",data.Id_train_programm, option_of_train, weight, count, queue, time_to_chill_before_next, date)
+    result, err := db.Exec("insert into test.Exercises_in_training_programs (`id_of_programm`, `name_of_train`,	`weight`,	`count`,	`number_o_execution_sequence`,	`time_to_chill_before_next`, `date`, `unit_of_measurement`) values (?, ?, ?, ?, ?, ?, ?, ?)",data.Id_train_programm, option_of_train, weight, count, queue, time_to_chill_before_next, date, unit_of_measurement)
     fmt.Println(result)
     http.Redirect(w, r, "/watch_training_programm/" + data.Id_train_programm, http.StatusSeeOther)
 
