@@ -295,7 +295,8 @@ html{
 
 .img_center_on_main{
   display: grid;
-  place-items: center; /* Центрирует по горизонтали и вертикали */
+  place-items: center;
+   float: left;/* Центрирует по горизонтали и вертикали */
 }
 
 .img_border{
@@ -308,12 +309,13 @@ html{
   background-color: #faebd7;
   width: 800px;
   height: 250px;
-
-
+  max-width: 800px;
   border-radius:20px;
   border: 2px solid #e5c08f;
-
-
+}
+.img_for_block_for_personal_view{
+  height: 250px;
+  width: 250px;
 }
 
 
@@ -510,6 +512,12 @@ html{
 #block_right_place_for_button{
   display: block;
 }
+
+.input_text_block{
+  max-width: 150px;
+  width: 100%;
+}
+
  @media (max-width: 540px) {
 
              .backgroundvideo {
@@ -522,6 +530,13 @@ html{
 
              }
 
+             .block_for_personal_view{
+               height: 130px;
+             }
+             .img_for_block_for_personal_view{
+               height: 130px;
+               width: 130px;
+             }
 
             .block_training{
               width: 110%;
@@ -536,7 +551,7 @@ html{
               display: block;
             }
             .adaptive_margin_bottom{
-              margin-bottom: 50px;
+              margin-bottom: 40px;
             }
             ul.hr {
                 /* Обнуляем значение отступов и полей */

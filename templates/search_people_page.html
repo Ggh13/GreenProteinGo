@@ -8,35 +8,38 @@
         <div class="row">
           <div class="col-12 ">
               <form action="/search_people" method="post">
-                <div class="row">
-                    <div class="col-1 center_text_in_div">
+                <div class="row adaptive_margin_bottom" >
+                    <div class="col-4 col-md-1 center_text_in_div adaptive_margin_bottom">
                        Имя:
                     </div>
-                    <div class="col-2">
-                       <input type="text" id="firstName" name="firstName">
-                    </div>
-                    <div class="col-1 center_text_in_div">
-                      Фамилия:
-                    </div>
-                    <div class="col-2">
-                      <input type="text" id="lastName" name="lastName">
+                    <div class="col-8 col-md-2">
+                       <input class="input_text_block" type="text" id="firstName" name="firstName">
                     </div>
 
-                    <div class="col-1 center_text_in_div">
+                    <div class="col-4 col-md-1 center_text_in_div adaptive_margin_bottom">
+                      Фамилия:
+                    </div>
+                    <div class="col-8 col-md-2">
+                      <input class="input_text_block" type="text" id="lastName" name="lastName">
+                    </div>
+
+                    <div class="col-4 col-md-1 center_text_in_div adaptive_margin_bottom">
                       Никнейм:
                     </div>
-                    <div class="col-2">
-                      <input type="text" id="nickname" name="nickname">
+                    <div class="col-8 col-md-2">
+                      <input class="input_text_block" type="text" id="nickname" name="nickname">
                     </div>
-                    <div class="col-1">
+
+                    <div class="col-12">
                       <input type="submit" value="Отправить">
                     </div>
+                </div>
                 </div>
 
                </form>
           </div>
 
-               <div class="col-2">
+               <div class="col-12">
                     <p>Поиск по запросу: {{.Name_of_searching}} {{.Surname_of_searching}} {{.Nickname_of_searching}} {{.Error}}</p>
 
 
@@ -44,10 +47,10 @@
 
                   <div class="col-12" style="margin-bottom:20px">
                     <a class="nav-link" href="/user_page/{{.Persona.Id}}">
-                      <div class="block_for_personal_view">
+                      <div class="block_for_personal_view" style="width:100%;">
                         <div class="row" style="height:100%;">
-                          <div class="col-3 img_center_on_main">
-                            <p><img class= "img_border" style="height:250px;width:250px; position: relative; top: -2px; left:-1px;" src="{{.Icon1}}" alt="Image!!"></p>
+                          <div class="col-5 col-md-5 img_center_on_main" style="height:100%;">
+                            <img class= "img_border img_for_block_for_personal_view"  src="{{.Icon1}}" alt="Image!!">
                           </div>
 
                           <div class="col offset-md-1">

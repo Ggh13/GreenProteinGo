@@ -1098,7 +1098,6 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
     var unit_of_measurement string
     err = res.Scan(&part.Id_train, &part.Type_of_train_translated, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &part.Date, &unit_of_measurement)
     if(unit_of_measurement == "per_cent"){
-      fmt.Println("PER CENT %%%%%%%%%%%%%%%")
       fmt.Println(strconv.Atoi(get_maximum_in_current_ex(data.Authorized_user_data.Id, part.Type_of_train)))
       var temp1, _ = strconv.Atoi(part.Weight)
       var temp2, _ = strconv.Atoi(get_maximum_in_current_ex(data.Authorized_user_data.Id, part.Type_of_train))
@@ -1173,7 +1172,7 @@ func exit(w http.ResponseWriter, r *http.Request){
 
    vars := mux.Vars(r)
    //w.WriteHeader(http.StatusOK)
-  authorized_user, err  := populateUserFromSession(r, sessionName)
+   authorized_user, err  := populateUserFromSession(r, sessionName)
    author_id := vars["id_author"]
    var data Data_for_send_to_page_View_created_training_programms
    data.Author = get_user_data_by_id(author_id)
@@ -1211,7 +1210,32 @@ func exit(w http.ResponseWriter, r *http.Request){
    t.ExecuteTemplate(w, "view_created_training_programms", data)
  }
 
+func refresh_curent_train_programm(w http.ResponseWriter, r *http.Request){
 
+  t, err := template.ParseFiles("templates/refresh_train_programm.html", "templates/header.html", "templates/footer.html")
+  fmt.Println("!!!!!!!!")
+  if err != nil {
+      panic(err)
+  }
+
+  var data Data_for_personal_page
+
+  authorized_user, err  := populateUserFromSession(r, sessionName)
+  data.Authorized_user_data  = authorized_user
+
+
+
+
+  vars := mux.Vars(r)
+  id_programm := vars["id_programm"]
+  fmt.Println("Refresh!")
+  fmt.Println(id_programm)
+
+
+
+  t.ExecuteTemplate(w, "refresh_train_programm", data)
+
+}
 
  func create_train_set_exercises(w http.ResponseWriter, r *http.Request){
 
@@ -1536,7 +1560,7 @@ func referal_page(w http.ResponseWriter, r *http.Request){
 
 
 
-  r.HandleFunc("/create_train_set_exercises/{id_programm}", create_train_set_exercises)
+  r.HandleFunc("/refresh_curent_train_programm/{id_programm}", refresh_curent_train_programm)
 
   r.HandleFunc("/processing_create_train_programm_step_1", processing_create_train_programm_step_1)
   r.HandleFunc("/referal_page", referal_page)
