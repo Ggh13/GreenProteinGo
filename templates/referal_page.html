@@ -1,11 +1,59 @@
 
 {{define "referal_page"}}
     {{template "header" .}}
+        <div class="row center_text_for_div">
+          <h1>Реферальная программа </h1>
+        </div>
+        <p>У вас: {{.Points}} белок</p>
+        <div class="row">
+          <p>Белок можно заработать за следующие активности:</p>
+        </div>
 
-        {{.Points}}
-        <p>Реферальная ссылка </p>
-        <p> http://localhost:8080/referal_page </p>
+        <div class="row">
 
+          <div class="col-4 padd-2 adaptive_margin_bottom">
+            <p>Пригласить нового спортсмена</p>
+          </div>
+
+          <div class="col-3">
+            <p>25 белок</p>
+          </div>
+
+        </div>
+
+
+        <div class="row adaptive_margin_bottom">
+          <div class="col-12">
+            За белок можно будет купить спортивное питание на текущем сайте. Курс будет опубликован позднее
+          </div>
+        </div>
+
+
+        <div class="row ">
+          <p>Персональная реферальная ссылка</p>
+        </div>
+        <div class="row">
+          <div class="col-5" id="text-to-copy" style="background-color:white; border-color:black; border-style:solid; border-radius:3px;"> {{.Link_adress}} </div>
+          <div class="col-4 padd-1">
+            <button onclick="copyText()">Скопировать текст</button>
+          </div>
+        </div>
+
+
+
+      <script>
+      function copyText() {
+          // Получаем текст из элемента
+          var textToCopy = document.getElementById("text-to-copy").innerText;
+
+          // Копируем текст в буфер обмена
+          navigator.clipboard.writeText(textToCopy).then(function() {
+              alert("Текст скопирован в буфер обмена!");
+          }).catch(function(error) {
+              console.error("Ошибка копирования текста: ", error);
+          });
+      }
+      </script>
           <!--<h4>Почта для жалоб, пожеланий и сотрудничества (просьба писать с темой: Высшая школа массы набора): roman_buzhor@mail.ru</h4>
           <h4>Если у Вас возникли вопросы или претензии по поводу контента использованного на сайте (по поводу нарушения авторских прав \ нецензурные выражения и высказывание или видео фото материалы): roman_buzhor@mail.ru
             -->

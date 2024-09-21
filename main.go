@@ -124,15 +124,21 @@ type Data_articles_page struct{
 
 type Data_referals struct{
   Authorized_user_data User
+  Link_adress string
   Points int
 
 }
 
 //"root:@tcp(127.127.126.50)/test"
 //"user:password@tcp(147.45.163.58:3306)/test"
+
+
+//"http://147.45.163.58:8080"
+//http://localhost:8080
+var adress_web = "http://147.45.163.58:8080"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "root:@tcp(127.127.126.50)/test"
+var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -181,6 +187,22 @@ func saveUserToSession(r *http.Request, w http.ResponseWriter, sessionName strin
     return session.Save(r, w)
 }
 
+func saveUserWhoInvite(r *http.Request, w http.ResponseWriter, sessionName string, id_person_who_invite string) error{
+    session, err := store.Get(r, sessionName)
+    if err != nil {
+        return err
+    }
+
+    session.Values["who_invite_id"] = id_person_who_invite
+
+
+
+
+    fmt.Println("Данные о сохранении:  : : :")
+    fmt.Println("------------")
+    return session.Save(r, w)
+}
+
 func save_session_lang_user(r *http.Request, w http.ResponseWriter, sessionName string, lang string) error{
   session, err := store.Get(r, sessionName)
   if err != nil {
@@ -188,6 +210,14 @@ func save_session_lang_user(r *http.Request, w http.ResponseWriter, sessionName 
   }
   session.Values["lang"] = lang
   return session.Save(r, w)
+}
+
+func get_who_inveted_id(r *http.Request, sessionName string) string{
+  session, err := store.Get(r, sessionName)
+  if err != nil{
+    panic(err)
+  }
+  return  getSessionValueAsString(session, "who_invite_id")
 }
 
 func get_session_lang_user(r *http.Request, sessionName string) string{
@@ -263,6 +293,31 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
       password := r.FormValue("password")
       nickname := r.FormValue("nickname")
 
+
+
+      who_invite_you := get_who_inveted_id(r, sessionName)
+      fmt.Println("I INVITE YOU! :" + who_invite_you)
+      if(who_invite_you != ""){
+            db, err := sql.Open("mysql", adress_data_base)
+            if err != nil{
+              panic(err)
+            }
+
+            defer db.Close()
+            fmt.Printf("Подключено")
+            query := `UPDATE score_system SET points = points + ? WHERE id_user = ?`
+
+
+            _, err = db.Exec(query, 25, who_invite_you)
+      }
+
+
+
+
+
+
+
+
       fmt.Println(name, surname)
       db, err := sql.Open("mysql", adress_data_base)
       if err != nil{
@@ -275,6 +330,9 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
      //insert, err := db.Query(fmt.Sprintf("INSERT INTO test.articles (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
      result, err := db.Exec("insert into test.persons (name, surname, email, password, nickname) values (?, ?, ?, ? ,?)", name, surname, email, password, nickname)
      fmt.Println(result)
+
+
+
      var zapros = fmt.Sprintf("SELECT id FROM `persons` WHERE email = '%s'", email)
      res,err := db.Query(zapros)
      fmt.Println(zapros)
@@ -288,13 +346,15 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
   //  }
     fmt.Printf("Последний вставленный ID: %d\n", idC)
 
-
+    result, err = db.Exec("insert into test.score_system (id_user	, points) values (?, ?)", idC, 100)
+    fmt.Println(result)
       // file, fileHeader, err := r.FormFile("image")
     //  if err != nil {
     //      http.Error(w, "Не удалось получить файл из формы", http.StatusInternalServerError)
     //      return
     //  }
     //  defer file.Close()
+
 
 
       // Путь для сохранения изображения (папка "uploads" в текущей директории)
@@ -1506,9 +1566,53 @@ func referal_page(w http.ResponseWriter, r *http.Request){
   for res.Next(){
     err = res.Scan(&points)
   }
+
   Data_ref.Points = points
+  Data_ref.Authorized_user_data = authorized_user
+  Data_ref.Link_adress = adress_web + "/invite_link_page/" + authorized_user.Id
   t.ExecuteTemplate(w, "referal_page", Data_ref)
+
 }
+
+
+
+
+
+
+
+
+func invite_link_page(w http.ResponseWriter, r *http.Request){
+  vars := mux.Vars(r)
+
+  id_person := vars["id_person"]
+
+  t, err := template.ParseFiles("templates/invite_link_page.html", "templates/header.html", "templates/footer.html")
+
+  var Data_ref Data_referals
+  if err != nil {
+      panic(err)
+  }
+  saveUserWhoInvite(r, w, sessionName, id_person)
+  authorized_user, err  := populateUserFromSession(r, sessionName)
+
+
+  Data_ref.Authorized_user_data = authorized_user
+  http.Redirect(w, r, "/", http.StatusSeeOther)
+  t.ExecuteTemplate(w, "invite_link_page", Data_ref)
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
  func main() {
 
    store.Options = &sessions.Options{
@@ -1564,6 +1668,9 @@ func referal_page(w http.ResponseWriter, r *http.Request){
 
   r.HandleFunc("/processing_create_train_programm_step_1", processing_create_train_programm_step_1)
   r.HandleFunc("/referal_page", referal_page)
+  r.HandleFunc("/invite_link_page/{id_person}", invite_link_page)
+
+
  fmt.Println()
  http.Handle ("/", r)
  http.ListenAndServe(":8080", nil)

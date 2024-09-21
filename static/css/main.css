@@ -303,7 +303,9 @@ html{
   border-radius:20px;
   border: 2px solid #e5c08f;
 }
-
+.adaptive_margin_top{
+    margin-bottom: 15px;
+}
 
 .block_for_personal_view{
   background-color: #faebd7;
@@ -551,6 +553,9 @@ html{
               display: block;
             }
             .adaptive_margin_bottom{
+              margin-bottom: 40px;
+            }
+            .adaptive_margin_top{
               margin-bottom: 40px;
             }
             ul.hr {
