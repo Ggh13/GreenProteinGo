@@ -101,6 +101,8 @@ type Data_for_watch_training_programm struct{
 }
 
 type Training_programma struct{
+  Author User
+  Authors_Icon1  string
   Name_of_programma,Style_of_trainings, Description, Id  string
 
 }
@@ -111,6 +113,8 @@ type Data_for_send_to_page_View_created_training_programms struct{
   Author User
   Is_this_Author bool
   Authors_Icon1  string
+
+
 }
 
 
@@ -135,10 +139,10 @@ type Data_referals struct{
 
 //"http://147.45.163.58:8080"
 //http://localhost:8080
-var adress_web = "http://147.45.163.58:8080"
+var adress_web = "http://localhost:8080"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
+var adress_data_base = "root:@tcp(127.127.126.50)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -947,6 +951,59 @@ func verification_of_authorization(w http.ResponseWriter, r *http.Request){
     t.ExecuteTemplate(w, "need_authorization", nil)
   }
 }
+
+func search_train_programm(w http.ResponseWriter, r *http.Request){
+  t, err := template.ParseFiles("templates/search_train_programm.html", "templates/header.html", "templates/footer.html")
+  if err != nil{
+    panic(err)
+  }
+
+//  authorized_user, err  := populateUserFromSession(r, sessionName)
+
+  var data Data_for_send_to_page_View_created_training_programms
+//  if(authorized_user.Id == author_id){
+//    data.Is_this_Author = true
+//  }else{
+//    data.Is_this_Author = false
+//  }
+//  data.Authors_Icon1 = "/personal_static/" + data.Author.Name+"_"+data.Author.Surname+"_"+ data.Author.Id + "/icon_1.jpg"
+
+
+  if err != nil {
+      panic(err)
+  }
+
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+  var zapros2 = fmt.Sprintf("SELECT  id,id_author_of_training_program, name_training_program, style_of_training, Description FROM `Training_programms`")
+  res2,_ := db.Query(zapros2)
+  fmt.Println(zapros2)
+  for res2.Next(){
+     var programma Training_programma
+     var id_author string
+     err = res2.Scan(&programma.Id, &id_author, &programma.Name_of_programma, &programma.Style_of_trainings, &programma.Description)
+     programma.Author = get_user_data_by_id(id_author)
+     programma.Authors_Icon1 =  "/personal_static/" + programma.Author.Name+"_"+programma.Author.Surname+"_"+ programma.Author.Id + "/icon_1.jpg"
+     data.Training_programms = append(data.Training_programms, programma)
+
+
+  }
+
+
+
+
+
+
+
+  fmt.Println(data.Training_programms)
+  data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
+  t.ExecuteTemplate(w, "search_train_programm", data)
+}
+
 func search_people(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/search_people_page.html", "templates/header.html", "templates/footer.html")
   fmt.Println("---09090------")
@@ -1647,7 +1704,10 @@ func invite_link_page(w http.ResponseWriter, r *http.Request){
   r.HandleFunc("/submit_achive", submit_achive)
   r.HandleFunc("/user_page/{id_user}", personal_account)
   r.HandleFunc("/create_train", create_train)
+
   r.HandleFunc("/search_people", search_people)
+  r.HandleFunc("/search_train_programm", search_train_programm)
+
   r.HandleFunc("/personal_statistic/{id_user}", personal_statistic)
   r.HandleFunc("/create_train_programm_step_1", verification_of_authorization)
   r.HandleFunc("/create_train_programm_step_2/{id_training_programm}", handlerTTT)

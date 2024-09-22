@@ -1,0 +1,57 @@
+{{define "search_train_programm"}}
+
+{{template "header" .}}
+
+
+    <div class="row adaptive_margin_bottom">
+      <div class="col-5 center_text_for_div">
+        <a class="nav-link" href="/search_people">
+            <h5 class="standart_border_radius" style="background-Color:#8ACC26; ">Поиск людей</h5>
+        </a>
+      </div>
+
+      <div class="col-5 offset-1 center_text_for_div">
+          <h5 class="standart_border_radius" style="background-Color:#ADFF2F;"> Поиск тренировочных программ</h5>
+      </div>
+    </div>
+
+RANGE
+{{range .Training_programms}}
+<div class="row">
+      <div class="col-12" style="margin-bottom: 20px;">
+        <div class="block_for_training_programm standart_border_radius"  style="cursor: pointer;" >
+          <div class="row">
+            <div class="col-12 center_text_for_div">
+              {{.Name_of_programma}}
+            </div>
+            <div class="row" >
+              <div class="col-6" onclick="window.location.href='/watch_training_programm/{{.Id}}';">
+                <div class="row">
+
+                  <div class="col-12">
+                    {{.Style_of_trainings}}
+                  </div>
+                  <div class="col-5">
+                    <p><img src="{{.Authors_Icon1}}" alt="Image!!" style="width:50px;height:50px;"> {{.Author.Name}} {{.Author.Surname}}</p>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="col-4" onclick="window.location.href='/watch_training_programm/{{.Id}}';">
+                <div class="row">
+                  <div class="col-12">
+                    <p>{{.Description}}</p>
+                  </div>
+                </div>
+              </div>
+        </div>
+    </div>
+  </div>
+</div>
+</div>
+{{end}}
+
+
+{{template "footer"}}
+{{end}}
