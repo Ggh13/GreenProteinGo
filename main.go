@@ -1724,6 +1724,8 @@ func invite_link_page(w http.ResponseWriter, r *http.Request){
 
 
 
+  r.HandleFunc("/create_train_set_exercises/{id_programm}", create_train_set_exercises)
+
   r.HandleFunc("/refresh_curent_train_programm/{id_programm}", refresh_curent_train_programm)
 
   r.HandleFunc("/processing_create_train_programm_step_1", processing_create_train_programm_step_1)
