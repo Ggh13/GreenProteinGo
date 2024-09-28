@@ -139,10 +139,10 @@ type Data_referals struct{
 
 //"http://147.45.163.58:8080"
 //http://localhost:8080
-var adress_web = "http://localhost:8080"
+var adress_web = "http://147.45.163.58:8080"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "root:@tcp(127.127.126.50)/test"
+var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -296,7 +296,6 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
       email := r.FormValue("email")
       password := r.FormValue("password")
       nickname := r.FormValue("nickname")
-
 
 
       who_invite_you := get_who_inveted_id(r, sessionName)
@@ -1176,7 +1175,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   data.Id_train_programm = vars["id_training_programm"]
 
 
-  var zapros = fmt.Sprintf("SELECT id_author_of_training_program FROM `Training_programms` WHERE id = %s", data.Id_train_programm)
+  var zapros = fmt.Sprintf("SELECT id_author_of_training_program FROM `Training_programms` WHERE id = %s;", data.Id_train_programm)
   res,err := db.Query(zapros)
   fmt.Println(zapros)
   for res.Next(){
@@ -1206,7 +1205,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
     }
 
-  zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, n.eng_name AS name_of_train,  e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, e.date, unit_of_measurement FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_programm = %s;", data.Id_train_programm)
+  zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, n.eng_name AS name_of_train,  e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, e.date, unit_of_measurement FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_programm = %s ORDER BY e.number_o_execution_sequence ASC;", data.Id_train_programm)
   res,err = db.Query(zapros)
   fmt.Println(zapros)
 
