@@ -1,0 +1,39 @@
+{{define "view_training_days_of_current_train_programm"}}
+    {{template "header" .}}
+
+    <div class="row">
+      <div class = "col-12">
+          {{range .Days}}
+            <div class="row block_for_view_training_day standart_border_radius adaptive_margin_bottom">
+              <div class = "col-12 center_text_for_div">
+                  {{.Name}}
+              </div>
+
+            </div>
+          {{end}}
+
+        </div>
+
+      </div>
+    {{if .Is_this_author}}
+    <div class="row">
+      <div class = "col-4 padd-4">
+      <form action="/create_train_day_in_train_programm/{{.Id_programm}}" method="post">
+
+            <div class="col-12" style="margin-bottom:15px;">
+              <input name="name_train_day" id="name_train_day" class="form-control">
+            </div>
+            <div class="col-12" style="margin-bottom:15px;">
+              <input name="number_train_day" id="number_train_day" class="form-control" placeholder="number_train_day"></input>
+            </div>
+            <div class="col-4" style="margin-bottom:15px;">
+              <button class="btn btn-warning">Создать</button>
+            </div>
+
+
+      </form>
+      </div>
+    </div>
+    {{end}}
+    {{template "footer"}}
+{{end}}

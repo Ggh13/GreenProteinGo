@@ -133,16 +133,31 @@ type Data_referals struct{
 
 }
 
+type Training_day_discrpt struct{
+  Name string
+}
+
+type Data_for_view_training_days_of_current_train_programm struct{
+  Days []Training_day_discrpt
+  Authorized_user_data User
+  Id_programm string
+  Is_this_author bool
+}
+
+
+
+
+
 //"root:@tcp(127.127.126.50)/test"
 //"user:password@tcp(147.45.163.58:3306)/test"
 
 
 //"http://147.45.163.58:8080"
 //http://localhost:8080
-var adress_web = "http://147.45.163.58:8080"
+var adress_web = "http://localhost:8080"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
+var adress_data_base = "root:@tcp(127.127.126.50)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -1609,6 +1624,9 @@ func referal_page(w http.ResponseWriter, r *http.Request){
       panic(err)
   }
   authorized_user, err  := populateUserFromSession(r, sessionName)
+
+
+
   db, err := sql.Open("mysql", adress_data_base)
   if err != nil{
     panic(err)
@@ -1660,6 +1678,93 @@ func invite_link_page(w http.ResponseWriter, r *http.Request){
 
 
 
+func create_train_day_in_train_programm(w http.ResponseWriter, r *http.Request){
+  vars := mux.Vars(r)
+  fmt.Println("^^^^^^^^^^^^^")
+  id_programm := vars["id_programm"]
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+
+
+
+  if r.Method == http.MethodPost {
+    name_train_day := r.FormValue("name_train_day")
+    number_train_day := r.FormValue("number_train_day")
+    result, err := db.Exec("insert into test.training_days ( `id_training_programm`,	`number_of_training_day`, `name_of_training_day`) values (?, ?,?)",id_programm, number_train_day, name_train_day)
+
+    fmt.Println(result)
+    if(err != nil){
+      fmt.Println(err)
+    }
+
+  }
+
+
+
+  http.Redirect(w, r, "/view_training_days_of_current_train_programm/" + id_programm, http.StatusSeeOther)
+}
+
+
+
+
+func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http.Request){
+  vars := mux.Vars(r)
+
+  id_programm := vars["id_programm"]
+
+  t, err := template.ParseFiles("templates/view_training_days_of_current_train_programm.html", "templates/header.html", "templates/footer.html")
+
+  var Data Data_for_view_training_days_of_current_train_programm
+  if err != nil {
+      panic(err)
+  }
+
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+  Data.Authorized_user_data,err = populateUserFromSession(r, sessionName)
+  var zapros = fmt.Sprintf("SELECT name_of_training_day FROM `training_days` WHERE 	id_training_programm = '%s' ", id_programm)
+  res,err := db.Query(zapros)
+  var day_temp Training_day_discrpt
+  for res.Next(){
+    err = res.Scan(&day_temp.Name)
+    Data.Days = append(Data.Days, day_temp)
+  }
+
+  zapros = fmt.Sprintf("SELECT id_author_of_training_program FROM `Training_programms` WHERE 	id = '%s' ", id_programm)
+  var id_author string
+  res,err = db.Query(zapros)
+fmt.Println(zapros)
+  for res.Next(){
+    fmt.Print("watch this hell ")
+
+
+    err = res.Scan(&id_author)
+
+    fmt.Print(id_author)
+    fmt.Print(Data.Authorized_user_data.Id)
+    if(id_author == Data.Authorized_user_data.Id){
+      Data.Is_this_author = true;
+    }else
+    {
+      Data.Is_this_author = false;
+    }
+
+  }
+
+
+
+  Data.Id_programm = id_programm
+  fmt.Print("Now see:   ")
+  fmt.Println(Data)
+  t.ExecuteTemplate(w, "view_training_days_of_current_train_programm", Data)
+
+}
 
 
 
@@ -1730,6 +1835,13 @@ func invite_link_page(w http.ResponseWriter, r *http.Request){
   r.HandleFunc("/processing_create_train_programm_step_1", processing_create_train_programm_step_1)
   r.HandleFunc("/referal_page", referal_page)
   r.HandleFunc("/invite_link_page/{id_person}", invite_link_page)
+
+
+
+
+  //
+  r.HandleFunc("/view_training_days_of_current_train_programm/{id_programm}", view_training_days_of_current_train_programm)
+  r.HandleFunc("/create_train_day_in_train_programm/{id_programm}", create_train_day_in_train_programm)
 
 
  fmt.Println()
