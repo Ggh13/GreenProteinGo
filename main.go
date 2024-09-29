@@ -86,7 +86,7 @@ type part_of_training_programm struct{
 type Data_for_watch_training_programm struct{
   Authorized_user_data User
 
-  Id_train_programm string
+  Id_day_int_train_programm string
   Id_author_train_programm string
   Style_sport string
   Name_training_program string
@@ -134,7 +134,8 @@ type Data_referals struct{
 }
 
 type Training_day_discrpt struct{
-  Name string
+
+  Id, Name string
 }
 
 type Data_for_view_training_days_of_current_train_programm struct{
@@ -1187,10 +1188,10 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
   var data Data_for_watch_training_programm
   data.Parts_training_programm = make(map[string][]part_of_training_programm)
-  data.Id_train_programm = vars["id_training_programm"]
+  data.Id_day_int_train_programm = vars["id_day"]
 
 
-  var zapros = fmt.Sprintf("SELECT id_author_of_training_program FROM `Training_programms` WHERE id = %s;", data.Id_train_programm)
+  var zapros = fmt.Sprintf("SELECT tp.id_author_of_training_program FROM training_days td JOIN Training_programms tp ON td.id_training_programm = tp.id WHERE td.id = %s;", data.Id_day_int_train_programm)
   res,err := db.Query(zapros)
   fmt.Println(zapros)
   for res.Next(){
@@ -1215,19 +1216,19 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
       date := getCurrentDate()
       fmt.Println(weight, count, option_of_train, id_of_train, date)
 
-      result, _ := db.Exec("insert into test. trainings (`id_of_all_train`, `name_of_train`,	`weight`,	`count`,	`id_person`,	`date`) values (?, ?, ?, ?, ?, ?)",id_of_train ,option_of_train, weight, count, authorized_user.Id, date)
+      result, _ := db.Exec("insert into test.trainings (`id_of_all_train`, `name_of_train`,	`weight`,	`count`,	`id_person`,	`date`) values (?, ?, ?, ?, ?, ?)",id_of_train ,option_of_train, weight, count, authorized_user.Id, date)
       fmt.Println(result)
 
     }
 
-  zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, n.eng_name AS name_of_train,  e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, e.date, unit_of_measurement FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_programm = %s ORDER BY e.number_o_execution_sequence ASC;", data.Id_train_programm)
+  zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, n.eng_name AS name_of_train,  e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, unit_of_measurement FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_day_in_programm = %s ORDER BY e.number_o_execution_sequence ASC;", data.Id_day_int_train_programm)
   res,err = db.Query(zapros)
   fmt.Println(zapros)
 
   var part part_of_training_programm
   for res.Next(){
     var unit_of_measurement string
-    err = res.Scan(&part.Id_train, &part.Type_of_train_translated, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &part.Date, &unit_of_measurement)
+    err = res.Scan(&part.Id_train, &part.Type_of_train_translated, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &unit_of_measurement)
     if(unit_of_measurement == "per_cent"){
       fmt.Println(strconv.Atoi(get_maximum_in_current_ex(data.Authorized_user_data.Id, part.Type_of_train)))
       var temp1, _ = strconv.Atoi(part.Weight)
@@ -1235,7 +1236,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
       part.Weight = strconv.Itoa(temp1 * (temp2/100)) + " (" + part.Weight + "%)"
     }
     fmt.Println(part)
-    part.Id_train_programm = data.Id_train_programm
+    part.Id_train_programm = data.Id_day_int_train_programm
 
     var exists bool
     query := "SELECT EXISTS(SELECT 1 FROM trainings WHERE id_of_all_train = ? AND id_person = ?)"
@@ -1262,9 +1263,11 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
     }
 
 
-    data.Parts_training_programm[part.Date] = append(data.Parts_training_programm[part.Date], part)
-    fmt.Println(data.Parts_training_programm[part.Date])
+    data.Parts_training_programm["part.Date"] = append(data.Parts_training_programm["part.Date"], part)
+
+    fmt.Println(data.Parts_training_programm["part.Date"])
   }
+  fmt.Println("Сам смотри")
   fmt.Println(data)
 
 //  fmt.Fprintf(w, "Category: %v\n", vars["id_user"])
@@ -1384,11 +1387,11 @@ func refresh_curent_train_programm(w http.ResponseWriter, r *http.Request){
      weight := r.FormValue("weight")
      count := r.FormValue("count")
      option_of_train := r.FormValue("option_of_train")
-     date := r.FormValue("date")
+
      unit_of_measurement := r.FormValue("unit_of_measurement")
      time_to_chill_before_next := r.FormValue("time_to_chill_before_next")
      queue := r.FormValue("queue")
-     fmt.Println(date)
+
 
      db, err := sql.Open("mysql", adress_data_base)
      if err != nil{
@@ -1397,8 +1400,9 @@ func refresh_curent_train_programm(w http.ResponseWriter, r *http.Request){
 
      defer db.Close()
 
-
-    result, err := db.Exec("insert into test.Exercises_in_training_programs (`id_of_programm`, `name_of_train`,	`weight`,	`count`,	`number_o_execution_sequence`,	`time_to_chill_before_next`, `date`, `unit_of_measurement`) values (?, ?, ?, ?, ?, ?, ?, ?)",data.Id_train_programm, option_of_train, weight, count, queue, time_to_chill_before_next, date, unit_of_measurement)
+     fmt.Println("Check this shit!! ------ ")
+     fmt.Println(data.Id_train_programm)
+    result, err := db.Exec("insert into test.Exercises_in_training_programs (`id_of_day_in_programm`, `name_of_train`,	`weight`,	`count`,	`number_o_execution_sequence`,	`time_to_chill_before_next`, `unit_of_measurement`) values (?, ?, ?, ?, ?, ?, ?)",data.Id_train_programm, option_of_train, weight, count, queue, time_to_chill_before_next, unit_of_measurement)
     fmt.Println(result)
     http.Redirect(w, r, "/watch_training_programm/" + data.Id_train_programm, http.StatusSeeOther)
 
@@ -1728,18 +1732,18 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
 
   defer db.Close()
   Data.Authorized_user_data,err = populateUserFromSession(r, sessionName)
-  var zapros = fmt.Sprintf("SELECT name_of_training_day FROM `training_days` WHERE 	id_training_programm = '%s' ", id_programm)
+  var zapros = fmt.Sprintf("SELECT id, name_of_training_day FROM `training_days` WHERE 	id_training_programm = '%s' ", id_programm)
   res,err := db.Query(zapros)
   var day_temp Training_day_discrpt
   for res.Next(){
-    err = res.Scan(&day_temp.Name)
+    err = res.Scan(&day_temp.Id, &day_temp.Name)
     Data.Days = append(Data.Days, day_temp)
   }
 
   zapros = fmt.Sprintf("SELECT id_author_of_training_program FROM `Training_programms` WHERE 	id = '%s' ", id_programm)
   var id_author string
   res,err = db.Query(zapros)
-fmt.Println(zapros)
+  fmt.Println(zapros)
   for res.Next(){
     fmt.Print("watch this hell ")
 
@@ -1768,11 +1772,19 @@ fmt.Println(zapros)
 
 
 
+/*
+func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http.Request){
+  vars := mux.Vars(r)
+
+  id_programm := vars["id_programm"]
+  id_day := vars["id_day"]
+
+  t, err := template.ParseFiles("templates/view_training_days_of_current_train_programm.html", "templates/header.html", "templates/footer.html")
+  t.ExecuteTemplate(w, "view_training_days_of_current_train_programm", Data)
+}
 
 
-
-
-
+*/
 
  func main() {
 
@@ -1816,7 +1828,7 @@ fmt.Println(zapros)
   r.HandleFunc("/create_train_programm_step_1", verification_of_authorization)
   r.HandleFunc("/create_train_programm_step_2/{id_training_programm}", handlerTTT)
 
-  r.HandleFunc("/watch_training_programm/{id_training_programm}", verification_of_authorization)
+  r.HandleFunc("/watch_training_programm/{id_day}", verification_of_authorization)
   r.HandleFunc("/watch_anthropometric/{id_person}", watch_anthropometric)
 
   r.HandleFunc("/view_created_training_programms/{id_author}", verification_of_authorization)
@@ -1842,7 +1854,7 @@ fmt.Println(zapros)
   //
   r.HandleFunc("/view_training_days_of_current_train_programm/{id_programm}", view_training_days_of_current_train_programm)
   r.HandleFunc("/create_train_day_in_train_programm/{id_programm}", create_train_day_in_train_programm)
-
+  //r.HandleFunc("/view_day_of_current_train_programm/{id_programm}/{id_day}", view_day_of_current_train_programm)
 
  fmt.Println()
  http.Handle ("/", r)

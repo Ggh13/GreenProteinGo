@@ -4,12 +4,15 @@
     <div class="row">
       <div class = "col-12">
           {{range .Days}}
-            <div class="row block_for_view_training_day standart_border_radius adaptive_margin_bottom">
-              <div class = "col-12 center_text_for_div">
-                  {{.Name}}
-              </div>
 
-            </div>
+            <a href="/watch_training_programm/{{.Id}}" class="nav-link clickable">
+              <div class="row block_for_view_training_day standart_border_radius adaptive_margin_bottom">
+                <div class = "col-12 center_text_for_div">
+                    {{.Name}}
+                </div>
+
+              </div>
+            </a>
           {{end}}
 
         </div>
@@ -21,10 +24,10 @@
       <form action="/create_train_day_in_train_programm/{{.Id_programm}}" method="post">
 
             <div class="col-12" style="margin-bottom:15px;">
-              <input name="name_train_day" id="name_train_day" class="form-control">
+              <input name="name_train_day" id="name_train_day" class="form-control" placeholder="Название дня">
             </div>
             <div class="col-12" style="margin-bottom:15px;">
-              <input name="number_train_day" id="number_train_day" class="form-control" placeholder="number_train_day"></input>
+              <input name="number_train_day" id="number_train_day" class="form-control" placeholder="Порядковый номер тренировочного дня"></input>
             </div>
             <div class="col-4" style="margin-bottom:15px;">
               <button class="btn btn-warning">Создать</button>

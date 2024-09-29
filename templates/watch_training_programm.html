@@ -15,9 +15,10 @@
             <p> Сегодня {{.Current_data}} и это отличный день чтобы порвать себе трицепс!<p>
           </div>
           {{range $time, $event := .Parts_training_programm}}
-          <div class="col-12 adaptive_margin_top">{{$time}}</div>
+           <!-- <div class="col-12 adaptive_margin_top">{{$time}}</div> -->
 
           {{range $event}}
+
           <div class="col-12">
             <div class="row block_training" style="height:auto;">
                 <div class="col-6 padd-0 ">
@@ -31,7 +32,8 @@
 
                   {{if not .Have_this_id_in_bd}}
 
-                    <form id="form1" action="/watch_training_programm/{{.Id_train_programm}}" method="post">
+                    <form id="form1" action="/watch_training_programm/{{$.Id_day_int_train_programm}}" method="post">
+
                       <div class ="row">
 
                         <input type="hidden" name="hiddenFieldID" value="{{.Id_train}}">
@@ -73,7 +75,9 @@
                 </div>
             </div>
           </div>
+
           {{ end }}
+
           {{ end }}
 
 
@@ -83,10 +87,11 @@
               <button id="showDivButton">Показать блок</button>
             </div>
           {{end}}
+
           <div class="col-12 padd-0">
             <div id="myDiv" class="block_training" style="display: none; margin-top: 10px; height:100%; width:100%;" >
               <h1 class="cover-heading">Тренировка</h1>
-              <form id="form2" action="/create_train_set_exercises/{{.Id_train_programm}}" method="post">
+              <form id="form2" action="/create_train_set_exercises/{{.Id_day_int_train_programm}}" method="post">
                   <select id="dropdown" name="option_of_train">
                     {{ range $key, $value := .Unique_types_of_exercises }}
                       <option value="{{$key}}">{{$value}}</option>
@@ -101,10 +106,7 @@
 
 
 
-                  <div class="form-group">
-                      <label for="date">Укажите период выполнения</label>
-                      <input type="text" id="date" name="date" required>
-                  </div>
+
                   <label for="dropdown2">Выберите единицу измерения:</label>
                     <select id="dropdown2" name="unit_of_measurement" >
 
@@ -142,6 +144,7 @@
     </div>
     <script>
       document.getElementById("showDivButton").onclick = function() {
+
         document.getElementById("myDiv").style.display = "block";
       };
     </script>
