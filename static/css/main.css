@@ -130,7 +130,10 @@ html{
 .block_for_view_training_day{
   width:90%;
   height:150px;
-  background-color: green;
+  background-color: #faebd7;
+  border-width: 3px;
+  border-style: solid;
+  border-color:#e5c08f
 
 }
 

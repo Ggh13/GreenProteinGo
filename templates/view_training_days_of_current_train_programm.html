@@ -1,14 +1,17 @@
 {{define "view_training_days_of_current_train_programm"}}
     {{template "header" .}}
 
-    <div class="row">
+    <div class="row adaptive_margin_bottom">
       <div class = "col-12">
           {{range .Days}}
 
             <a href="/watch_training_programm/{{.Id}}" class="nav-link clickable">
               <div class="row block_for_view_training_day standart_border_radius adaptive_margin_bottom">
-                <div class = "col-12 center_text_for_div">
-                    {{.Name}}
+                <div class="col-1">
+                  {{.Number_of_training_day}}
+                </div>
+                <div class = "col-10 center_text_for_div">
+                    <h5>{{.Name}}</h5>
                 </div>
 
               </div>
@@ -19,6 +22,9 @@
 
       </div>
     {{if .Is_this_author}}
+    <div class="row center_text_for_div">
+      <h3>Создать тренировочный день</h3>
+    </div>
     <div class="row">
       <div class = "col-4 padd-4">
       <form action="/create_train_day_in_train_programm/{{.Id_programm}}" method="post">

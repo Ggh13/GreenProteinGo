@@ -135,7 +135,7 @@ type Data_referals struct{
 
 type Training_day_discrpt struct{
 
-  Id, Name string
+  Id, Name,Number_of_training_day string
 }
 
 type Data_for_view_training_days_of_current_train_programm struct{
@@ -1711,7 +1711,25 @@ func create_train_day_in_train_programm(w http.ResponseWriter, r *http.Request){
 }
 
 
+func select_in_favorites(w http.ResponseWriter, r *http.Request){
 
+
+  referer := r.Header.Get("Referer")
+  fmt.Println(referer)
+  vars := mux.Vars(r)
+
+  id_programm := vars["id_programm"]
+
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+
+  auth_user,_ := populateUserFromSession(r, sessionName)
+  _, err = db.Exec("insert into test.selected_programs ( `id_selected_programm`,	`id_user_whos_select`) values (?, ?)",id_programm, auth_user.Id)
+
+  http.Redirect(w, r, referer, http.StatusSeeOther)
+}
 
 func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http.Request){
   vars := mux.Vars(r)
@@ -1732,11 +1750,11 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
 
   defer db.Close()
   Data.Authorized_user_data,err = populateUserFromSession(r, sessionName)
-  var zapros = fmt.Sprintf("SELECT id, name_of_training_day FROM `training_days` WHERE 	id_training_programm = '%s' ", id_programm)
+  var zapros = fmt.Sprintf("SELECT id, name_of_training_day, number_of_training_day FROM `training_days` WHERE 	id_training_programm = '%s'ORDER BY number_of_training_day ASC", id_programm)
   res,err := db.Query(zapros)
   var day_temp Training_day_discrpt
   for res.Next(){
-    err = res.Scan(&day_temp.Id, &day_temp.Name)
+    err = res.Scan(&day_temp.Id, &day_temp.Name, &day_temp.Number_of_training_day)
     Data.Days = append(Data.Days, day_temp)
   }
 
@@ -1785,7 +1803,73 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
 
 
 */
+ func view_choosen_programm(w http.ResponseWriter, r *http.Request){
+  // t, _ := template.ParseFiles("templates/view_choosen_programm.html", "templates/header.html", "templates/footer.html")
+   t, err := template.ParseFiles("templates/search_train_programm.html", "templates/header.html", "templates/footer.html")
+   if err != nil{
+     panic(err)
+   }
 
+   //  authorized_user, err  := populateUserFromSession(r, sessionName)
+
+   var data Data_for_send_to_page_View_created_training_programms
+   //  if(authorized_user.Id == author_id){
+   //    data.Is_this_Author = true
+   //  }else{
+   //    data.Is_this_Author = false
+   //  }
+   //  data.Authors_Icon1 = "/personal_static/" + data.Author.Name+"_"+data.Author.Surname+"_"+ data.Author.Id + "/icon_1.jpg"
+   data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
+
+   if err != nil {
+       panic(err)
+   }
+
+   db, err := sql.Open("mysql", adress_data_base)
+   if err != nil{
+     panic(err)
+   }
+
+   defer db.Close()
+
+
+
+
+
+   var zapros3 = fmt.Sprintf("SELECT id_selected_programm  FROM `selected_programs` WHERE id_user_whos_select = %s", data.Authorized_user_data.Id)
+   res3,_ := db.Query(zapros3)
+   fmt.Println(zapros3)
+   for res3.Next(){
+       var id_choosen_temp string
+       err = res3.Scan(&id_choosen_temp)
+
+       var zapros2 = fmt.Sprintf("SELECT  id, id_author_of_training_program, name_training_program, style_of_training, Description FROM `Training_programms` WHERE id = %s", id_choosen_temp)
+       res2,_ := db.Query(zapros2)
+       fmt.Println(zapros2)
+       for res2.Next(){
+          var programma Training_programma
+          var id_author string
+          err = res2.Scan(&programma.Id, &id_author, &programma.Name_of_programma, &programma.Style_of_trainings, &programma.Description)
+          programma.Author = get_user_data_by_id(id_author)
+          programma.Authors_Icon1 =  "/personal_static/" + programma.Author.Name+"_"+programma.Author.Surname+"_"+ programma.Author.Id + "/icon_1.jpg"
+          data.Training_programms = append(data.Training_programms, programma)
+
+
+       }
+     }
+
+
+
+
+
+
+
+   fmt.Println(data.Training_programms)
+
+   t.ExecuteTemplate(w, "search_train_programm", data)
+
+   //t.ExecuteTemplate(w, "view_choosen_programm", data)
+ }
  func main() {
 
    store.Options = &sessions.Options{
@@ -1855,6 +1939,10 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
   r.HandleFunc("/view_training_days_of_current_train_programm/{id_programm}", view_training_days_of_current_train_programm)
   r.HandleFunc("/create_train_day_in_train_programm/{id_programm}", create_train_day_in_train_programm)
   //r.HandleFunc("/view_day_of_current_train_programm/{id_programm}/{id_day}", view_day_of_current_train_programm)
+
+  r.HandleFunc("/select_in_favorites/{id_programm}", select_in_favorites)
+
+  r.HandleFunc("/view_choosen_programm", view_choosen_programm)
 
  fmt.Println()
  http.Handle ("/", r)
