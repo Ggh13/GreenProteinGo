@@ -155,10 +155,10 @@ type Data_for_view_training_days_of_current_train_programm struct{
 
 //"http://147.45.163.58:8080"
 //http://localhost:8080
-var adress_web = "http://localhost:8080"
+var adress_web = "http://147.45.163.58:8080"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "root:@tcp(127.127.126.50)/test"
+var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -1159,6 +1159,7 @@ func get_maximum_in_current_ex(id_person string, name_of_ex string ) string{
   for res.Next(){
     err = res.Scan(&max_w)
   }
+
   return max_w
 }
 
@@ -1230,10 +1231,19 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
     var unit_of_measurement string
     err = res.Scan(&part.Id_train, &part.Type_of_train_translated, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &unit_of_measurement)
     if(unit_of_measurement == "per_cent"){
+      fmt.Print("Watch ------ ")
       fmt.Println(strconv.Atoi(get_maximum_in_current_ex(data.Authorized_user_data.Id, part.Type_of_train)))
-      var temp1, _ = strconv.Atoi(part.Weight)
-      var temp2, _ = strconv.Atoi(get_maximum_in_current_ex(data.Authorized_user_data.Id, part.Type_of_train))
-      part.Weight = strconv.Itoa(temp1 * (temp2/100)) + " (" + part.Weight + "%)"
+
+      var temp4, _ = strconv.Atoi(part.Weight)
+      temp1 := float64(temp4)
+      var temp3, _ = strconv.Atoi(get_maximum_in_current_ex(data.Authorized_user_data.Id, part.Type_of_train))
+      temp2 := float64(temp3)
+
+      part.Weight = strconv.Itoa(int(temp1 * (temp2/100))) + " (" + part.Weight + "%)"
+      fmt.Print("second wantch4   ")
+      fmt.Println(temp2)
+      fmt.Print("3 wantch   ")
+      fmt.Println(strconv.Itoa(int(temp1 * (temp2/100))))
     }
     fmt.Println(part)
     part.Id_train_programm = data.Id_day_int_train_programm
@@ -1842,7 +1852,6 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
    for res3.Next(){
        var id_choosen_temp string
        err = res3.Scan(&id_choosen_temp)
-
        var zapros2 = fmt.Sprintf("SELECT  id, id_author_of_training_program, name_training_program, style_of_training, Description FROM `Training_programms` WHERE id = %s", id_choosen_temp)
        res2,_ := db.Query(zapros2)
        fmt.Println(zapros2)
