@@ -155,10 +155,10 @@ type Data_for_view_training_days_of_current_train_programm struct{
 
 //"http://147.45.163.58:8080"
 //http://localhost:8080
-var adress_web = "http://147.45.163.58:8080"
+var adress_web = "http://localhost:8080"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
+var adress_data_base = "root:@tcp(127.127.126.50)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
