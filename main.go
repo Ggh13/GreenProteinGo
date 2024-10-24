@@ -8,9 +8,9 @@ _ "github.com/go-sql-driver/mysql"
 "strconv"
 "path/filepath"
 
- "mime/multipart"
- "io"
- "time"
+"mime/multipart"
+"io"
+"time"
 "log"
 "gonum.org/v1/plot"
 "gonum.org/v1/plot/plotter"
@@ -70,6 +70,7 @@ type part_of_training_programm struct{
   Date string
   Id_train string
 
+  Technique_exercise_link string
   Type_of_train string
   Type_of_train_translated string
   Weight string
@@ -151,8 +152,9 @@ type Data_for_view_training_days_of_current_train_programm struct{
 
 //"root:@tcp(127.127.126.50)/test"
 //"user:password@tcp(147.45.163.58:3306)/test"
+//"user:password@tcp(147.45.163.58:3306)/test"
 
-
+//http://buzhor13.ru
 //"http://147.45.163.58:8080"
 //http://localhost:8080
 var adress_web = "http://localhost:8080"
@@ -1070,11 +1072,17 @@ func search_people(w http.ResponseWriter, r *http.Request){
     db, err := sql.Open("mysql", adress_data_base)
     if err != nil{
       panic(err)
+    }else{
+      fmt.Println("GOOOOD ONE ")
     }
+
     zapros := fmt.Sprintf("SELECT id, name, surname, nickname FROM `persons` ")
     res,err := db.Query(zapros)
-    fmt.Println(zapros)
 
+    fmt.Println(zapros)
+    if(err != nil){
+      panic(err)
+    }
     for res.Next(){
       var temp Data_for_personal_page
       err = res.Scan(&temp.Persona.Id, &temp.Persona.Name, &temp.Persona.Surname, &temp.Persona.Nickname)
@@ -1165,6 +1173,21 @@ func get_maximum_in_current_ex(id_person string, name_of_ex string ) string{
 
 
 
+func delet_current_train_from_training_day(w http.ResponseWriter, r *http.Request){
+
+  vars := mux.Vars(r)
+  id_ex := vars["id_ex"]
+
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+  query := fmt.Sprintf("DELETE FROM Exercises_in_training_programs WHERE id = %s", id_ex)
+	_, err = db.Exec(query)
+
+  referer := r.Header.Get("Referer")
+  http.Redirect(w, r, referer, http.StatusSeeOther)
+}
 
 func watch_training_programm(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/watch_training_programm.html", "templates/header.html", "templates/footer.html")
@@ -1222,14 +1245,14 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
 
     }
 
-  zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, n.eng_name AS name_of_train,  e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, unit_of_measurement FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_day_in_programm = %s ORDER BY e.number_o_execution_sequence ASC;", data.Id_day_int_train_programm)
+  zapros = fmt.Sprintf("SELECT e.id, n.rus_name AS name_of_train, n.eng_name AS name_of_train,  e.weight, e.count, number_o_execution_sequence, time_to_chill_before_next, unit_of_measurement, technique_exercise FROM Exercises_in_training_programs e JOIN names_of_exercises n ON e.name_of_train = n.eng_name WHERE e.id_of_day_in_programm = %s ORDER BY e.number_o_execution_sequence ASC;", data.Id_day_int_train_programm)
   res,err = db.Query(zapros)
   fmt.Println(zapros)
 
   var part part_of_training_programm
   for res.Next(){
     var unit_of_measurement string
-    err = res.Scan(&part.Id_train, &part.Type_of_train_translated, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &unit_of_measurement)
+    err = res.Scan(&part.Id_train, &part.Type_of_train_translated, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &unit_of_measurement, &part.Technique_exercise_link)
     if(unit_of_measurement == "per_cent"){
       fmt.Print("Watch ------ ")
       fmt.Println(strconv.Atoi(get_maximum_in_current_ex(data.Authorized_user_data.Id, part.Type_of_train)))
@@ -1394,15 +1417,6 @@ func refresh_curent_train_programm(w http.ResponseWriter, r *http.Request){
    //var current_user_id =
    if r.Method == http.MethodPost {
 
-     weight := r.FormValue("weight")
-     count := r.FormValue("count")
-     option_of_train := r.FormValue("option_of_train")
-
-     unit_of_measurement := r.FormValue("unit_of_measurement")
-     time_to_chill_before_next := r.FormValue("time_to_chill_before_next")
-     queue := r.FormValue("queue")
-
-
      db, err := sql.Open("mysql", adress_data_base)
      if err != nil{
        panic(err)
@@ -1410,9 +1424,30 @@ func refresh_curent_train_programm(w http.ResponseWriter, r *http.Request){
 
      defer db.Close()
 
+     weight := r.FormValue("weight")
+     count := r.FormValue("count")
+     option_of_train := r.FormValue("option_of_train")
+
+     unit_of_measurement := r.FormValue("unit_of_measurement")
+     time_to_chill_before_next := r.FormValue("time_to_chill_before_next")
+     queue := r.FormValue("queue")
+     technique_exercise := r.FormValue("technique_exercise")
+     if(technique_exercise == ""){
+
+       var zapros = fmt.Sprintf("SELECT `technique_exercise_defoult`	 FROM `names_of_exercises` WHERE 	`eng_name` = '%s'", option_of_train)
+       res,_ := db.Query(zapros)
+       fmt.Println(zapros)
+       var tech_defoult string
+       for res.Next(){
+           _ = res.Scan(&tech_defoult)
+       }
+       technique_exercise = tech_defoult
+     }
+
+
      fmt.Println("Check this shit!! ------ ")
      fmt.Println(data.Id_train_programm)
-    result, err := db.Exec("insert into test.Exercises_in_training_programs (`id_of_day_in_programm`, `name_of_train`,	`weight`,	`count`,	`number_o_execution_sequence`,	`time_to_chill_before_next`, `unit_of_measurement`) values (?, ?, ?, ?, ?, ?, ?)",data.Id_train_programm, option_of_train, weight, count, queue, time_to_chill_before_next, unit_of_measurement)
+    result, err := db.Exec("insert into test.Exercises_in_training_programs (`id_of_day_in_programm`, `name_of_train`,	`weight`,	`count`,	`number_o_execution_sequence`,	`time_to_chill_before_next`, `unit_of_measurement`, `technique_exercise`) values (?, ?, ?, ?, ?, ?, ?,?)",data.Id_train_programm, option_of_train, weight, count, queue, time_to_chill_before_next, unit_of_measurement, technique_exercise)
     fmt.Println(result)
     http.Redirect(w, r, "/watch_training_programm/" + data.Id_train_programm, http.StatusSeeOther)
 
@@ -1952,6 +1987,8 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
   r.HandleFunc("/select_in_favorites/{id_programm}", select_in_favorites)
 
   r.HandleFunc("/view_choosen_programm", view_choosen_programm)
+  r.HandleFunc("/delete_current_train_from_training_day/{id_ex}", delet_current_train_from_training_day)
+
 
  fmt.Println()
  http.Handle ("/", r)
