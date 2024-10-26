@@ -157,10 +157,10 @@ type Data_for_view_training_days_of_current_train_programm struct{
 //http://buzhor13.ru
 //"http://147.45.163.58:8080"
 //http://localhost:8080
-var adress_web = "http://localhost:8080"
+var adress_web = "http://buzhor13.ru"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "root:@tcp(127.127.126.50)/test"
+var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -209,6 +209,19 @@ func saveUserToSession(r *http.Request, w http.ResponseWriter, sessionName strin
     return session.Save(r, w)
 }
 
+
+
+func returnToLastPage(r *http.Request, w http.ResponseWriter){
+  referer := r.Referer()
+
+    // Если Referer пустой, используем URL по умолчанию
+    if referer == "" {
+        referer = "buzhor13.ru" // Замените на ваш URL по умолчанию
+    }
+
+    // Выполняем редирект
+    http.Redirect(w, r, referer, http.StatusFound)
+}
 func saveUserWhoInvite(r *http.Request, w http.ResponseWriter, sessionName string, id_person_who_invite string) error{
     session, err := store.Get(r, sessionName)
     if err != nil {
@@ -1253,6 +1266,21 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   for res.Next(){
     var unit_of_measurement string
     err = res.Scan(&part.Id_train, &part.Type_of_train_translated, &part.Type_of_train, &part.Weight, &part.Count, &part.Queue, &part.Time_to_chill, &unit_of_measurement, &part.Technique_exercise_link)
+
+
+    if(part.Technique_exercise_link == ""){
+
+      var zaprosTech = fmt.Sprintf("SELECT `technique_exercise_defoult`	 FROM `names_of_exercises` WHERE 	`eng_name` = '%s'", part.Type_of_train)
+      resTech,_ := db.Query(zaprosTech)
+      fmt.Println(zaprosTech)
+      var tech_defoult string
+      for resTech.Next(){
+          _ = resTech.Scan(&tech_defoult)
+      }
+      part.Technique_exercise_link = tech_defoult
+    }
+
+
     if(unit_of_measurement == "per_cent"){
       fmt.Print("Watch ------ ")
       fmt.Println(strconv.Atoi(get_maximum_in_current_ex(data.Authorized_user_data.Id, part.Type_of_train)))
@@ -1432,17 +1460,7 @@ func refresh_curent_train_programm(w http.ResponseWriter, r *http.Request){
      time_to_chill_before_next := r.FormValue("time_to_chill_before_next")
      queue := r.FormValue("queue")
      technique_exercise := r.FormValue("technique_exercise")
-     if(technique_exercise == ""){
 
-       var zapros = fmt.Sprintf("SELECT `technique_exercise_defoult`	 FROM `names_of_exercises` WHERE 	`eng_name` = '%s'", option_of_train)
-       res,_ := db.Query(zapros)
-       fmt.Println(zapros)
-       var tech_defoult string
-       for res.Next(){
-           _ = res.Scan(&tech_defoult)
-       }
-       technique_exercise = tech_defoult
-     }
 
 
      fmt.Println("Check this shit!! ------ ")
@@ -1465,6 +1483,9 @@ func refresh_curent_train_programm(w http.ResponseWriter, r *http.Request){
        }
        t.ExecuteTemplate(w, "View_current_training_programm", nil)
  }
+
+
+
 
 func training_summary(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/training_summary.html", "templates/header.html", "templates/footer.html")
