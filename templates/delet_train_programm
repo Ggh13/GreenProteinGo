@@ -1,0 +1,5 @@
+{{define "delet_train_programm"}}
+    {{template "header" .}}
+      Удалить?
+    {{template "footer"}}
+{{end}}

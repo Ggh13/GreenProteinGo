@@ -1389,19 +1389,23 @@ func exit(w http.ResponseWriter, r *http.Request){
    }
 
    defer db.Close()
-   var zapros2 = fmt.Sprintf("SELECT  id, name_training_program, style_of_training, Description FROM `Training_programms` WHERE 	id_author_of_training_program = '%s' ", author_id)
+   var zapros2 = fmt.Sprintf("SELECT 	id_author_of_training_program, id, name_training_program, style_of_training, Description FROM `Training_programms` WHERE 	id_author_of_training_program = '%s' ", author_id)
    res2,_ := db.Query(zapros2)
    fmt.Println(zapros2)
    for res2.Next(){
       var programma Training_programma
-      err = res2.Scan(&programma.Id, &programma.Name_of_programma, &programma.Style_of_trainings, &programma.Description)
+      err = res2.Scan(	&programma.Author.Id, &programma.Id, &programma.Name_of_programma, &programma.Style_of_trainings, &programma.Description)
       data.Training_programms = append(data.Training_programms, programma)
-
+      fmt.Println("Author.Id")
+      fmt.Println(programma.Author.Id)
 
    }
 
 
    data.Authorized_user_data, err = populateUserFromSession(r, sessionName)
+
+   fmt.Println("Authorized_user_data.Id")
+   fmt.Println(data.Authorized_user_data.Id)
    t.ExecuteTemplate(w, "view_created_training_programms", data)
  }
 
@@ -1535,14 +1539,34 @@ func training_summary(w http.ResponseWriter, r *http.Request){
   t.ExecuteTemplate(w, "training_summary", data)
 }
 
- func handlerTTT(w http.ResponseWriter, r *http.Request) {
-    // Извлечение заголовка Referer
-    referer := r.Header.Get("Referer")
 
-    // Вывод страницы-источника
-    fmt.Fprintf(w, "Переадресация произошла с: %s", referer)
+
+
+func deletTrainProgramm(w http.ResponseWriter, r *http.Request){
+  t, _ := template.ParseFiles("templates/delet_train_programm.html", "templates/header.html", "templates/footer.html")
+
+  vars := mux.Vars(r)
+  //w.WriteHeader(http.StatusOK)
+  id_train_programm := vars["id_train_programm"]
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+  defer db.Close()
+
+  var zapros = fmt.Sprintf("SELECT id_author_of_training_program, name_training_program FROM `Training_programms` WHERE id = '%s' ", id_train_programm)
+  res,err := db.Query(zapros)
+  fmt.Println(zapros)
+
+  var data Training_programma
+  for res.Next(){
+    data.Id = id_train_programm
+    _ = res.Scan(&data.Author.Id, &data.Name_of_programma)
+
+  }
+
+  t.ExecuteTemplate(w, "delet_train_programm", data)
 }
-
 
 
 func record_anthropometric_changes(w http.ResponseWriter, r *http.Request){
@@ -1975,7 +1999,7 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
 
   r.HandleFunc("/personal_statistic/{id_user}", personal_statistic)
   r.HandleFunc("/create_train_programm_step_1", verification_of_authorization)
-  r.HandleFunc("/create_train_programm_step_2/{id_training_programm}", handlerTTT)
+//  r.HandleFunc("/create_train_programm_step_2/{id_training_programm}", handlerTTT)
 
   r.HandleFunc("/watch_training_programm/{id_day}", verification_of_authorization)
   r.HandleFunc("/watch_anthropometric/{id_person}", watch_anthropometric)
