@@ -2007,9 +2007,81 @@ func add_to_cart(w http.ResponseWriter, r *http.Request){
   returnToLastPage(r, w);
 }
 
-func cart_main(w http.ResponseWriter, r *http.Request){
+func change_quantity_product_in_cart(w http.ResponseWriter, r *http.Request){
+  vars := mux.Vars(r)
 
+  id_product := vars["id_product"]
+  plus_or_minus := vars["plus_or_minus"]
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+  defer db.Close()
+
+
+  fmt.Println(plus_or_minus)
+  fmt.Println(id_product)
+  temp := fmt.Sprintf("UPDATE cart SET quantity = quantity %s WHERE id_product = '%s'; ",plus_or_minus, id_product)
+  fmt.Println(temp)
+  result, err := db.Exec(temp)
+
+  fmt.Println(result)
+  if(err != nil){
+    fmt.Println(err)
+  }
+  returnToLastPage(r, w);
 }
+
+
+func cart_main(w http.ResponseWriter, r *http.Request){
+  t, err := template.ParseFiles("templates/cart_main.html", "templates/header.html", "templates/footer.html")
+  if err != nil{
+    panic(err)
+  }
+  var data Data_for_store_main_page
+  data.Authorized_user_data, err  = populateUserFromSession(r, sessionName)
+
+
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+  defer db.Close()
+
+  zapros := fmt.Sprintf("SELECT id_product FROM `cart` WHERE id_user = '%s'", data.Authorized_user_data.Id)
+
+  res,err := db.Query(zapros)
+  fmt.Println(zapros)
+  for res.Next(){
+    var product_Id string
+    err = res.Scan(&product_Id)
+    zapros2 := fmt.Sprintf("SELECT id, name, brand, weight, price FROM `products_in_store` WHERE id = '%s';" , product_Id)
+    res2,_ := db.Query(zapros2)
+    fmt.Println(zapros2)
+
+    for res2.Next(){
+      var product Product_data
+      err = res2.Scan(&product.Id, &product.Name, &product.Brand, &product.Weight, &product.Price)
+      product.Icon_product = "/store_data/" + product.Id + "/icon_product.jpg"
+      data.Products = append(data.Products, product)
+    }
+
+
+
+
+
+
+  }
+
+
+
+  t.ExecuteTemplate(w, "cart_main", data)
+}
+
+
+
+
+
 func store_page(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/store_main.html", "templates/header.html", "templates/footer.html")
   if err != nil{
@@ -2032,7 +2104,7 @@ func store_page(w http.ResponseWriter, r *http.Request){
   for res.Next(){
     var product Product_data
     err = res.Scan(&product.Id, &product.Name, &product.Brand, &product.Weight, &product.Price)
-    zapros2 := fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM cart WHERE id_product = '%s' );", product.Id)
+    zapros2 := fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM cart WHERE id_product = '%s' AND id_user = '%s' );", product.Id, data.Authorized_user_data.Id)
     res2,_ := db.Query(zapros2)
     fmt.Println(zapros2)
     var temp int
@@ -2214,9 +2286,11 @@ func admin_main(w http.ResponseWriter, r *http.Request){
 
 
   r.HandleFunc("/store_page", store_page)
+  r.HandleFunc("/cart_main", cart_main)
   r.HandleFunc("/add_new_product_in_store", add_new_product_in_store)
   r.HandleFunc("/add_to_cart/{id_product}", verification_of_authorization )
 
+  r.HandleFunc("/change_quantity_product_in_cart/{id_product}/{plus_or_minus}", change_quantity_product_in_cart )
 
   r.HandleFunc("/admin", admin_main)
 

@@ -1,0 +1,66 @@
+
+{{define "cart_main"}}
+
+{{template "header" .}}
+
+    <div class="row">
+      <div class="col-12">
+        <h1> Корзина </h1>
+      </div>
+    </div>
+
+
+<div class="row">
+    {{ range .Products }}
+
+
+    <div class="col-12 adaptive_margin_bottom standart_border_radius" style="height:200px; width:100%; background-color:green">
+
+        <div class="row">
+          <div class="col-2 ">
+            <div class="row">
+
+              <div class="col-12 img_center_on_main">
+                <img class="standart_border_radius" style="width:200px; height:200px; " src="{{.Icon_product}}" alt="Image!!" >
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="col-10 ">
+            <div class="row">
+              <div class="col-10 center_text_in_div">
+                {{.Name}}
+              </div>
+              <div class="col-2 ">
+                {{.Price}}
+              </div>
+              <div class="col-5 ">
+                {{.Brand}}
+              </div>
+              <div class="col-4 ">
+
+              </div>
+              <div class="col-1 ">
+                <a href="/change_quantity_product_in_cart/{{.Id}}/-1" class="clickable">
+                    -
+                </a>
+
+              </div>
+              <div class="col-1 ">
+                2
+              </div>
+              <div class="col-1 ">
+                <a href="/change_quantity_product_in_cart/{{.Id}}/+1" class="clickable">
+                    +
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {{ end }}
+</div>
+{{template "footer"}}
+{{end}}

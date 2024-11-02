@@ -7,29 +7,41 @@
       <div class="col-12">
         <h1> Форма добавления товара </h1>
       </div>
-    </div>
+
 
     <h2>Форма товара</h2>
     <form action="#" method="post" enctype="multipart/form-data">
+      <div class="col-12 adaptive_margin_bottom">
         <label for="name">Название товара:</label>
         <input type="text" id="name" name="name" required>
+      </div>
 
+      <div class="col-12 adaptive_margin_bottom">
         <label for="weight">Вес товара (кг):</label>
         <input type="number" id="weight" name="weight" step="0.01" required>
+      </div>
 
+      <div class="col-12 adaptive_margin_bottom">
         <label for="brand">Бренд:</label>
         <input type="text" id="brand" name="brand" required>
+      </div>
 
+      <div class="col-12 adaptive_margin_bottom">
         <label for="price">Цена:</label>
         <input type="text" id="price" name="price" required>
+      </div>
 
+      <div class="col-12 adaptive_margin_bottom">
         <label for="icon_product">Картинка товара:</label>
         <input type="file" id="icon_product" name="icon_product" accept="image/*" required>
+      </div>
 
+      <div class="col-12 adaptive_margin_bottom">
         <button type="submit">Отправить</button>
+      </div>
     </form>
 
-
+  </div>
 
 
 {{template "footer"}}
