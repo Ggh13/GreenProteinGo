@@ -118,7 +118,11 @@ html{
 
 
 
-
+.product_block{
+  width:250px;
+  height:350px;
+  background-color: red;
+}
 
 
 *{

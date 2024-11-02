@@ -1,4 +1,4 @@
-package main // v1 work
+  package main // v1 work
 
 import ("fmt";"net/http";"html/template")
 import( "github.com/gorilla/mux"
@@ -28,6 +28,7 @@ _ "github.com/go-sql-driver/mysql"
 type User struct{
    Id, Name, Surname, Email, Password, Nickname string
    Is_that_authorized_user bool
+   Is_it_admin bool
 }
 
 type anthropometry_data_for_person struct{
@@ -147,7 +148,15 @@ type Data_for_view_training_days_of_current_train_programm struct{
 }
 
 
-
+type Product_data struct{
+  Id, Name, Price, Brand, Weight string
+  Icon_product string
+  In_cart bool
+}
+type Data_for_store_main_page struct{
+  Products []Product_data
+  Authorized_user_data User
+}
 
 
 //"root:@tcp(127.127.126.50)/test"
@@ -157,10 +166,10 @@ type Data_for_view_training_days_of_current_train_programm struct{
 //http://buzhor13.ru
 //"http://147.45.163.58:8080"
 //http://localhost:8080
-var adress_web = "http://buzhor13.ru"
+var adress_web = "http://localhost:8080"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "user:password@tcp(147.45.163.58:3306)/test"
+var adress_data_base = "root:@tcp(127.127.126.50)/test"
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -181,6 +190,7 @@ func populateUserFromSession(r *http.Request, sessionName string) (User, error) 
         Password:              getSessionValueAsString(session, "password"),
         Nickname:              getSessionValueAsString(session, "nickname"),
         Is_that_authorized_user: getSessionValueAsBool(session, "is_authorized"),
+        Is_it_admin:  getSessionValueAsBool(session, "adminAuth"),
     }
 
     return user, nil
@@ -201,13 +211,24 @@ func saveUserToSession(r *http.Request, w http.ResponseWriter, sessionName strin
     session.Values["password"] = user.Password
     session.Values["nickname"] = user.Nickname
     session.Values["is_authorized"] = user.Is_that_authorized_user
-
+    session.Values["adminAuth"] = user.Is_it_admin
 
 
     fmt.Println("Данные о сохранении:  : : :")
     fmt.Println("------------")
     return session.Save(r, w)
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -529,7 +550,7 @@ func get_anthropometry_data_for_person_by_id(person_id string) (anthropometry_da
     }
   }
 
-  fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
   fmt.Println(anthropometry)
   return anthropometry
 }
@@ -667,7 +688,7 @@ func personal_account(w http.ResponseWriter, r *http.Request){
  var zapros = fmt.Sprintf("SELECT type_training, type_of_sports_load FROM `view_personal_achievements` WHERE id_user = '%s'", current_user_id)
  res,err := db.Query(zapros)
  fmt.Println(zapros)
-data.Sport_achive = make(map[string]string)
+ data.Sport_achive = make(map[string]string)
  for res.Next(){
    var type_training, type_of_sports_load string
    err = res.Scan(&type_training, &type_of_sports_load)
@@ -973,6 +994,9 @@ func verification_of_authorization(w http.ResponseWriter, r *http.Request){
      }
      if strings.Contains(path, "/view_current_training_programm") {
        view_current_training_programm(w,r)
+     }
+     if strings.Contains(path, "/add_to_cart") {
+       add_to_cart(w,r)
      }
 
 
@@ -1893,6 +1917,159 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
 
 
 */
+func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
+  t, err := template.ParseFiles("templates/add_new_product_in_store.html", "templates/header.html", "templates/footer.html")
+  if err != nil{
+    panic(err)
+  }
+  var data Data_for_store_main_page
+  data.Authorized_user_data, err  = populateUserFromSession(r, sessionName)
+
+
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+  defer db.Close()
+
+  if r.Method == http.MethodPost {
+    name := r.FormValue("name")
+    brand := r.FormValue("brand")
+    weight := r.FormValue("weight")
+    price := r.FormValue("price")
+
+    result, err := db.Exec("insert into test.products_in_store ( `name`,	`brand`, `weight`, `price`) values (?, ?,?,?)",name, brand, weight, price)
+
+    fmt.Println(result)
+    if(err != nil){
+      fmt.Println(err)
+    }
+    zapros := fmt.Sprintf("SELECT id FROM `products_in_store` ORDER BY id DESC LIMIT 1;")
+    var id_prod string
+    res,err := db.Query(zapros)
+    fmt.Println(zapros)
+    for res.Next(){
+      err = res.Scan(&id_prod)
+
+    }
+    uploadsDir := "../store_data/" + id_prod
+    fmt.Println("WAY TO :  ",uploadsDir)
+    err = os.Mkdir(uploadsDir, os.FileMode(0755))
+    if err != nil{
+      panic(err)
+    }
+    err = r.ParseMultipartForm(10 << 20) // Размер максимального загружаемого файла 10MB
+    if err != nil {
+      http.Error(w, "Failed to parse form", http.StatusInternalServerError)
+      return
+    }
+
+    // Получаем изображения из формы по разным именам
+    image1, _, err := r.FormFile("icon_product")
+    if err != nil {
+      http.Error(w, "Failed to get image1", http.StatusBadRequest)
+      return
+    }
+    defer image1.Close()
+
+    dir := uploadsDir
+
+    err = saveFile("icon_product.jpg", image1, dir)
+    if err != nil {
+      http.Error(w, "Failed to save image1", http.StatusInternalServerError)
+      return
+    }
+
+
+
+  }
+
+  t.ExecuteTemplate(w, "add_new_product_in_store", data)
+}
+
+func add_to_cart(w http.ResponseWriter, r *http.Request){
+  vars := mux.Vars(r)
+
+  id_product := vars["id_product"]
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+  defer db.Close()
+
+  User_data, err := populateUserFromSession(r, sessionName)
+  result, err := db.Exec("insert into test.cart ( `id_user`,	`id_product`) values (?, ?)",User_data.Id, id_product)
+
+  fmt.Println(result)
+  if(err != nil){
+    fmt.Println(err)
+  }
+  returnToLastPage(r, w);
+}
+
+func cart_main(w http.ResponseWriter, r *http.Request){
+
+}
+func store_page(w http.ResponseWriter, r *http.Request){
+  t, err := template.ParseFiles("templates/store_main.html", "templates/header.html", "templates/footer.html")
+  if err != nil{
+    panic(err)
+  }
+  var data Data_for_store_main_page
+  data.Authorized_user_data, err  = populateUserFromSession(r, sessionName)
+
+
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+  defer db.Close()
+
+  zapros := fmt.Sprintf("SELECT id, name, brand, weight, price FROM `products_in_store`")
+
+  res,err := db.Query(zapros)
+  fmt.Println(zapros)
+  for res.Next(){
+    var product Product_data
+    err = res.Scan(&product.Id, &product.Name, &product.Brand, &product.Weight, &product.Price)
+    zapros2 := fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM cart WHERE id_product = '%s' );", product.Id)
+    res2,_ := db.Query(zapros2)
+    fmt.Println(zapros2)
+    var temp int
+    for res2.Next(){
+      err =  res2.Scan(&temp)
+    }
+    if(temp == 1){
+      product.In_cart=true
+    }else{
+      product.In_cart=false
+    }
+    fmt.Println(temp)
+    fmt.Println(product.In_cart)
+
+
+
+    product.Icon_product = "/store_data/" + product.Id + "/icon_product.jpg"
+    data.Products = append(data.Products, product)
+  }
+
+
+  t.ExecuteTemplate(w, "store_main", data)
+}
+
+func admin_main(w http.ResponseWriter, r *http.Request){
+ // t, _ := template.ParseFiles("templates/view_choosen_programm.html", "templates/header.html", "templates/footer.html")
+  t, err := template.ParseFiles("templates/admin_main.html", "templates/header.html", "templates/footer.html")
+  if err != nil{
+    panic(err)
+  }
+  var admin_User User
+  admin_User.Is_it_admin = true
+  saveUserToSession(r, w, sessionName, admin_User)
+
+  t.ExecuteTemplate(w, "admin_main", nil)
+}
+
  func view_choosen_programm(w http.ResponseWriter, r *http.Request){
   // t, _ := template.ParseFiles("templates/view_choosen_programm.html", "templates/header.html", "templates/footer.html")
    t, err := template.ParseFiles("templates/search_train_programm.html", "templates/header.html", "templates/footer.html")
@@ -1974,7 +2151,8 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
  fs := http.FileServer(http.Dir("../personal_static"))
  http.Handle("/personal_static/", http.StripPrefix("/personal_static/", fs))
 
-
+ fs = http.FileServer(http.Dir("../store_data"))
+ http.Handle("/store_data/", http.StripPrefix("/store_data/", fs))
 
 
  r := mux.NewRouter()
@@ -2034,6 +2212,13 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
   r.HandleFunc("/view_choosen_programm", view_choosen_programm)
   r.HandleFunc("/delete_current_train_from_training_day/{id_ex}", delet_current_train_from_training_day)
 
+
+  r.HandleFunc("/store_page", store_page)
+  r.HandleFunc("/add_new_product_in_store", add_new_product_in_store)
+  r.HandleFunc("/add_to_cart/{id_product}", verification_of_authorization )
+
+
+  r.HandleFunc("/admin", admin_main)
 
  fmt.Println()
  http.Handle ("/", r)
