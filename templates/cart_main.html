@@ -43,24 +43,37 @@
 
               </div>
               <div class="col-1 ">
-                <a href="/change_quantity_product_in_cart/{{.Id}}/-1" class="clickable">
-                    -
-                </a>
+                {{if   lt 0 .Quantity_in_cart }}
+                  <a href="/change_quantity_product_in_cart/{{.Id}}/-1" class="clickable">
+                      -
+                  </a>
+                {{end}}
 
               </div>
               <div class="col-1 ">
-                2
+                {{.Quantity_in_cart}}
               </div>
               <div class="col-1 ">
-                <a href="/change_quantity_product_in_cart/{{.Id}}/+1" class="clickable">
-                    +
-                </a>
+                {{if  lt .Quantity_in_cart .Quantity_in_store }}
+                  <a href="/change_quantity_product_in_cart/{{.Id}}/+1" class="clickable">
+                      +
+                  </a>
+                {{end}}
               </div>
             </div>
           </div>
         </div>
       </div>
     {{ end }}
+    <div class="col-5">
+    </div>
+    <div class="col-2">
+      <a href="/buy_all_cart" class="clickable">
+        <div class = "standart_border_radius center_text_in_div" style = "width:200px; height:100px; background-color:green; ">
+          Купить все
+        </div>
+      </a>
+    </div>
 </div>
 {{template "footer"}}
 {{end}}

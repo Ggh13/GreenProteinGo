@@ -27,37 +27,61 @@
 <div class="row">
     {{ range .Products }}
     <div class="col-3 adaptive_margin_bottom ">
-      <div class="product_block standart_border_radius">
-        <div class="row">
+      watch_product_page
+      <a href="/watch_product_page/{{.Id}}" class="clickable">
+        <div class="product_block standart_border_radius">
+          <div class="row">
 
-          <div class="col-12 img_center_on_main">
-            <img class="standart_border_radius" style="width:250px; height:250px; " src="{{.Icon_product}}" alt="Image!!" >
-          </div>
-          <div class="col-12">
-            {{.Price}} Белок
-          </div>
-          <div class="col-12 center_text_in_div">
-            {{.Name}}
-          </div>
-          <div class="col-6 ">
-            {{.Brand}}
-          </div>
-          <div class="col-6 ">
-            {{.Weight}} грамм
-          </div>
-          <div class="col-12">
-            {{if .In_cart}}
-              В корзине
-            {{else}}
-            <a href="/add_to_cart/{{.Id}}" class="clickable">
-              <div class ="standart_border_radius center_text_in_div" style="background-color:green; weight:90%; height:flex;">
-                В корзину
-              </div>
-            </a>
-            {{end}}
+            <div class="col-12 img_center_on_main">
+              <img class="standart_border_radius" style="width:250px; height:250px; " src="{{.Icon_product}}" alt="Image!!" >
+            </div>
+            <div class="col-12">
+              {{.Price}} Белок
+            </div>
+            <div class="col-12 center_text_in_div">
+              {{.Name}}
+            </div>
+            <div class="col-6 ">
+              {{.Brand}}
+            </div>
+            <div class="col-6 ">
+              {{.Weight}} грамм
+            </div>
+            <div class="col-12">
+              {{if .In_cart}}
+              <div class="row">
+                  <div class="col-12 ">В корзине</div>
+
+
+                  <div class="col-4 ">
+                    {{if   lt 0 .Quantity_in_cart }}
+                      <a href="/change_quantity_product_in_cart/{{.Id}}/-1" class="clickable">
+                          -
+                      </a>
+                    {{end}}
+                  </div>
+                  <div class="col-4 ">
+                    {{.Quantity_in_cart}}
+                  </div>
+                  <div class="col-4 ">
+                    {{if  lt .Quantity_in_cart .Quantity_in_store }}
+                      <a href="/change_quantity_product_in_cart/{{.Id}}/+1" class="clickable">
+                          +
+                      </a>
+                    {{end}}
+                  </div>
+                </div>
+              {{else}}
+              <a href="/add_to_cart/{{.Id}}" class="clickable">
+                <div class ="standart_border_radius center_text_in_div" style="background-color:green; weight:90%; height:flex;">
+                  В корзину
+                </div>
+              </a>
+              {{end}}
+            </div>
           </div>
         </div>
-      </div>
+      </a>
     </div>
     {{ end }}
 </div>
