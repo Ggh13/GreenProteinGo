@@ -150,9 +150,11 @@ type Data_for_view_training_days_of_current_train_programm struct{
 
 type Product_data struct{
   Id, Name, Price, Brand, Weight string
+  Date string
   Quantity_in_store, Quantity_in_cart int
   Icon_product string
   In_cart bool
+
 }
 type Data_for_store_main_page struct{
   Products []Product_data
@@ -1951,7 +1953,10 @@ func buy_all_cart(w http.ResponseWriter, r *http.Request){
     need_score_to_buy_cart = quantity * price
     fmt.Println(quantity)
     fmt.Println(price)
-    querty_varible += fmt.Sprintf("UPDATE `score_system` SET points = points - %s WHERE id_user = %s; UPDATE `products_in_store` SET quantity = quantity - %s WHERE id = %s;", strconv.Itoa(price), data.Authorized_user_data.Id, strconv.Itoa(quantity), strconv.Itoa(id))
+    //querty_varible += fmt.Sprintf(" UPDATE `score_system` SET points = points - %s WHERE id_user = %s; UPDATE `products_in_store` SET quantity = quantity - %s WHERE id = %s; ", strconv.Itoa(price), data.Authorized_user_data.Id, strconv.Itoa(quantity), strconv.Itoa(id))
+    querty_varible += fmt.Sprintf(" UPDATE `products_in_store` SET quantity = quantity - %s WHERE id = %s; ",strconv.Itoa(quantity), strconv.Itoa(id))
+    querty_varible += fmt.Sprintf(" UPDATE `score_system` SET points = points - %s WHERE id_user = %s; ", strconv.Itoa(price), data.Authorized_user_data.Id)
+
   }
 
   fmt.Println(score)
@@ -1964,12 +1969,40 @@ func buy_all_cart(w http.ResponseWriter, r *http.Request){
     }
     t.ExecuteTemplate(w, "not_enough_score_page", data)
   }else{
+    zapros = fmt.Sprintf("SELECT p.id, c.quantity, p.price FROM cart c JOIN products_in_store p ON c.id_product = p.id WHERE c.id_user = %s;", data.Authorized_user_data.Id)
+    res,err = db.Query(zapros)
+    fmt.Println(zapros)
+    for res.Next(){
+      var quantity, price, id int
+      err = res.Scan(&id, &quantity, &price)
+      need_score_to_buy_cart = quantity * price
+      fmt.Println(quantity)
+      fmt.Println(price)
+
+      //querty_varible += fmt.Sprintf(" UPDATE `score_system` SET points = points - %s WHERE id_user = %s; UPDATE `products_in_store` SET quantity = quantity - %s WHERE id = %s; ", strconv.Itoa(price), data.Authorized_user_data.Id, strconv.Itoa(quantity), strconv.Itoa(id))
+      querty_varible = fmt.Sprintf(" UPDATE `products_in_store` SET quantity = quantity - %s WHERE id = %s; ",strconv.Itoa(quantity), strconv.Itoa(id))
+      _, err = db.Exec(querty_varible)
+      querty_varible = fmt.Sprintf(" DELETE FROM `cart` WHERE id_product = %s; ", strconv.Itoa(id))
+      _, err = db.Exec(querty_varible)
+      fmt.Println(querty_varible)
+      if(err != nil){
+        panic(err)
+      }
+      querty_varible = fmt.Sprintf(" UPDATE `score_system` SET points = points - %s WHERE id_user = %s; ", strconv.Itoa(price), data.Authorized_user_data.Id)
+      _, err = db.Exec(querty_varible)
+
+      result, err := db.Exec("insert into test.bought_products (`id_in_storage`,	`quantity_bought`, `price`, `id_user`) values (?, ?,?, ?)",id, quantity, price, data.Authorized_user_data.Id)
+
+      fmt.Println(result)
+      if(err != nil){
+        fmt.Println(err)
+      }
+    }
+
+    //temp := fmt.Sprintf("%s", querty_varible)
+    //fmt.Println(temp)
 
 
-    temp := fmt.Sprintf(`START TRANSACTION; %s COMMIT;`, querty_varible)
-    fmt.Println(temp)
-
-    _, err = db.Exec(temp)
 
     if err != nil{
       panic(err)
@@ -2159,6 +2192,59 @@ func change_quantity_product_in_cart(w http.ResponseWriter, r *http.Request){
 }
 
 
+func history_of_bought(w http.ResponseWriter, r *http.Request){
+  t, err := template.ParseFiles("templates/history_of_bought.html", "templates/header.html", "templates/footer.html")
+  if err != nil{
+    panic(err)
+  }
+  var data Data_for_store_main_page
+  data.Authorized_user_data, err  = populateUserFromSession(r, sessionName)
+
+
+  db, err := sql.Open("mysql", adress_data_base)
+  if err != nil{
+    panic(err)
+  }
+
+  defer db.Close()
+
+  zapros := fmt.Sprintf("SELECT id_in_storage, quantity_bought, date FROM `bought_products` WHERE id_user = '%s' ORDER BY date DESC", data.Authorized_user_data.Id)
+
+  res,err := db.Query(zapros)
+  fmt.Println(zapros)
+  for res.Next(){
+    var product_Id string
+    var product Product_data
+    err = res.Scan(&product_Id, &product.Quantity_in_cart, &product.Date)
+    zapros2 := fmt.Sprintf("SELECT id, name, brand, weight, price, quantity FROM `products_in_store` WHERE id = '%s';" , product_Id)
+    res2,_ := db.Query(zapros2)
+    fmt.Println(zapros2)
+
+    for res2.Next(){
+
+      err = res2.Scan(&product.Id, &product.Name, &product.Brand, &product.Weight, &product.Price, &product.Quantity_in_store)
+      product.Icon_product = "/store_data/" + product.Id + "/icon_product.jpg"
+
+    }
+    if(product.Quantity_in_cart > 0){
+      data.Products = append(data.Products, product)
+    }else{
+      delet_product_from_cart(product.Id)
+    }
+
+
+
+
+
+
+  }
+
+
+
+  t.ExecuteTemplate(w, "history_of_bought", data)
+}
+
+
 func cart_main(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/cart_main.html", "templates/header.html", "templates/footer.html")
   if err != nil{
@@ -2211,9 +2297,6 @@ func cart_main(w http.ResponseWriter, r *http.Request){
 }
 
 
-
-
-
 func store_page(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/store_main.html", "templates/header.html", "templates/footer.html")
   if err != nil{
@@ -2221,6 +2304,20 @@ func store_page(w http.ResponseWriter, r *http.Request){
   }
   var data Data_for_store_main_page
   data.Authorized_user_data, err  = populateUserFromSession(r, sessionName)
+  sort_type := "new"
+  if r.Method == http.MethodPost {
+    sort_type = r.FormValue("dropdown2")
+  }
+  fmt.Println(sort_type)
+  if(sort_type == "new"){
+    sort_type = "ORDER BY id DESC"
+  }else if(sort_type == "cheep"){
+    sort_type = "ORDER BY price ASC"
+  }else if(sort_type == "expensive"){
+    sort_type = "ORDER BY price DESC"
+  }
+
+
 
 
   db, err := sql.Open("mysql", adress_data_base)
@@ -2228,8 +2325,8 @@ func store_page(w http.ResponseWriter, r *http.Request){
     panic(err)
   }
   defer db.Close()
-
-  zapros := fmt.Sprintf("SELECT id, name, brand, weight, price, quantity FROM `products_in_store`")
+  fmt.Println(sort_type)
+  zapros := fmt.Sprintf("SELECT id, name, brand, weight, price, quantity FROM `products_in_store` %s", sort_type)
 
   res,err := db.Query(zapros)
   fmt.Println(zapros)
@@ -2238,7 +2335,7 @@ func store_page(w http.ResponseWriter, r *http.Request){
     err = res.Scan(&product.Id, &product.Name, &product.Brand, &product.Weight, &product.Price, &product.Quantity_in_store)
     zapros2 := fmt.Sprintf("SELECT quantity FROM cart WHERE id_product = '%s' AND id_user = '%s' ;", product.Id, data.Authorized_user_data.Id)
     res2,_ := db.Query(zapros2)
-    fmt.Println(zapros2)
+    //fmt.Println(zapros2)
     for res2.Next(){
       err =  res2.Scan(&product.Quantity_in_cart)
     }
@@ -2274,6 +2371,8 @@ func admin_main(w http.ResponseWriter, r *http.Request){
 
   t.ExecuteTemplate(w, "admin_main", nil)
 }
+
+
 
  func view_choosen_programm(w http.ResponseWriter, r *http.Request){
   // t, _ := template.ParseFiles("templates/view_choosen_programm.html", "templates/header.html", "templates/footer.html")
@@ -2426,7 +2525,7 @@ func admin_main(w http.ResponseWriter, r *http.Request){
 
 
   r.HandleFunc("/buy_all_cart", buy_all_cart)
-
+  r.HandleFunc("/history_of_bought", history_of_bought)
 
   r.HandleFunc("/change_quantity_product_in_cart/{id_product}/{plus_or_minus}", change_quantity_product_in_cart )
 
