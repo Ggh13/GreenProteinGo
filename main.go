@@ -2014,12 +2014,13 @@ func buy_all_cart(w http.ResponseWriter, r *http.Request){
 }
 func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
   t, err := template.ParseFiles("templates/add_new_product_in_store.html", "templates/header.html", "templates/footer.html")
-  if err != nil{
-    panic(err)
-  }
+
+  vars := mux.Vars(r)
+
+  id_product := vars["id_product"]
+
   var data Data_for_store_main_page
   data.Authorized_user_data, err  = populateUserFromSession(r, sessionName)
-
 
   db, err := sql.Open("mysql", adress_data_base)
   if err != nil{
@@ -2027,54 +2028,87 @@ func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
   }
   defer db.Close()
 
+  var product_data Product_data
+
+  if(id_product != ""){
+    zapros := fmt.Sprintf("SELECT id, name, brand, weight, price, quantity FROM `products_in_store` WHERE id = %s", id_product)
+
+    res,_ := db.Query(zapros)
+    fmt.Println(zapros)
+    for res.Next(){
+      _ = res.Scan(&product_data.Id, &product_data.Name, &product_data.Brand, &product_data.Weight, &product_data.Price, &product_data.Quantity_in_store)
+
+    }
+
+  }
+  data.Products = append(data.Products, product_data)
+  fmt.Println("BMW")
+  fmt.Println(data.Products)
+
+  if err != nil{
+    panic(err)
+  }
+
+
+
+
   if r.Method == http.MethodPost {
     name := r.FormValue("name")
     brand := r.FormValue("brand")
     weight := r.FormValue("weight")
     price := r.FormValue("price")
     quantity := r.FormValue("quantity")
+    id_inputed := r.FormValue("id")
+    if(id_inputed == ""){
+      result, err := db.Exec("insert into test.products_in_store ( `name`,	`brand`, `weight`, `price`, `quantity`) values (?, ?,?,?,?)",name, brand, weight, price, quantity)
 
-    result, err := db.Exec("insert into test.products_in_store ( `name`,	`brand`, `weight`, `price`, `quantity`) values (?, ?,?,?,?)",name, brand, weight, price, quantity)
+      fmt.Println(result)
+      if(err != nil){
+        fmt.Println(err)
+      }
+      zapros := fmt.Sprintf("SELECT id FROM `products_in_store` ORDER BY id DESC LIMIT 1;")
+      var id_prod string
+      res,err := db.Query(zapros)
+      fmt.Println(zapros)
+      for res.Next(){
+        err = res.Scan(&id_prod)
 
-    fmt.Println(result)
-    if(err != nil){
-      fmt.Println(err)
-    }
-    zapros := fmt.Sprintf("SELECT id FROM `products_in_store` ORDER BY id DESC LIMIT 1;")
-    var id_prod string
-    res,err := db.Query(zapros)
-    fmt.Println(zapros)
-    for res.Next(){
-      err = res.Scan(&id_prod)
+      }
+      uploadsDir := "../store_data/" + id_prod
+      fmt.Println("WAY TO :  ",uploadsDir)
+      err = os.Mkdir(uploadsDir, os.FileMode(0755))
+      if err != nil{
+        panic(err)
+      }
+      err = r.ParseMultipartForm(10 << 20) // Размер максимального загружаемого файла 10MB
+      if err != nil {
+        http.Error(w, "Failed to parse form", http.StatusInternalServerError)
+        return
+      }
+
+      // Получаем изображения из формы по разным именам
+      image1, _, err := r.FormFile("icon_product")
+      if err != nil {
+        http.Error(w, "Failed to get image1", http.StatusBadRequest)
+        return
+      }
+      defer image1.Close()
+
+      dir := uploadsDir
+
+      err = saveFile("icon_product.jpg", image1, dir)
+      if err != nil {
+        http.Error(w, "Failed to save image1", http.StatusInternalServerError)
+        return
+      }
+    }else{
+      fmt.Println("UPDATE-2")
+      q := fmt.Sprintf("UPDATE test.products_in_store SET name = '%s',	brand = '%s', weight = %s, price = %s, quantity = %s WHERE id = %s",name, brand, weight, price, quantity, id_inputed)
+      fmt.Println(q)
+      _, _ = db.Exec(q)
 
     }
-    uploadsDir := "../store_data/" + id_prod
-    fmt.Println("WAY TO :  ",uploadsDir)
-    err = os.Mkdir(uploadsDir, os.FileMode(0755))
-    if err != nil{
-      panic(err)
-    }
-    err = r.ParseMultipartForm(10 << 20) // Размер максимального загружаемого файла 10MB
-    if err != nil {
-      http.Error(w, "Failed to parse form", http.StatusInternalServerError)
-      return
-    }
 
-    // Получаем изображения из формы по разным именам
-    image1, _, err := r.FormFile("icon_product")
-    if err != nil {
-      http.Error(w, "Failed to get image1", http.StatusBadRequest)
-      return
-    }
-    defer image1.Close()
-
-    dir := uploadsDir
-
-    err = saveFile("icon_product.jpg", image1, dir)
-    if err != nil {
-      http.Error(w, "Failed to save image1", http.StatusInternalServerError)
-      return
-    }
 
 
 
@@ -2154,6 +2188,7 @@ func watch_product_page(w http.ResponseWriter, r *http.Request){
     for res2.Next(){
       err =  res2.Scan(&product.Quantity_in_cart)
     }
+
     if(product.Quantity_in_cart >= 1){
       product.In_cart=true
     }else{
@@ -2163,8 +2198,12 @@ func watch_product_page(w http.ResponseWriter, r *http.Request){
 
   }
   data.Products = append(data.Products, product)
+  fmt.Println("check rhis shiiiiit")
+  fmt.Println(data.Authorized_user_data.Is_it_admin)
   t.ExecuteTemplate(w, "product_page", data)
 }
+
+
 
 func change_quantity_product_in_cart(w http.ResponseWriter, r *http.Request){
   vars := mux.Vars(r)
@@ -2520,6 +2559,7 @@ func admin_main(w http.ResponseWriter, r *http.Request){
   r.HandleFunc("/store_page", store_page)
   r.HandleFunc("/cart_main", cart_main)
   r.HandleFunc("/add_new_product_in_store", add_new_product_in_store)
+  r.HandleFunc("/add_new_product_in_store/{id_product}", add_new_product_in_store)
   r.HandleFunc("/add_to_cart/{id_product}", verification_of_authorization )
   r.HandleFunc("/watch_product_page/{id_product}", watch_product_page)
 
