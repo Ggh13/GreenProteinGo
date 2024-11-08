@@ -2027,31 +2027,6 @@ func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
     panic(err)
   }
   defer db.Close()
-
-  var product_data Product_data
-
-  if(id_product != ""){
-    zapros := fmt.Sprintf("SELECT id, name, brand, weight, price, quantity FROM `products_in_store` WHERE id = %s", id_product)
-
-    res,_ := db.Query(zapros)
-    fmt.Println(zapros)
-    for res.Next(){
-      _ = res.Scan(&product_data.Id, &product_data.Name, &product_data.Brand, &product_data.Weight, &product_data.Price, &product_data.Quantity_in_store)
-
-    }
-
-  }
-  data.Products = append(data.Products, product_data)
-  fmt.Println("BMW")
-  fmt.Println(data.Products)
-
-  if err != nil{
-    panic(err)
-  }
-
-
-
-
   if r.Method == http.MethodPost {
     name := r.FormValue("name")
     brand := r.FormValue("brand")
@@ -2107,12 +2082,68 @@ func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
       fmt.Println(q)
       _, _ = db.Exec(q)
 
+
+      uploadsDir := "../store_data/" + id_inputed
+      err = os.Remove(uploadsDir+"/icon_product.jpg")
+
+      fmt.Println("AYYYY")
+
+      fmt.Println("WAY TO :  ",uploadsDir)
+      err = os.Mkdir(uploadsDir, os.FileMode(0755))
+
+      err = r.ParseMultipartForm(10 << 20) // Размер максимального загружаемого файла 10MB
+      if err != nil {
+        http.Error(w, "Failed to parse form", http.StatusInternalServerError)
+        return
+      }
+
+      // Получаем изображения из формы по разным именам
+      image1, _, err := r.FormFile("icon_product")
+      if err != nil {
+        http.Error(w, "Failed to get image1", http.StatusBadRequest)
+        return
+      }
+      defer image1.Close()
+
+      dir := uploadsDir
+
+
+      err = saveFile("icon_product.jpg", image1, dir)
+      if err != nil {
+        http.Error(w, "Failed to save image1", http.StatusInternalServerError)
+        return
+      }
+
+
+    }
+  }
+
+
+  var product_data Product_data
+
+  if(id_product != ""){
+    zapros := fmt.Sprintf("SELECT id, name, brand, weight, price, quantity FROM `products_in_store` WHERE id = %s", id_product)
+
+    res,_ := db.Query(zapros)
+    fmt.Println(zapros)
+    for res.Next(){
+      _ = res.Scan(&product_data.Id, &product_data.Name, &product_data.Brand, &product_data.Weight, &product_data.Price, &product_data.Quantity_in_store)
+
     }
 
-
-
-
   }
+  data.Products = append(data.Products, product_data)
+  fmt.Println("BMW")
+  fmt.Println(data.Products)
+
+  if err != nil{
+    panic(err)
+  }
+
+
+
+
+
 
   t.ExecuteTemplate(w, "add_new_product_in_store", data)
 }

@@ -20,6 +20,25 @@ html{
   background:  white; <!--antiquewhite;--!>
 }
 
+
+
+
+.clickable:hover{
+  color:black; !important
+}
+
+.clickable{
+
+  text-decoration: none; !important
+  color: #000000; !important
+
+}
+
+.text_defoult{
+  text-decoration: none;
+  color: #000000;
+}
+
 .center_text_in_div{
   height: auto;
   width: 100%;
@@ -116,14 +135,26 @@ html{
 }
 
 
-
+  .standart_border_weight_and_color{
+    border-width:2px;
+    border-style:solid;
+    border-color:black;
+  }
 
 .product_block{
   width:250px;
   height:400px;
-  background-color: red;
+  background-color: greenyellow;
+
 }
 
+.img_in_product_block{
+
+  width: 100%;
+  object-fit: scale-down;
+
+
+}
 
 *{
     margin: 0px;
