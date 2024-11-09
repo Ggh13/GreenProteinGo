@@ -32,16 +32,20 @@
 <div class="row">
     <div class = "col-12 adaptive_margin_bottom">
       <form action="/store_page" method="post">
-
-          <label for="dropdown2">Выберите тип сортировки:</label>
-          <select id="dropdown2" name="dropdown2" style="width:100%;">
-              <option value="cheep">Сначала дешевые</option>
-              <option value="expensive">Сначала дорогие</option>
-              <option value="new">Новые</option>
-          </select>
-
-          <input type="submit" value="Отправить">
-    </form>
+          <div class="row">
+            <div class="col-6">
+              <label for="dropdown2">Выберите тип сортировки:</label>
+              <select id="dropdown2" name="dropdown2" class="standart_border_radius adaptive_margin_bottom" style="width:100%;">
+                  <option style="border-radius:3px;" value="cheep">Сначала дешевые</option>
+                  <option value="expensive">Сначала дорогие</option>
+                  <option value="new">Новые</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <input class="standart_border_radius" style="padding:2px;" type="submit" value="Поиск">
+            </div>
+          </div>
+      </form>
     </div>
     <div class="col-2 adaptive_margin_bottom ">
       {{if .Authorized_user_data.Is_it_admin}}
@@ -56,48 +60,50 @@
     </div>
     {{ range .Products }}
       {{if le 1 .Quantity_in_store }}
-      <div class="col-5 adaptive_margin_bottom">
-        <a href="/watch_product_page/{{.Id}}" class="text_defoult" >
+      <div class="col-4 adaptive_margin_bottom img_center_on_main">
+        <a href="/watch_product_page/{{.Id}}" class="text_defoult img_center_on_main" >
           <div class="product_block standart_border_weight_and_color standart_border_radius" >
-            <div class="row" style="height:100%;">
+            <div class="row align-items-start" style="height:100%;">
 
-              <div class="col-12 img_center_on_main" style="height:auto;">
+              <div class="col-12 img_center_on_main" style="height:fit;">
                 <img class="standart_border_radius img_in_product_block" src="{{.Icon_product}}" alt="Image!!" >
+              </div>
+
+              <div class="col-12 center_text_in_div"  style="height:auto;">
+                {{.Name}}
+              </div>
+              <div class="col-12">
+                {{.Brand}}
+              </div>
+              <div class="col-12">
+                {{.Weight}} грамм
               </div>
               <div class="col-12"  style="height:fit;">
                 {{.Price}} Белок
               </div>
-              <div class="col-12 center_text_in_div"  style="height:fit;">
-                {{.Name}}
-              </div>
-              <div class="col-6 "  style="height:fit;">
-                {{.Brand}}
-              </div>
-              <div class="col-6 "  style="height:fit;">
-                {{.Weight}} грамм
-              </div>
-              <div class="col-12">
-                <div class="row align-items-end" style="height:auto;">
+              
+              <div class="col-12" style="height:auto;">
+                <div class="row align-items-end" style="height:100%;">
                   <div class="col-12">
                     {{if .In_cart}}
-                    <div class="row">
-                        <div class="col-12 ">В корзине</div>
+                      <div class="row">
+                        <div class="col-12">В корзине</div>
                         <div class="col-4 img_center_on_main ">
                           {{if   lt 0 .Quantity_in_cart }}
                             <a href="/change_quantity_product_in_cart/{{.Id}}/-1" class="img_center_on_main text_defoult ">
-                                <div class = "standart_border_radius center_text_in_div" style="width:20px; height:20px; background-color:#7b9f20;">
+                                <div class = "standart_border_radius center_text_in_div" style="width:25px; height:25px; background-color:#7b9f20;">
                                     -
                                 </div>
                             </a>
                           {{end}}
                         </div>
-                        <div class="col-4 img_center_on_main">
+                        <div class="col-4 center_text_in_div">
                           {{.Quantity_in_cart}}
                         </div>
                         <div class="col-4 img_center_on_main">
                           {{if  lt .Quantity_in_cart .Quantity_in_store }}
                           <a href="/change_quantity_product_in_cart/{{.Id}}/+1" class="img_center_on_main text_defoult ">
-                              <div class = "standart_border_radius center_text_in_div" style="width:20px; height:20px; background-color:#7b9f20;">
+                              <div class = "standart_border_radius center_text_in_div" style="width:25px; height:25px; background-color:#7b9f20;">
                                   +
                               </div>
                           </a>
@@ -105,11 +111,13 @@
                         </div>
                       </div>
                     {{else}}
-                      <a href="/add_to_cart/{{.Id}}" class="text_defoult">
-                        <div class ="standart_border_radius center_text_in_div" style="background-color:green; weight:90%; height:flex;">
-                          В корзину
-                        </div>
-                      </a>
+                      <div class="col-12">
+                        <a href="/add_to_cart/{{.Id}}" class="text_defoult">
+                          <div class ="standart_border_radius center_text_in_div" style="background-color:green; weight:90%; height:flex;">
+                            В корзину
+                          </div>
+                        </a>
+                      </div>
                     {{end}}
                   </div>
                 </div>

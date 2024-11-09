@@ -142,10 +142,10 @@ html{
   }
 
 .product_block{
-  width:250px;
-  height:400px;
+  width:230px;
+  height:420px;
   background-color: greenyellow;
-
+  padding-bottom: 20px;
 }
 
 .img_in_product_block{
@@ -566,6 +566,13 @@ html{
 }
 
  @media (max-width: 540px) {
+           .product_block{
+             width:250px;
+             height:400px;
+             background-color: greenyellow;
+             padding-bottom: 20px;
+           }
+
 
              .backgroundvideo {
                object-fit: cover;
