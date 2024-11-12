@@ -75,55 +75,52 @@
               <div class="col-12">
                 {{.Brand}}
               </div>
+
               <div class="col-12">
                 {{.Weight}} грамм
               </div>
               <div class="col-12"  style="height:fit;">
                 {{.Price}} Белок
               </div>
-              
-              <div class="col-12" style="height:auto;">
-                <div class="row align-items-end" style="height:100%;">
-                  <div class="col-12">
-                    {{if .In_cart}}
-                      <div class="row">
-                        <div class="col-12">В корзине</div>
-                        <div class="col-4 img_center_on_main ">
-                          {{if   lt 0 .Quantity_in_cart }}
-                            <a href="/change_quantity_product_in_cart/{{.Id}}/-1" class="img_center_on_main text_defoult ">
-                                <div class = "standart_border_radius center_text_in_div" style="width:25px; height:25px; background-color:#7b9f20;">
-                                    -
-                                </div>
-                            </a>
-                          {{end}}
-                        </div>
-                        <div class="col-4 center_text_in_div">
-                          {{.Quantity_in_cart}}
-                        </div>
-                        <div class="col-4 img_center_on_main">
-                          {{if  lt .Quantity_in_cart .Quantity_in_store }}
-                          <a href="/change_quantity_product_in_cart/{{.Id}}/+1" class="img_center_on_main text_defoult ">
-                              <div class = "standart_border_radius center_text_in_div" style="width:25px; height:25px; background-color:#7b9f20;">
-                                  +
-                              </div>
-                          </a>
-                          {{end}}
-                        </div>
-                      </div>
-                    {{else}}
-                      <div class="col-12">
-                        <a href="/add_to_cart/{{.Id}}" class="text_defoult">
-                          <div class ="standart_border_radius center_text_in_div" style="background-color:green; weight:90%; height:flex;">
-                            В корзину
-                          </div>
+            </div>
+            <div class="row align-items-end " style="flex: 1;">
+              <div class="col-12">
+                {{if .In_cart}}
+                  <div class="row">
+                    <div class="col-12">В корзине</div>
+                    <div class="col-4 img_center_on_main ">
+                      {{if   lt 0 .Quantity_in_cart }}
+                        <a href="/change_quantity_product_in_cart/{{.Id}}/-1" class="img_center_on_main text_defoult ">
+                            <div class = "standart_border_radius center_text_in_div" style="width:25px; height:25px; background-color:#7b9f20;">
+                                -
+                            </div>
                         </a>
-                      </div>
-                    {{end}}
+                      {{end}}
+                    </div>
+                    <div class="col-4 center_text_in_div">
+                      {{.Quantity_in_cart}}
+                    </div>
+                    <div class="col-4 img_center_on_main">
+                      {{if  lt .Quantity_in_cart .Quantity_in_store }}
+                      <a href="/change_quantity_product_in_cart/{{.Id}}/+1" class="img_center_on_main text_defoult ">
+                          <div class = "standart_border_radius center_text_in_div" style="width:25px; height:25px; background-color:#7b9f20;">
+                              +
+                          </div>
+                      </a>
+                      {{end}}
+                    </div>
                   </div>
-                </div>
+                {{else}}
+                  <div class="col-12">
+                    <a href="/add_to_cart/{{.Id}}" class="text_defoult">
+                      <div class ="standart_border_radius center_text_in_div" style="background-color:green; weight:90%; height:flex;">
+                        В корзину
+                      </div>
+                    </a>
+                  </div>
+                {{end}}
               </div>
             </div>
-
 
           </div>
         </a>

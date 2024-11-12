@@ -48,6 +48,31 @@
         <input type="file" id="icon_product" name="icon_product" accept="image/*" required>
       </div>
 
+
+      {{if (index .Products 0).Id }}
+        <label for="dropdown2">Характеристику для добавления:</label>
+        <select id="dropdown2" name="dropdown2" class="standart_border_radius adaptive_margin_bottom" style="width:100%;">
+            <option value="">Ничего</option>
+            {{range .Features}}
+              <option value="{{.Id}}">{{.Name}}</option>
+            {{end}}
+        </select>
+
+        <div class="col-12 adaptive_margin_bottom">
+          <label for="id">Укажите значение для добавленной характеристики:</label>
+          <input type="text" id="value_of_feature" name="value_of_feature" value=""required>
+        </div>
+
+      {{end}}
+
+
+
+
+
+
+
+
+
       <div class="col-12 adaptive_margin_bottom">
         <button type="submit">Отправить</button>
       </div>

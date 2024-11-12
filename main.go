@@ -151,6 +151,7 @@ type Data_for_view_training_days_of_current_train_programm struct{
 type Product_data struct{
   Id, Name, Price, Brand, Weight string
   Date string
+  Features_had []Features_for_products
   Quantity_in_store, Quantity_in_cart int
   Icon_product string
   In_cart bool
@@ -158,9 +159,14 @@ type Product_data struct{
 }
 type Data_for_store_main_page struct{
   Products []Product_data
+  Features []Features_for_products
   Authorized_user_data User
 }
 
+
+type Features_for_products struct{
+  Id, Name, Unit_of_measurement, Value string
+}
 
 //"root:@tcp(127.127.126.50)/test"
 //"user:password@tcp(147.45.163.58:3306)/test"
@@ -172,7 +178,11 @@ type Data_for_store_main_page struct{
 var adress_web = "http://localhost:8080"
 //var authorized_user User
 var sessionName = "name_session"
-var adress_data_base = "root:@tcp(127.127.126.50)/test"
+var adress_sql = "root:@tcp(127.127.126.50)/"
+var adress_data_base_test = adress_sql + "test"
+var adress_data_base_store = adress_sql + "/store"
+
+
 
 var store = sessions.NewCookieStore([]byte("super-secret-key"))
 
@@ -221,19 +231,6 @@ func saveUserToSession(r *http.Request, w http.ResponseWriter, sessionName strin
     fmt.Println("------------")
     return session.Save(r, w)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 func returnToLastPage(r *http.Request, w http.ResponseWriter){
   referer := r.Referer()
@@ -356,7 +353,7 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
       who_invite_you := get_who_inveted_id(r, sessionName)
       fmt.Println("I INVITE YOU! :" + who_invite_you)
       if(who_invite_you != ""){
-            db, err := sql.Open("mysql", adress_data_base)
+            db, err := sql.Open("mysql", adress_data_base_test)
             if err != nil{
               panic(err)
             }
@@ -377,7 +374,7 @@ func create_personal_account(w http.ResponseWriter, r *http.Request){
 
 
       fmt.Println(name, surname)
-      db, err := sql.Open("mysql", adress_data_base)
+      db, err := sql.Open("mysql", adress_data_base_test)
       if err != nil{
         panic(err)
       }
@@ -510,7 +507,7 @@ func saveFile(fileName string, file multipart.File, dir string) error {
 }
 
 func get_user_data_by_id(id_user_cur string) User{
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -532,7 +529,7 @@ func get_user_data_by_id(id_user_cur string) User{
 }
 
 func get_anthropometry_data_for_person_by_id(person_id string) (anthropometry_data_for_person) {
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -576,7 +573,7 @@ func authorization(w http.ResponseWriter, r *http.Request){
       email := r.FormValue("email")
       password := r.FormValue("password")
 
-      db, err := sql.Open("mysql", adress_data_base)
+      db, err := sql.Open("mysql", adress_data_base_test)
       if err != nil{
         panic(err)
       }
@@ -617,7 +614,7 @@ func authorization(w http.ResponseWriter, r *http.Request){
 
 
 func get_Unique_types_of_exercises_m(lang string ) (map [string] string){
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if lang == ""{
     lang = "rus"
   }
@@ -679,7 +676,7 @@ func personal_account(w http.ResponseWriter, r *http.Request){
   data.Icon1 = "/personal_static/" + data.Persona.Name+"_"+data.Persona.Surname+"_"+ data.Persona.Id + "/icon_1.jpg"
   data.Background_video = "/personal_static/" + data.Persona.Name+"_"+data.Persona.Surname+"_"+ data.Persona.Id + "/background_video.mp4"
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -741,7 +738,7 @@ func submit_achive(w http.ResponseWriter, r *http.Request){
 
 
     fmt.Println(type_training, type_of_sports_load)
-    db, err := sql.Open("mysql", adress_data_base)
+    db, err := sql.Open("mysql", adress_data_base_test)
     if err != nil{
       panic(err)
     }
@@ -775,7 +772,7 @@ func create_train(w http.ResponseWriter, r *http.Request){
   var data Data_for_personal_page
   data.Unique_types_of_exercises = make(map [string] string)
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -816,7 +813,7 @@ func create_train(w http.ResponseWriter, r *http.Request){
     count := r.FormValue("count")
 
     fmt.Println(option_of_train, weight, count)
-    db, err := sql.Open("mysql", adress_data_base)
+    db, err := sql.Open("mysql", adress_data_base_test)
     if err != nil{
       panic(err)
     }
@@ -917,7 +914,7 @@ func personal_statistic(w http.ResponseWriter, r *http.Request){
   data.Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
 
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1030,7 +1027,7 @@ func search_train_programm(w http.ResponseWriter, r *http.Request){
       panic(err)
   }
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1077,7 +1074,7 @@ func search_people(w http.ResponseWriter, r *http.Request){
     if(name == "" && surname == "" && nickname == "" ){
       data.Error = "Введите имя, фамилию или никнейм"
     }else{
-      db, err := sql.Open("mysql", adress_data_base)
+      db, err := sql.Open("mysql", adress_data_base_test)
       if err != nil{
         panic(err)
       }
@@ -1109,7 +1106,7 @@ func search_people(w http.ResponseWriter, r *http.Request){
      }
     }
   }else{
-    db, err := sql.Open("mysql", adress_data_base)
+    db, err := sql.Open("mysql", adress_data_base_test)
     if err != nil{
       panic(err)
     }else{
@@ -1144,7 +1141,7 @@ func processing_create_train_programm_step_1(w http.ResponseWriter, r *http.Requ
     Description := r.FormValue("Description")
     fmt.Println(name_of_train_programm, option_of_style_training)
 
-    db, err := sql.Open("mysql", adress_data_base)
+    db, err := sql.Open("mysql", adress_data_base_test)
     if err != nil{
       panic(err)
     }
@@ -1195,7 +1192,7 @@ func SecondsSinceStartOfDay() int {
 
 
 func get_maximum_in_current_ex(id_person string, name_of_ex string ) string{
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1218,7 +1215,7 @@ func delet_current_train_from_training_day(w http.ResponseWriter, r *http.Reques
   vars := mux.Vars(r)
   id_ex := vars["id_ex"]
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1237,7 +1234,7 @@ func watch_training_programm(w http.ResponseWriter, r *http.Request){
   if err != nil{
     panic(err)
   }
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1410,7 +1407,7 @@ func exit(w http.ResponseWriter, r *http.Request){
        panic(err)
    }
 
-   db, err := sql.Open("mysql", adress_data_base)
+   db, err := sql.Open("mysql", adress_data_base_test)
    if err != nil{
      panic(err)
    }
@@ -1476,7 +1473,7 @@ func refresh_curent_train_programm(w http.ResponseWriter, r *http.Request){
    //var current_user_id =
    if r.Method == http.MethodPost {
 
-     db, err := sql.Open("mysql", adress_data_base)
+     db, err := sql.Open("mysql", adress_data_base_test)
      if err != nil{
        panic(err)
      }
@@ -1527,7 +1524,7 @@ func training_summary(w http.ResponseWriter, r *http.Request){
   data.Parts_training_programm = make(map[string][]part_of_training_programm)
   Unique_types_of_exercises := make(map[string]string)
   Unique_types_of_exercises = get_Unique_types_of_exercises_m(get_session_lang_user(r, sessionName))
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1575,7 +1572,7 @@ func deletTrainProgramm(w http.ResponseWriter, r *http.Request){
   vars := mux.Vars(r)
   //w.WriteHeader(http.StatusOK)
   id_train_programm := vars["id_train_programm"]
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1624,7 +1621,7 @@ func record_anthropometric_changes(w http.ResponseWriter, r *http.Request){
 
     fmt.Println(data)
 
-    db, err := sql.Open("mysql", adress_data_base)
+    db, err := sql.Open("mysql", adress_data_base_test)
     if err != nil{
       panic(err)
     }
@@ -1646,7 +1643,7 @@ func watch_anthropometric(w http.ResponseWriter, r *http.Request){
   w.WriteHeader(http.StatusOK)
   Person := get_user_data_by_id(vars["id_person"])
   var data Data_for_record_anthropometry
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1667,7 +1664,7 @@ func watch_anthropometric(w http.ResponseWriter, r *http.Request){
 }
 
 func create_name_of_theme_article(w http.ResponseWriter, r *http.Request){
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
 
   vars := mux.Vars(r)
 
@@ -1705,7 +1702,7 @@ func articles_page(w http.ResponseWriter, r *http.Request){
 
       data.Themes_and_name_articles = make(map[string] []string)
       data.Themes = make([]string, 0)
-      db, err := sql.Open("mysql", adress_data_base)
+      db, err := sql.Open("mysql", adress_data_base_test)
       if err != nil{
         panic(err)
       }
@@ -1748,7 +1745,7 @@ func referal_page(w http.ResponseWriter, r *http.Request){
 
 
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1803,7 +1800,7 @@ func create_train_day_in_train_programm(w http.ResponseWriter, r *http.Request){
   vars := mux.Vars(r)
   fmt.Println("^^^^^^^^^^^^^")
   id_programm := vars["id_programm"]
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1837,7 +1834,7 @@ func select_in_favorites(w http.ResponseWriter, r *http.Request){
 
   id_programm := vars["id_programm"]
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1860,7 +1857,7 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
       panic(err)
   }
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -1922,7 +1919,7 @@ func view_training_days_of_current_train_programm(w http.ResponseWriter, r *http
 */
 
 func buy_all_cart(w http.ResponseWriter, r *http.Request){
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -2022,11 +2019,17 @@ func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
   var data Data_for_store_main_page
   data.Authorized_user_data, err  = populateUserFromSession(r, sessionName)
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
   defer db.Close()
+
+
+
+
+
+
   if r.Method == http.MethodPost {
     name := r.FormValue("name")
     brand := r.FormValue("brand")
@@ -2034,6 +2037,14 @@ func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
     price := r.FormValue("price")
     quantity := r.FormValue("quantity")
     id_inputed := r.FormValue("id")
+
+
+
+
+
+
+
+
     if(id_inputed == ""){
       result, err := db.Exec("insert into test.products_in_store ( `name`,	`brand`, `weight`, `price`, `quantity`) values (?, ?,?,?,?)",name, brand, weight, price, quantity)
 
@@ -2077,10 +2088,31 @@ func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
         return
       }
     }else{
+
+      new_feature := r.FormValue("dropdown2")
+      if(new_feature != ""){
+        zapros := fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM `Features_added_in_products` WHERE id_feature = '%s');", new_feature)
+
+        res,_ := db.Query(zapros)
+        var res_check bool
+        err = res.Scan(&res_check)
+        fmt.Println("Result of statment:")
+        fmt.Println(res_check)
+        if(!res_check){
+          value_of_feature := r.FormValue("value_of_feature")
+          _, _ = db.Exec("insert into test.Features_added_in_products (id_product_in_store, id_feature, value) values (?, ?,?)",id_inputed, new_feature, value_of_feature)
+
+        }
+      }
+
+
+
+
       fmt.Println("UPDATE-2")
       q := fmt.Sprintf("UPDATE test.products_in_store SET name = '%s',	brand = '%s', weight = %s, price = %s, quantity = %s WHERE id = %s",name, brand, weight, price, quantity, id_inputed)
       fmt.Println(q)
       _, _ = db.Exec(q)
+
 
 
       uploadsDir := "../store_data/" + id_inputed
@@ -2131,6 +2163,18 @@ func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
 
     }
 
+
+    zapros = fmt.Sprintf("SELECT id, name_of_features FROM `features_for_products`;")
+    var featur Features_for_products
+    res,err = db.Query(zapros)
+    fmt.Println(zapros)
+    for res.Next(){
+      err = res.Scan(&featur.Id, &featur.Name)
+      data.Features = append(data.Features, featur)
+    }
+
+    fmt.Println(data.Features)
+
   }
   data.Products = append(data.Products, product_data)
   fmt.Println("BMW")
@@ -2152,7 +2196,7 @@ func add_to_cart(w http.ResponseWriter, r *http.Request){
   vars := mux.Vars(r)
 
   id_product := vars["id_product"]
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -2172,7 +2216,7 @@ func add_to_cart(w http.ResponseWriter, r *http.Request){
 
 func delet_product_from_cart(id_product string){
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -2197,7 +2241,7 @@ func watch_product_page(w http.ResponseWriter, r *http.Request){
   var data Data_for_store_main_page
   data.Authorized_user_data, err  = populateUserFromSession(r, sessionName)
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -2227,9 +2271,21 @@ func watch_product_page(w http.ResponseWriter, r *http.Request){
       delet_product_from_cart(product.Id)
     }
 
+    zapros3 := fmt.Sprintf("SELECT f.value, s.name_of_features, s.unit_of_measurement FROM Features_added_in_products f JOIN  features_for_products s ON f.id_feature = s.id WHERE f.id_product_in_store = '%s';", product.Id)
+    res3,_ := db.Query(zapros3)
+    fmt.Println(zapros3)
+    var feature_in_product Features_for_products
+    for res3.Next(){
+      err =  res3.Scan(&feature_in_product.Value, &feature_in_product.Name, &feature_in_product.Unit_of_measurement)
+      product.Features_had = append(product.Features_had, feature_in_product)
+    }
+
+
+
   }
   data.Products = append(data.Products, product)
   fmt.Println("check rhis shiiiiit")
+  fmt.Println(data.Products)
   fmt.Println(data.Authorized_user_data.Is_it_admin)
   t.ExecuteTemplate(w, "product_page", data)
 }
@@ -2241,7 +2297,7 @@ func change_quantity_product_in_cart(w http.ResponseWriter, r *http.Request){
 
   id_product := vars["id_product"]
   plus_or_minus := vars["plus_or_minus"]
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -2271,7 +2327,7 @@ func history_of_bought(w http.ResponseWriter, r *http.Request){
   data.Authorized_user_data, err  = populateUserFromSession(r, sessionName)
 
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -2324,7 +2380,7 @@ func cart_main(w http.ResponseWriter, r *http.Request){
   data.Authorized_user_data, err  = populateUserFromSession(r, sessionName)
 
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -2390,7 +2446,7 @@ func store_page(w http.ResponseWriter, r *http.Request){
 
 
 
-  db, err := sql.Open("mysql", adress_data_base)
+  db, err := sql.Open("mysql", adress_data_base_test)
   if err != nil{
     panic(err)
   }
@@ -2466,7 +2522,7 @@ func admin_main(w http.ResponseWriter, r *http.Request){
        panic(err)
    }
 
-   db, err := sql.Open("mysql", adress_data_base)
+   db, err := sql.Open("mysql", adress_data_base_test)
    if err != nil{
      panic(err)
    }
