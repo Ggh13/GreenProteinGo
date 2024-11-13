@@ -15,12 +15,12 @@
         <label for="name">Название товара:</label>
         <input type="text" id="name" name="name" value="{{(index .Products 0).Name}}" required>
       </div>
-
+<!--
       <div class="col-12 adaptive_margin_bottom">
         <label for="weight">Вес товара (кг):</label>
         <input type="number" id="weight" name="weight" step="0.01" value="{{(index .Products 0).Weight}}" required>
       </div>
-
+-->
       <div class="col-12 adaptive_margin_bottom">
         <label for="brand">Бренд:</label>
         <input type="text" id="brand" name="brand" value="{{(index .Products 0).Brand}}" required>
@@ -37,10 +37,11 @@
       </div>
 
 
-      <div class="col-12 adaptive_margin_bottom">
-        <label for="id">Количество в наличии:</label>
-        <input type="text" id="id" name="id" value="{{(index .Products 0).Id}}" hidden required>
-      </div>
+      {{if ne (index .Products 0).Id ""}}
+        <div class="col-12 adaptive_margin_bottom">
+          <input type="text" id="id" name="id" value="{{(index .Products 0).Id}}" hidden required>
+        </div>
+      {{end}}
 
 
       <div class="col-12 adaptive_margin_bottom">
@@ -64,14 +65,6 @@
         </div>
 
       {{end}}
-
-
-
-
-
-
-
-
 
       <div class="col-12 adaptive_margin_bottom">
         <button type="submit">Отправить</button>

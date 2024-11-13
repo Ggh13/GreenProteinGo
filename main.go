@@ -2033,20 +2033,15 @@ func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
   if r.Method == http.MethodPost {
     name := r.FormValue("name")
     brand := r.FormValue("brand")
-    weight := r.FormValue("weight")
+    //weight := r.FormValue("weight")
     price := r.FormValue("price")
     quantity := r.FormValue("quantity")
     id_inputed := r.FormValue("id")
 
 
-
-
-
-
-
-
     if(id_inputed == ""){
-      result, err := db.Exec("insert into test.products_in_store ( `name`,	`brand`, `weight`, `price`, `quantity`) values (?, ?,?,?,?)",name, brand, weight, price, quantity)
+      
+      result, err := db.Exec("insert into test.products_in_store ( `name`,	`brand`, `price`, `quantity`) values (?, ?,?,?)",name, brand, price, quantity)
 
       fmt.Println(result)
       if(err != nil){
@@ -2109,7 +2104,7 @@ func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
 
 
       fmt.Println("UPDATE-2")
-      q := fmt.Sprintf("UPDATE test.products_in_store SET name = '%s',	brand = '%s', weight = %s, price = %s, quantity = %s WHERE id = %s",name, brand, weight, price, quantity, id_inputed)
+      q := fmt.Sprintf("UPDATE test.products_in_store SET name = '%s',	brand = '%s', price = %s, quantity = %s WHERE id = %s",name, brand, price, quantity, id_inputed)
       fmt.Println(q)
       _, _ = db.Exec(q)
 
@@ -2154,12 +2149,12 @@ func add_new_product_in_store(w http.ResponseWriter, r *http.Request){
   var product_data Product_data
 
   if(id_product != ""){
-    zapros := fmt.Sprintf("SELECT id, name, brand, weight, price, quantity FROM `products_in_store` WHERE id = %s", id_product)
+    zapros := fmt.Sprintf("SELECT id, name, brand, price, quantity FROM `products_in_store` WHERE id = %s", id_product)
 
     res,_ := db.Query(zapros)
     fmt.Println(zapros)
     for res.Next(){
-      _ = res.Scan(&product_data.Id, &product_data.Name, &product_data.Brand, &product_data.Weight, &product_data.Price, &product_data.Quantity_in_store)
+      _ = res.Scan(&product_data.Id, &product_data.Name, &product_data.Brand, &product_data.Price, &product_data.Quantity_in_store)
 
     }
 
@@ -2248,13 +2243,13 @@ func watch_product_page(w http.ResponseWriter, r *http.Request){
   defer db.Close()
 
   var product Product_data
-  zapros := fmt.Sprintf("SELECT id, name, brand, weight, price, quantity FROM `products_in_store` WHERE id = '%s';" , id_product)
+  zapros := fmt.Sprintf("SELECT id, name, brand, price, quantity FROM `products_in_store` WHERE id = '%s';" , id_product)
   res,_ := db.Query(zapros)
   fmt.Println(zapros)
 
   for res.Next(){
 
-    err = res.Scan(&product.Id, &product.Name, &product.Brand, &product.Weight, &product.Price, &product.Quantity_in_store)
+    err = res.Scan(&product.Id, &product.Name, &product.Brand, &product.Price, &product.Quantity_in_store)
     product.Icon_product = "/store_data/" + product.Id + "/icon_product.jpg"
 
     zapros2 := fmt.Sprintf("SELECT quantity FROM cart WHERE id_product = '%s' AND id_user = '%s' ;", product.Id, data.Authorized_user_data.Id)
@@ -2342,13 +2337,13 @@ func history_of_bought(w http.ResponseWriter, r *http.Request){
     var product_Id string
     var product Product_data
     err = res.Scan(&product_Id, &product.Quantity_in_cart, &product.Date)
-    zapros2 := fmt.Sprintf("SELECT id, name, brand, weight, price, quantity FROM `products_in_store` WHERE id = '%s';" , product_Id)
+    zapros2 := fmt.Sprintf("SELECT id, name, brand, price, quantity FROM `products_in_store` WHERE id = '%s';" , product_Id)
     res2,_ := db.Query(zapros2)
     fmt.Println(zapros2)
 
     for res2.Next(){
 
-      err = res2.Scan(&product.Id, &product.Name, &product.Brand, &product.Weight, &product.Price, &product.Quantity_in_store)
+      err = res2.Scan(&product.Id, &product.Name, &product.Brand, &product.Price, &product.Quantity_in_store)
       product.Icon_product = "/store_data/" + product.Id + "/icon_product.jpg"
 
     }
@@ -2394,13 +2389,13 @@ func cart_main(w http.ResponseWriter, r *http.Request){
     var product_Id string
     var product Product_data
     err = res.Scan(&product_Id, &product.Quantity_in_cart)
-    zapros2 := fmt.Sprintf("SELECT id, name, brand, weight, price, quantity FROM `products_in_store` WHERE id = '%s';" , product_Id)
+    zapros2 := fmt.Sprintf("SELECT id, name, brand, price, quantity FROM `products_in_store` WHERE id = '%s';" , product_Id)
     res2,_ := db.Query(zapros2)
     fmt.Println(zapros2)
 
     for res2.Next(){
 
-      err = res2.Scan(&product.Id, &product.Name, &product.Brand, &product.Weight, &product.Price, &product.Quantity_in_store)
+      err = res2.Scan(&product.Id, &product.Name, &product.Brand, &product.Price, &product.Quantity_in_store)
       product.Icon_product = "/store_data/" + product.Id + "/icon_product.jpg"
 
     }
@@ -2452,13 +2447,13 @@ func store_page(w http.ResponseWriter, r *http.Request){
   }
   defer db.Close()
   fmt.Println(sort_type)
-  zapros := fmt.Sprintf("SELECT id, name, brand, weight, price, quantity FROM `products_in_store` %s", sort_type)
+  zapros := fmt.Sprintf("SELECT id, name, brand, price, quantity FROM `products_in_store` %s", sort_type)
 
   res,err := db.Query(zapros)
   fmt.Println(zapros)
   for res.Next(){
     var product Product_data
-    err = res.Scan(&product.Id, &product.Name, &product.Brand, &product.Weight, &product.Price, &product.Quantity_in_store)
+    err = res.Scan(&product.Id, &product.Name, &product.Brand, &product.Price, &product.Quantity_in_store)
     zapros2 := fmt.Sprintf("SELECT quantity FROM cart WHERE id_product = '%s' AND id_user = '%s' ;", product.Id, data.Authorized_user_data.Id)
     res2,_ := db.Query(zapros2)
     //fmt.Println(zapros2)

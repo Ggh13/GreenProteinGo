@@ -3,38 +3,41 @@
   {{template "header" .}}
 
     {{range .Products}}
-      <div class = "row">
-        <div class = "col-4">
-          <img class="standart_border_radius" style="width:200px; height:200px; " src="{{.Icon_product}}" alt="Image!!" >
-        </div>
-        <div class = "col-4">
-          <div class = "row">
-            <div class="col-12 center_text_in_div">
-              {{.Name}}
-            </div>
+        <div class = "row">
+          <div class = "col-4">
+            <img class="standart_border_radius" style="width:200px; height:200px; " src="{{.Icon_product}}" alt="Image!!" >
+          </div>
+          <div class = "col-4">
+            <div class = "row">
+              <div class="col-12 center_text_in_div">
+                {{.Name}}
+              </div>
 
-            <div class="col-12 ">
-              О товаре
-            </div>
-            <div class="col-12 ">
-              {{.Weight}}
+              <div class="col-12 ">
+                О товаре
+              </div>
+              {{range .Features_had}}
+                <div class="col-12 ">
+                  {{.Name}} {{.Value}} {{.Unit_of_measurement}}
+                </div>
+              {{end}}
+
             </div>
           </div>
-        </div>
 
-        <div class = "col-4">
-          <div class = "row standart_border_radius" style="background-color:white">
-            <div class="col-12 center_text_in_div standart_border_radius" >
-              {{.Price}}{{$.Authorized_user_data.Is_it_admin}}
-            </div>
-            <div class = "col-12" style="width:100%; height:80px;">
-              {{if $.Authorized_user_data.Is_it_admin}}
-                <a href="/add_new_product_in_store/{{.Id}}" class="clickable">
-                  <div class = "col-12">
-                    Редактировать товар
-                  </div>
-                </a>
-              {{end}}
+          <div class = "col-4">
+            <div class = "row standart_border_radius" style="background-color:white">
+              <div class="col-12 center_text_in_div standart_border_radius" >
+                {{.Price}}
+              </div>
+              <div class = "col-12" style="width:100%; height:80px;">
+                {{if $.Authorized_user_data.Is_it_admin}}
+                  <a href="/add_new_product_in_store/{{.Id}}" class="clickable">
+                    <div class = "col-12">
+                      Редактировать товар
+                    </div>
+                  </a>
+                {{end}}
               {{if .In_cart}}
               <div class="row">
 
